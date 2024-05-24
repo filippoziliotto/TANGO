@@ -78,14 +78,14 @@ habitat:
 habitat_baselines:
   trainer_name: "ddppo"
   torch_gpu_id: 0
-  # writer_type: wb # to deactivate just comment this
+  writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
-    project_name: Habitat-Visprog
-    run_name: zs_onav
+    project_name: NavProg
+    run_name: zs_onav_minival
   video_dir: "video_dir/objectgoal/"
   # To evaluate on all episodes, set this to -1
-  test_episode_count: -1 # n° of evaluation episodes
+  test_episode_count: 2 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

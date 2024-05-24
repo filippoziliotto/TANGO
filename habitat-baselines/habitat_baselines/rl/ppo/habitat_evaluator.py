@@ -369,7 +369,9 @@ class HabitatEvaluator(Evaluator):
                 "eval_reward/average_reward", self.aggregated_stats["reward"], self.step_id
             )
 
-        # TODO: add wandb logs
+        # logging to wandb
+        if self.config.habitat_baselines.writer_type in ['wb']:
+            wandb.log(self.aggregated_stats)
 
         # Print final results
         print('-----------------------')

@@ -301,6 +301,7 @@ class HabitatEvaluator(Evaluator):
                 
                 if display:
                     self.display_results(per_episode=True)
+                self.current_step = 0
 
             self.not_done_masks = self.not_done_masks.to(device=self.device)
             (
@@ -432,7 +433,7 @@ class HabitatEvaluator(Evaluator):
         possibility to extend to new and better sampling strategies
         """
         hab_simulator = self.call_habitat_sim()
-        min_distance = 25.
+        min_distance = 20.
         max_tries = 1000
         current_pos = self.get_current_position()
         agent_pos = current_pos.position
@@ -474,22 +475,20 @@ class HabitatEvaluator(Evaluator):
         self._init_variables(**kwargs)
         self.init_env()
 
+        code_generator = CodeGenerator(self, debug=True)
+        self.code_interpreter = PseudoCodeExecuter(self)
+
         while self.episode_iterator():
             self.current_episodes_info = self.envs.current_episodes()
 
-            code_generator = CodeGenerator(
-                self,
-                debug=True
-            )
+            # Generate the PseudoCode
             self.pseudo_code = code_generator.generate()
 
-            self.interpreter = PseudoCodeExecuter(
-                self,
-                self.pseudo_code
-            )
-            self.interpreter.run()
+            # Reset init variables
+            self.code_interpreter.parse(self.pseudo_code)
 
-            self.current_step = 0
+            # Run the code
+            self.code_interpreter.run()
 
         self.display_results()
 

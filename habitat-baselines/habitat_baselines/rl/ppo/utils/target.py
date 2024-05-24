@@ -39,15 +39,16 @@ class Target:
             raise ValueError("Bounding box centroid is out of image bounds.")
 
         distance = depth[int(coord_box_centroid[1]),int(coord_box_centroid[0])][0]
+
         # Handle potential NaN values in distance
         if np.isnan(distance):
             raise ValueError("Distance value is NaN.")
-
+ 
         # Calculate the angle of the object
         coord_img_centroid = np.array([w / 2, h / 2])
         delta_x = coord_box_centroid[0] - coord_img_centroid[0]
-        delta_y = coord_box_centroid[1] - coord_img_centroid[1]
-        theta = np.arctan2(delta_y, delta_x)
+        delta_y = np.abs(coord_box_centroid[1] - coord_img_centroid[1])
+        theta = np.arctan(delta_y / delta_x)
 
         # Handle potential NaN values in theta
         if np.isnan(theta):
@@ -68,9 +69,9 @@ class Target:
         agent_pos = agent_pos.position
 
         rho, phi = polar_coords[0][0].cpu().numpy(), polar_coords[0][1].cpu().numpy()
-        self.cartesian_coords = from_polar_to_xyz(agent_pos, agent_ang, rho, phi)
+        cartesian_coords = from_polar_to_xyz(agent_pos, agent_ang, rho, phi)
         
-        return torch.tensor(self.cartesian_coords, dtype=torch.float32)
+        return torch.tensor(cartesian_coords, dtype=torch.float32)
 
     def from_cartesian_to_polar(self, cartesian_coords):
         """
@@ -98,7 +99,7 @@ class Target:
             polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
         return polar_coords
         
-    def get_polar_coords(self, bboxes=None,):
+    def get_target_coords(self, bboxes=None,):
         """
         Function that returns the polar coordinates of the target
         depending if in exploration phase or not
@@ -107,8 +108,8 @@ class Target:
         if self.exploration:
             self.polar_coords = self.get_exploration_target()
         else:
-            # TODO: check if bboxes is None and this makes sense
             self.polar_coords = self.from_bbox_to_polar(bboxes)
+            self.cartesian_coords = self.from_polar_to_cartesian(self.polar_coords)
 
         return self.polar_coords
 
@@ -134,7 +135,7 @@ class Target:
         """
         assert self.exploration is False, ValueError
         distance = self.polar_coords[0][0]
-        if distance <= 0.2:
+        if distance <= 0.5:
             return True
         else:
             return False

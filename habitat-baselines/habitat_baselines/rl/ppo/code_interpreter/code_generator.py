@@ -16,6 +16,7 @@ class CodeGenerator(object):
     def generate(self):
         if self.debug:
             object_name = refined_names[self.get_objectgoal_target()]
+            print('Navigate to', object_name)
             prompt = f"""
 while True:
     explore_scene():

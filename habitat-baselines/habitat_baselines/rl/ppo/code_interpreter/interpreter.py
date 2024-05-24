@@ -7,12 +7,15 @@ class PseudoCodeInterpreter:
     Low level interpreter for pseudo code
     able to interpret for, while, if conditions
     """
-    def __init__(self, pseudo_code):
-        self.pseudo_code = pseudo_code
-        self.variables = {'episode_is_over': False}
+    def __init__(self):
+        self.pseudo_code = None
         self.primitives = {}
+
+    def parse(self, pseudo_code):
+        self.pseudo_code = pseudo_code
         self.lines = [(line.strip(), (len(line) - len(line.lstrip())) // 4) for line in self.pseudo_code.strip().split('\n')]
         self.current_line = 0
+        self.variables = {'episode_is_over': False}
         self.loop_exit_flag = False
 
     def run(self):
@@ -152,14 +155,16 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
     Primitive functions interpreter if primitives are added
     they should first be defined here
     """
-    def __init__(self, psuedo_code):
-        super().__init__(psuedo_code)
+    def __init__(self):
+        super().__init__()
         self.primitives = {
             'explore_scene': self.explore_scene,
             'detect_objects': self.detect_objects,
             'navigate_to': self.navigate_to,
             'stop_navigation': self.stop_navigation,    
         }
+        self.object_detector = ObjectDetector(type='owl-vit2', size='base')
+
 
     def detect_objects(self, target):
         pass
@@ -184,11 +189,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     Primitive functions interactive with habitat
     environment. Is composed to another class
     """
-    def __init__(self, habitat_env, pseudo_code):
-        super().__init__(pseudo_code)
+    def __init__(self, habitat_env):
+        super().__init__()
         self.habitat_env = habitat_env
         self.target = Target(habitat_env)
-        self.object_detector = ObjectDetector(type='owlv')
     
     """
     Habitat environment modules to define actions
@@ -199,7 +203,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
         self.target.exploration = True
-        self.coords = self.target.get_polar_coords()
+        self.coords = self.target.get_target_coords()
 
         self.habitat_env.execute_action(coords=self.coords)
         self.habitat_env.update_episode_stats()

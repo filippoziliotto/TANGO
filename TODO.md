@@ -2,6 +2,7 @@
 
 - [x] created new repo "named" navprog
     - [ ] give access to tommaso and Ms students
+- [x] creating navprog repo on cluster
 
 - [ ] evalaute on minival and val objectnav
 - [ ] extend also for IIN and evaluate

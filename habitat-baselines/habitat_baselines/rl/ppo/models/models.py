@@ -3,26 +3,35 @@ import numpy as np
 from PIL import Image, ImageDraw
 from collections import defaultdict
 from transformers import (Owlv2Processor, OwlViTProcessor,
-                          Owlv2ForObjectDetection, OwlViTForObjectDetection
+                          Owlv2ForObjectDetection, OwlViTForObjectDetection,
+                          AutoProcessor
                           )
 from habitat_baselines.rl.ppo.utils.nms import nms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class ObjectDetector:
-    def __init__(self, type):
+    def __init__(self, type, size):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.thresh = 0.4
+        self.thresh = 0.5
         self.nms_thresh = 0.5
-
-        if type == 'owlv2':
-            self.model_name = "google/owlv2-base-patch16-ensemble"
-            self.processor = Owlv2Processor.from_pretrained(self.model_name)
-            self.model = Owlv2ForObjectDetection.from_pretrained(self.model_name).to(self.device)
-        elif type in ['owlv']:
-            self.model_name = "google/owlvit-base-patch32"
+        
+        if type == 'owl-vit2':
+            if size in ['large']:
+                self.model_name = "google/owlv2-large-patch14-ensemble"
+            else:
+                self.model_name = "google/owlv2-base-patch16-ensemble"
+            self.processor = AutoProcessor.from_pretrained(self.model_name)
+            self.model = Owlv2ForObjectDetection.from_pretrained(self.model_name).to(self.device)  
+        elif type in ['owl-vit']:
+            if size in ['large']:
+                self.model_name = "google/owlvit-large-patch14"
+            else:
+                self.model_name = "google/owlvit-base-patch32"
             self.processor = OwlViTProcessor.from_pretrained(self.model_name)
             self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
+        else:
+            raise ValueError(f"Invalid ObjectDetector type: {type}")
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size

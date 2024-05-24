@@ -429,6 +429,15 @@ class PointNavResNetNet(Net):
         self._n_prev_action = 32
         rnn_input_size = self._n_prev_action  # test
 
+        # added by pippo
+        # delete keys in observation space.spaces not in depth/pointgoal
+        keys_to_delete = []
+        for key in observation_space.spaces.keys():
+            if not (key.startswith("depth") or key.startswith("pointgoal_with_gps_compass")):
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            del observation_space.spaces[key]
+
         # Only fuse the 1D state inputs. Other inputs are processed by the
         # visual encoder
         if fuse_keys is None:
@@ -714,35 +723,35 @@ class PointNavResNetNet(Net):
             object_goal = observations[ObjectGoalSensor.cls_uuid].long()
             x.append(self.obj_categories_embedding(object_goal).squeeze(dim=1))
 
-        if EpisodicCompassSensor.cls_uuid in observations:
-            compass_observations = torch.stack(
-                [
-                    torch.cos(observations[EpisodicCompassSensor.cls_uuid]),
-                    torch.sin(observations[EpisodicCompassSensor.cls_uuid]),
-                ],
-                -1,
-            )
-            x.append(
-                self.compass_embedding(compass_observations.squeeze(dim=1))
-            )
+        # if EpisodicCompassSensor.cls_uuid in observations:
+        #     compass_observations = torch.stack(
+        #         [
+        #             torch.cos(observations[EpisodicCompassSensor.cls_uuid]),
+        #             torch.sin(observations[EpisodicCompassSensor.cls_uuid]),
+        #         ],
+        #         -1,
+        #     )
+        #     x.append(
+        #         self.compass_embedding(compass_observations.squeeze(dim=1))
+        #     )
 
-        if EpisodicGPSSensor.cls_uuid in observations:
-            x.append(
-                self.gps_embedding(observations[EpisodicGPSSensor.cls_uuid])
-            )
+        # if EpisodicGPSSensor.cls_uuid in observations:
+        #     x.append(
+        #         self.gps_embedding(observations[EpisodicGPSSensor.cls_uuid])
+        #     )
 
-        for uuid in [
-            ImageGoalSensor.cls_uuid,
-            InstanceImageGoalSensor.cls_uuid,
-        ]:
-            if uuid in observations:
-                goal_image = observations[uuid]
+        # for uuid in [
+        #     ImageGoalSensor.cls_uuid,
+        #     InstanceImageGoalSensor.cls_uuid,
+        # ]:
+        #     if uuid in observations:
+        #         goal_image = observations[uuid]
 
-                goal_visual_encoder = getattr(self, f"{uuid}_encoder")
-                goal_visual_output = goal_visual_encoder({"rgb": goal_image})
+        #         goal_visual_encoder = getattr(self, f"{uuid}_encoder")
+        #         goal_visual_output = goal_visual_encoder({"rgb": goal_image})
 
-                goal_visual_fc = getattr(self, f"{uuid}_fc")
-                x.append(goal_visual_fc(goal_visual_output))
+        #         goal_visual_fc = getattr(self, f"{uuid}_fc")
+        #         x.append(goal_visual_fc(goal_visual_output))
 
         if self.discrete_actions:
             prev_actions = prev_actions.squeeze(-1)

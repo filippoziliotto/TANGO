@@ -19,6 +19,9 @@ from habitat.config.default_structured_configs import (
 )
 from habitat.config.read_write import read_write
 
+from typing import List, Optional, Union
+import yacs.config
+
 _HABITAT_CFG_DIR = osp.dirname(inspect.getabsfile(inspect.currentframe()))
 # Habitat config directory inside the installed package.
 # Used to access default predefined configs.
@@ -54,6 +57,16 @@ Returns absolute path to the habitat yaml config file if exists, else raises Run
 :return: absolute config to the habitat yaml config file.
 """
 
+# Default Habitat config node
+class Config(yacs.config.CfgNode):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, new_allowed=True)
+
+
+CN = Config
+
+DEFAULT_CONFIG_DIR = "configs/"
+CONFIG_FILE_SEPARATOR = ","
 
 def get_agent_config(
     sim_config: DictConfig, agent_id: Optional[int] = None

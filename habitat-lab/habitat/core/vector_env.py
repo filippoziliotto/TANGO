@@ -73,6 +73,7 @@ NUMBER_OF_EPISODE_NAME = "number_of_episodes"
 ACTION_SPACE_NAME = "action_space"
 ORIG_ACTION_SPACE_NAME = "original_action_space"
 OBSERVATION_SPACE_NAME = "observation_space"
+ENV_SIMULATOR = "habitat_env"
 
 
 def _make_env_fn(

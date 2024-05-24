@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 @hydra.main(
     version_base=None,
     config_path="config",
-    config_name="pointnav/ppo_pointnav_example",
+    # config_name="pointnav/ppo_pointnav_example",
+    # OBJECTNAV
+    config_name="objectnav/zs_objectnav"
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

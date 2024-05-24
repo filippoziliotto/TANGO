@@ -212,7 +212,8 @@ class SingleAgentAccessMgr(AgentAccessMgr):
                 {  # type: ignore
                     k[len("actor_critic.") :]: v
                     for k, v in pretrained_state["state_dict"].items()
-                }
+                },
+                strict=False,
             )
         elif self._config.habitat_baselines.rl.ddppo.pretrained_encoder:
             prefix = "actor_critic.net.visual_encoder."
@@ -221,7 +222,8 @@ class SingleAgentAccessMgr(AgentAccessMgr):
                     k[len(prefix) :]: v
                     for k, v in pretrained_state["state_dict"].items()
                     if k.startswith(prefix)
-                }
+                },
+                strict=False,
             )
         if self._is_static_encoder:
             for param in actor_critic.visual_encoder.parameters():

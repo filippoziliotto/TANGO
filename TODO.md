@@ -1,6 +1,8 @@
 ### TODO List
 
-- [ ] add branch with new code on github
+- [x] created new repo "named" navprog
+    - [ ] give access to tommaso and Ms students
+
 - [ ] evalaute on minival and val objectnav
 - [ ] extend also for IIN and evaluate
 - [ ] extend for EQA and evaluate

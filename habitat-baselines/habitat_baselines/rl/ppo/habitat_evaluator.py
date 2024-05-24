@@ -210,7 +210,7 @@ class HabitatEvaluator(Evaluator):
         ).unsqueeze(1)
         self.current_episode_reward += self.rewards
 
-    def update_episode_stats(self, force_stop=False):
+    def update_episode_stats(self, force_stop=False, display=False):
         """
         After each step, check if the episode is over
         if yes update the stats and generate video
@@ -298,6 +298,9 @@ class HabitatEvaluator(Evaluator):
                         self.config.habitat.task,
                         self.current_episodes_info[i].episode_id,
                     )
+                
+                if display:
+                    self.display_results(per_episode=True)
 
             self.not_done_masks = self.not_done_masks.to(device=self.device)
             (
@@ -327,10 +330,19 @@ class HabitatEvaluator(Evaluator):
     
     def display_results(self, per_episode=False):
         if per_episode:
-            for k, v in self.stats_episodes.items():
-                print(f"Episode {k}: {v}")
+            last_key = list(self.stats_episodes.keys())[-1]
+            v = self.stats_episodes[last_key]
+            episode_info = f"Episode {last_key}:"
+            formatted_results = (
+                f"num_steps: {v['num_steps']} | "
+                f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+                f"success: {v['success']:.2f} | "
+                f"spl: {v['spl']:.2f} | "
+                f"soft_spl: {v['soft_spl']:.2f}"
+            )
+            print(f"{episode_info}\n{formatted_results}")
             print('-----------------------')
-            return 
+            return
             
         self.pbar.close()
         assert (
@@ -358,7 +370,7 @@ class HabitatEvaluator(Evaluator):
 
         # TODO: add wandb logs
 
-        # Print the mean results
+        # Print final results
         print('-----------------------')
         print('| EVALUATION FINISHED |')
         print('-----------------------')
@@ -478,7 +490,6 @@ class HabitatEvaluator(Evaluator):
             self.interpreter.run()
 
             self.current_step = 0
-            self.display_results(per_episode=True)
 
         self.display_results()
 

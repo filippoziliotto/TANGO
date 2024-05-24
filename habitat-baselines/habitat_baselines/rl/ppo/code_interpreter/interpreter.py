@@ -208,7 +208,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             self.loop_exit_flag = True
             self.habitat_env.execute_action(force_stop=True)
-            self.habitat_env.update_episode_stats(force_stop=True)
+            self.habitat_env.update_episode_stats(
+                force_stop=True,
+                display=True)
             self.update_variable('episode_is_over', True)
 
     def navigate_to(self, bbox):
@@ -233,7 +235,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Target reached stopping the navigation
         """
         self.habitat_env.execute_action(force_stop=True)
-        self.habitat_env.update_episode_stats(force_stop=True)
+        self.habitat_env.update_episode_stats(
+            force_stop=True,
+            display=True)
 
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 

@@ -449,6 +449,17 @@ class SaveObservations(HabitatBaselinesBaseConfig):
     image_path: str = "images/"
 
 @dataclass
+class ObjectDetectorConfig(HabitatBaselinesBaseConfig):
+    """
+    Object detector config settings
+    """
+    type: str = "owl-vit2"
+    size: str = "large"
+    thresh: float = 0.5
+    nms_thresh: float = 0.5
+
+
+@dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
     # If habitat_baselines.evaluate is true, the run will be in evaluation mode
@@ -494,6 +505,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # Weights and Biases config
     wb: WBConfig = WBConfig()
     save_obs: SaveObservations = SaveObservations()
+    object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

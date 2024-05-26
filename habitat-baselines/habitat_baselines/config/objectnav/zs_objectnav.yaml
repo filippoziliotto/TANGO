@@ -88,8 +88,15 @@ habitat_baselines:
     save_to_disk: True 
     image_path: "images/"
   video_dir: "video_dir/objectgoal/"
+  # Object Detector settings
+  object_detector:
+    type: "owl-vit2"
+    size: "base"
+    thresh: 0.3
+    nms_thresh: 0.5
+  # Eval settings
   # To evaluate on all episodes, set this to -1
-  test_episode_count: 2 # n° of evaluation episodes
+  test_episode_count: 5 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

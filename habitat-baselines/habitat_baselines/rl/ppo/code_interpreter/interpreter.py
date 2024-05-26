@@ -163,7 +163,6 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'navigate_to': self.navigate_to,
             'stop_navigation': self.stop_navigation,    
         }
-        self.object_detector = ObjectDetector(type='owl-vit2', size='base')
 
 
     def detect_objects(self, target):
@@ -193,6 +192,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         super().__init__()
         self.habitat_env = habitat_env
         self.target = Target(habitat_env)
+
+        self.object_detector = ObjectDetector(
+            type=self.habitat_env.object_detector.type, 
+            size=self.habitat_env.object_detector.size,
+            thresh=self.habitat_env.object_detector.thresh,
+            nms_thresh=self.habitat_env.object_detector.nms_thresh,
+        )
     
     """
     Habitat environment modules to define actions

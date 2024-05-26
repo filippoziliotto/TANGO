@@ -12,27 +12,28 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class ObjectDetector:
-    def __init__(self, type, size):
+    def __init__(self, type, size, thresh, nms_thresh):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.thresh = 0.5
-        self.nms_thresh = 0.5
+        self.thresh = thresh 
+        self.nms_thresh = nms_thresh
+
+        if (type not in ['owl-vit', 'owl-vit2']) or (size not in ['base', 'large']):
+            raise ValueError("Invalid model settings!")
         
         if type == 'owl-vit2':
             if size in ['large']:
                 self.model_name = "google/owlv2-large-patch14-ensemble"
-            else:
+            elif size in ['base']:
                 self.model_name = "google/owlv2-base-patch16-ensemble"
             self.processor = AutoProcessor.from_pretrained(self.model_name)
             self.model = Owlv2ForObjectDetection.from_pretrained(self.model_name).to(self.device)  
         elif type in ['owl-vit']:
             if size in ['large']:
                 self.model_name = "google/owlvit-large-patch14"
-            else:
+            elif size in ['base']:
                 self.model_name = "google/owlvit-base-patch32"
             self.processor = OwlViTProcessor.from_pretrained(self.model_name)
             self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
-        else:
-            raise ValueError(f"Invalid ObjectDetector type: {type}")
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size

@@ -44,6 +44,7 @@ class HabitatEvaluator(Evaluator):
         
         # Define additional variables
         self.save_obs = self.config.habitat_baselines.save_obs.save_to_disk
+        self.object_detector = self.config.habitat_baselines.object_detector
 
     def init_env(self):
         self.observations = self.envs.reset()

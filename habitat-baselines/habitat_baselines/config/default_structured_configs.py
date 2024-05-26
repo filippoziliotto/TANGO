@@ -439,6 +439,16 @@ class HydraCallbackConfig(HabitatBaselinesBaseConfig):
 
 
 @dataclass
+class SaveObservations(HabitatBaselinesBaseConfig):
+    """
+    Save observations to disk.
+    """
+    # Save each frame
+    save_to_disk: bool = False
+    # Path to save
+    image_path: str = "images/"
+
+@dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
     # If habitat_baselines.evaluate is true, the run will be in evaluation mode
@@ -483,6 +493,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     force_torch_single_threaded: bool = False
     # Weights and Biases config
     wb: WBConfig = WBConfig()
+    save_obs: SaveObservations = SaveObservations()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

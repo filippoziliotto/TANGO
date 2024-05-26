@@ -78,11 +78,15 @@ habitat:
 habitat_baselines:
   trainer_name: "ddppo"
   torch_gpu_id: 0
-  writer_type: wb # to deactivate just comment this
+  # Visualization settings
+  # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
     run_name: zs_onav_minival
+  save_obs:
+    save_to_disk: True 
+    image_path: "images/"
   video_dir: "video_dir/objectgoal/"
   # To evaluate on all episodes, set this to -1
   test_episode_count: 2 # n° of evaluation episodes
@@ -101,7 +105,7 @@ habitat_baselines:
   verbose: False
   eval_keys_to_include_in_name: []
   eval:
-  # minival: 30 , val: 1000 episodes
+  # minival: 30 episodes , val: 1000 episodes
     split: minival
     should_load_ckpt: False
     use_ckpt_config: False

@@ -255,7 +255,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
         image = self.habitat_env.get_current_observation(type='rgb')
-        bbox = self.object_detector.detect(image, target_name)
+        bbox = self.object_detector.detect(image, target_name, self.habitat_env.save_obs)
         
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(bbox)

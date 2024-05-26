@@ -4,6 +4,7 @@ import cv2
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
+from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
 
 class Target:
     def __init__(self, habitat_env):
@@ -113,7 +114,7 @@ class Target:
 
         return self.polar_coords
 
-    def update_polar_coords(self, display_image=True):
+    def update_polar_coords(self):
         """
         Function that updates the polar coordinates of the target
         after each step during navigate_to primitive
@@ -121,10 +122,9 @@ class Target:
         """
         self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
 
-        if display_image:
+        if self.habitat_env.save_obs:
             img = self.habitat_env.get_current_observation(type='rgb')
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            cv2.imwrite('images/detector_img.jpg', img)
+            save_images_to_disk(img)
 
         return self.polar_coords
 

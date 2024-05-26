@@ -6,6 +6,7 @@ from transformers import (Owlv2Processor, OwlViTProcessor,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor
                           )
+from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
 from habitat_baselines.rl.ppo.utils.nms import nms
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -88,46 +89,16 @@ class ObjectDetector:
         detection_dict = {'boxes': selected_boxes[0], 'scores': selected_scores[0], 'labels': selected_labels[0]}
         return detection_dict
 
-    def box_image(self,img,boxes,highlight_best=True, label=None):
-        if len(boxes)==4:
-            boxes = [boxes]
-        img1 = Image.fromarray(img).copy()
-        draw = ImageDraw.Draw(img1)
-        for i, box in enumerate(boxes):
-            if i==0 and highlight_best:
-                color = 'red'
-            else:
-                color = 'blue'
-
-            draw.rectangle(box,outline=color,width=5)
-            if label is not None:
-                # font = ImageFont.truetype("arial.ttf", size=13)
-                draw.text((box[0],box[1]-5),label[i],fill='white')
-        return img1
-
-    def bbox_area(self, img, box):
-        area_full = img.shape[0] * img.shape[1]
-        area_bbox = (box[2] - box[0]) * (box[3] - box[1])
-        return area_bbox / area_full
-
-    def save_images_to_disk(self, img, box, label):
-        """
-        Useful in debugging cases but slow
-        avoid using this during whole evaluation process
-        """
-        obs_img = Image.fromarray(img)
-        obs_img.save('images/observation.jpg')
-        box_img = self.box_image(img, box, label=label)
-        box_img.save('images/detector_img.jpg')
-
-    def detect(self, image, target_name):
+    def detect(self, image, target_name, save_obs):
         """
         Actual function that detects target_name in the environment
         it also saves to disk the images (observation and detection)
         returns the bounding box of the detected object
         """
         detection = self.predict(image, target_name)
-        self.save_images_to_disk(image, detection['boxes'], target_name)
+        if save_obs:
+            save_images_to_disk(image, boxes=detection['boxes'], label=target_name)
+
         return detection['boxes']
 
 class VQA:

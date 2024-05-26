@@ -41,6 +41,9 @@ class HabitatEvaluator(Evaluator):
     def _init_variables(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
+        
+        # Define additional variables
+        self.save_obs = self.config.habitat_baselines.save_obs.save_to_disk
 
     def init_env(self):
         self.observations = self.envs.reset()

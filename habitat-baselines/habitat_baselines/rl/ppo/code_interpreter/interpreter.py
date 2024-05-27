@@ -264,8 +264,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         bbox = self.object_detector.detect(image, target_name, self.habitat_env.save_obs)
         
         if bbox:
-            self.target.polar_coords = self.target.from_bbox_to_polar(bbox)
+            self.target.polar_coords = self.target.from_bbox_to_polar(bbox)    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
+
 
         self.update_variable('objects', bbox)
         return bbox

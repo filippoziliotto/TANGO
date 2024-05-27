@@ -1,10 +1,9 @@
 import torch
 import numpy as np
-from PIL import Image, ImageDraw
 from collections import defaultdict
 from transformers import (Owlv2Processor, OwlViTProcessor,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
-                          AutoProcessor
+                          AutoProcessor, AutoModelForZeroShotObjectDetection
                           )
 from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
 from habitat_baselines.rl.ppo.utils.nms import nms
@@ -12,12 +11,13 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class ObjectDetector:
-    def __init__(self, type, size, thresh, nms_thresh):
+    def __init__(self, type, size, thresh=.3, nms_thresh=.5):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.type = type
         self.thresh = thresh 
         self.nms_thresh = nms_thresh
 
-        if (type not in ['owl-vit', 'owl-vit2']) or (size not in ['base', 'large']):
+        if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino']) or (size not in ['base', 'large']):
             raise ValueError("Invalid model settings!")
         
         if type == 'owl-vit2':
@@ -34,6 +34,12 @@ class ObjectDetector:
                 self.model_name = "google/owlvit-base-patch32"
             self.processor = OwlViTProcessor.from_pretrained(self.model_name)
             self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
+        elif type in ['grounding-dino']:
+            assert size == 'base', "Only base size available for grounding_dino model."
+            self.model_name = f"IDEA-Research/grounding-dino-{size}"
+            self.processor = AutoProcessor.from_pretrained(self.model_name)
+            self.model = AutoModelForZeroShotObjectDetection.from_pretrained(self.model_name).to(self.device)
+
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -45,10 +51,15 @@ class ObjectDetector:
         return [x1,y1,x2,y2]
 
     def predict(self,img, obj_name):
+        if self.type in ["owl-vit", "owl-vit2"]:
+            text = [[f'a photo of {obj_name}']]
+        elif self.type in ["grounding-dino"]:
+            text = f"a photo of {obj_name}"
+
         encoding = self.processor(
-            text=[[f'a photo of {obj_name}']], 
-            images=img,
-            return_tensors='pt')
+                text=text, 
+                images=img,
+                return_tensors='pt')
         encoding = {k:v.to(self.device) for k,v in encoding.items()}
         with torch.no_grad():
             outputs = self.model(**encoding)
@@ -57,7 +68,17 @@ class ObjectDetector:
                     outputs[k] = v.to('cpu') if isinstance(v, torch.Tensor) else v
         
         target_sizes = torch.Tensor([img.shape[:-1]])
-        results = self.processor.post_process_object_detection(outputs=outputs,threshold=self.thresh,target_sizes=target_sizes)
+
+        if self.type in ["owl-vit", "owl-vit2"]:
+            results = self.processor.post_process_object_detection(outputs=outputs,threshold=self.thresh,target_sizes=target_sizes)
+        elif self.type in ["grounding-dino"]:
+            results = self.processor.post_process_grounded_object_detection(
+                outputs,
+                encoding['input_ids'],
+                box_threshold=0.4,
+                text_threshold=0.3,
+                target_sizes=target_sizes)
+
         boxes, scores = results[0]["boxes"], results[0]["scores"]
         boxes = boxes.cpu().detach().numpy().tolist()
         scores = scores.cpu().detach().numpy().tolist()

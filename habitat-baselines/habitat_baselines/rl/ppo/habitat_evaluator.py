@@ -45,6 +45,8 @@ class HabitatEvaluator(Evaluator):
         # Define additional variables
         self.save_obs = self.config.habitat_baselines.save_obs.save_to_disk
         self.object_detector = self.config.habitat_baselines.object_detector
+        self.agent_radius = self.config.habitat.simulator.agents.main_agent.radius
+        self.object_distance_threshold = self.config.habitat_baselines.object_distance_threshold
 
     def init_env(self):
         self.observations = self.envs.reset()

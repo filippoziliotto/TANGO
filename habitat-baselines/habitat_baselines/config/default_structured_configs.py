@@ -506,6 +506,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     wb: WBConfig = WBConfig()
     save_obs: SaveObservations = SaveObservations()
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
+    object_distance_threshold: float = 0.5
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

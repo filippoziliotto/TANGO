@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-import cv2
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
@@ -50,14 +49,15 @@ class Target:
         delta_x = coord_box_centroid[0] - coord_img_centroid[0]
         delta_y = np.abs(coord_box_centroid[1] - coord_img_centroid[1])
         theta = np.arctan(delta_y / delta_x)
-
-        # Handle potential NaN values in theta
-        if np.isnan(theta):
-            raise ValueError("Theta value is NaN.")
         
+        focal_length = 128.
+        angle = np.arctan(delta_x / focal_length)
+        theta = np.clip(angle, np.deg2rad(-45), np.deg2rad(45))
+
         # return the polar coordinates in correct tensor format
         distance = torch.tensor(distance, dtype=torch.float32)
         theta = torch.tensor(theta, dtype=torch.float32)
+
         return torch.Tensor([[distance, theta]]).to(self.habitat_env.device)
     
     def from_polar_to_cartesian(self, polar_coords):
@@ -135,7 +135,7 @@ class Target:
         """
         assert self.exploration is False, ValueError
         distance = self.polar_coords[0][0]
-        if distance <= 0.5:
+        if distance <= self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius:
             return True
         else:
             return False

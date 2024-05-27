@@ -20,11 +20,10 @@ class CodeGenerator(object):
             prompt = f"""
 while True:
     explore_scene():
-    objects = detect_objects('{object_name}')
-    if objects:
-        for object in objects:
-            navigate_to(object)
-            stop_navigation()
+    object = detect_objects('{object_name}')
+    if object:
+        navigate_to(object)
+        stop_navigation()
 """  
         else:
             # TODO: Implement LLM call generation

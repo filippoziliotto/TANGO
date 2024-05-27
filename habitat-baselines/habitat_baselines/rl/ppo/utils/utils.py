@@ -61,24 +61,3 @@ def save_images_to_disk(img, path='images/', boxes=None, label=None):
             draw.text((box[0], box[1] - 5), label, fill='white')
     img1.save(path+'detection.jpg')
     return img1
-
-
-
-# def aaaaaaaaaaaaaaaaaaaaaaaaaaaaa():
-    # trial caluclating x,y,z coordinates
-    # agent_pos = self.habitat_env.get_current_position().position
-    # agent_ang = self.habitat_env.get_current_position().rotation
-    # focal_len = 128
-    # cx, cy = w / 2, h / 2
-    # bbox_cx, bbox_cy = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
-    # depth = depth[int(bbox_cy), int(bbox_cx)][0]
-
-    # z_rel = depth
-    # x_rel = (bbox_cx - cx) * z_rel / focal_len
-    # y_rel = (bbox_cy - cy) * z_rel / focal_len
-
-    # x_obj = agent_pos[0] + x_rel
-    # y_obj = agent_pos[2] + y_rel
-    # z_obj = agent_pos[1] + z_rel
-    # cartesian_coords = torch.tensor([x_obj, y_obj, z_obj])
-    # return

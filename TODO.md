@@ -1,11 +1,13 @@
 ### TODO List
 
 - [x] created new repo "named" navprog
-    - [ ] give access to tommaso and Ms students
 - [x] creating navprog repo on cluster
-
-- [ ] evalaute on minival and val objectnav
-- [ ] Pretrain Pointgoal on Objectnav settings
+- [x] adding detr support
+- [x] evaluate val objectnav
+    - [x] ablation study on object detector
+    - [ ] ablation study on object_distance_threshold
+    - [ ] ablation study on threshold open-set
+- [ ] Pretrain Pointgoal model on Objectnav settings
 - [ ] extend also for IIN and evaluate
 - [ ] extend for EQA and evaluate
 - [ ] tell master students to use this new version

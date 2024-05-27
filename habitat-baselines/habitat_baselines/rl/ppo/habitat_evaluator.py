@@ -339,7 +339,7 @@ class HabitatEvaluator(Evaluator):
         if per_episode:
             last_key = list(self.stats_episodes.keys())[-1]
             v = self.stats_episodes[last_key]
-            episode_info = f"Episode {last_key}:"
+            episode_info = f"Episode {len(self.stats_episodes)}, {last_key}:"
             formatted_results = (
                 f"num_steps: {v['num_steps']} | "
                 f"distante_to_goal: {v['distance_to_goal']:.2f} | "

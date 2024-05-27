@@ -90,9 +90,9 @@ habitat_baselines:
   video_dir: "video_dir/objectgoal/"
   # Object Detector settings
   object_detector:
-    type: "grounding-dino"
-    size: "base"
-    thresh: 0.4
+    type: "detr"
+    size: "resnet101"
+    thresh: 0.99
     nms_thresh: 0.5
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

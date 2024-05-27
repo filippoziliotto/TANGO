@@ -59,25 +59,19 @@ habitat:
       main_agent:
         sim_sensors:
           depth_sensor:
-            # width: 640
-            # height: 480
-            # hfov: 79
             position: [0, 0.88, 0]
           rgb_sensor:
-            # width: 640
-            # height: 480
-            # hfov: 79
             position: [0, 0.88, 0]
         height: 0.88
         radius: 0.18
 
     habitat_sim_v0:
       gpu_device_id: 0
-      # allow_sliding: False
 
 habitat_baselines:
   trainer_name: "ddppo"
   torch_gpu_id: 0
+  task_name: objectnav
   # Visualization settings
   # writer_type: wb # to deactivate just comment this
   wb:
@@ -94,6 +88,9 @@ habitat_baselines:
     size: "resnet101"
     thresh: 0.99
     nms_thresh: 0.5
+  # Feature Matcher settings
+  feature_matcher:
+    use_matcher: False
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )

@@ -26,7 +26,9 @@ if TYPE_CHECKING:
     config_path="config",
     # config_name="pointnav/ppo_pointnav_example",
     # OBJECTNAV
-    config_name="objectnav/zs_objectnav"
+    # config_name="objectnav/zs_objectnav"
+    # IIN
+    config_name="instance_imagenav/zs_instance_imagenav.yaml"
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

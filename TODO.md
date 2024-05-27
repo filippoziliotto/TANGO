@@ -1,4 +1,7 @@
-### TODO List
+## TODO List
+- [ ] Pretrain Pointgoal model on Objectnav settings
+
+### ObjectNav
 
 - [x] created new repo "named" navprog
 - [x] creating navprog repo on cluster
@@ -7,9 +10,15 @@
     - [x] ablation study on object detector
     - [ ] ablation study on object_distance_threshold
     - [ ] ablation study on threshold open-set
-- [ ] Pretrain Pointgoal model on Objectnav settings
-- [ ] extend also for IIN and evaluate
-- [ ] extend for EQA and evaluate
-- [ ] tell master students to use this new version
-- [ ] add new primitives
-- [ ] try on Open-EQA dataset HM3D 
+- [ ] implement storing all detections into memory
+
+### IIN
+- [x] Implement Match module
+- [ ] Implement new psuedocode for Match module
+- [ ] Implement initial VQA module
+- [ ] IIN evaluation
+
+### EQA
+- [ ] Implement VQA 
+- [ ] EQA evaluation (MP3D)
+- [ ] Open-EQA dataset HM3D evalution

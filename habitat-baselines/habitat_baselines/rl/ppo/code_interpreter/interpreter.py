@@ -161,6 +161,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'explore_scene': self.explore_scene,
             'detect_objects': self.detect_objects,
             'navigate_to': self.navigate_to,
+            'feature_match': self.feature_match,
             'stop_navigation': self.stop_navigation,    
         }
 
@@ -199,6 +200,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             thresh=self.habitat_env.object_detector.thresh,
             nms_thresh=self.habitat_env.object_detector.nms_thresh,
         )
+
+        if self.habitat_env.matcher.use_matcher:
+            self.feature_matcher = FeatureMatcher(
+                threshold=self.habitat_env.matcher.threshold,
+            )
     
     """
     Habitat environment modules to define actions
@@ -270,6 +276,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         self.update_variable('objects', bbox)
         return bbox
+
+    def feature_match(self):
+        """
+        (Each frame) match object features with the current scene
+        The actual class is defined in models.py
+        """
+        observation = self.habitat_env.get_current_observation(type='rgb')
+        target = self.habitat_env.get_current_observation(type='instance_imagegoal')
+        tau = self.feature_matcher.match(observation, target)
+
+        if tau >= self.habitat_env.matcher.threshold:
+            return True
+        else:
+            return False
     
     """
     Python logical modules
@@ -282,136 +302,3 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
 
 
-
-
-
-
-# --------------------------------------
-# ---------------------------
-# class OLDPseudoCodeInterpreter:
-#     """
-#     Low level interpreter for pseudo code
-#     able to interpret for,while,if conditions
-#     """
-#     def __init__(self, pseudo_code):
-#         self.pseudo_code = pseudo_code
-#         self.variables = { 
-#             'episode_is_over': False,
-#         }
-#         self.primitives = {}
-#         self.lines = [(line.strip(), (len(line) - len(line.lstrip())) // 4) for line in self.pseudo_code.strip().split('\n')]
-#         self.current_line = 0
-#         self.loop_exit_flag = False
-
-#     def run(self):
-#         while not self.loop_exit_flag:
-#             line, indent_level = self.lines[self.current_line]
-#             if '=' in line:
-#                 self.assign_variable(line)
-#             elif line.startswith('while'):
-#                 condition = self.extract_condition(line, 'while')
-#                 self.run_while(condition, indent_level)
-#             elif line.startswith('for'):
-#                 variable, iterable = self.parse_for_loop(line)
-#                 self.run_for(variable, iterable, indent_level)
-#             elif line.startswith('if'):
-#                 condition = self.extract_condition(line, 'if')
-#                 self.run_if(condition, indent_level)
-#             else:
-#                 self.execute_line(line)
-            
-#             self.current_line += 1
-#             self.check_current_line()
-            
-#     def check_current_line(self):
-#         if self.current_line >= len(self.lines):
-#             self.current_line = 0
-
-#     def run_while(self, condition, indent_level):
-#         while self.evaluate_condition(condition) and not self.loop_exit_flag:
-#             self.run_block(indent_level + 1)
-
-#     def run_for(self, variable, iterable, indent_level):
-#         if not iterable:
-#             self.skip_block(indent_level + 1)
-#             return
-
-#         for item in iterable:
-#             self.variables[variable] = item
-#             self.run_block(indent_level + 1)
-
-#     def run_if(self, condition, indent_level):
-#         if self.evaluate_condition(condition):
-#             self.run_block(indent_level + 1)
-#         else:
-#             self.skip_block(indent_level + 1)
-
-#     def run_block(self, expected_indent):
-#         while not self.loop_exit_flag:
-#             self.current_line += 1
-#             line, indent_level = self.lines[self.current_line]
-#             if indent_level == expected_indent:
-#                 if '=' in line:
-#                     self.assign_variable(line)
-#                 elif line.startswith(('while', 'for', 'if')):
-#                     self.run()
-#                 else:
-#                     self.execute_line(line)
-#             else:
-#                 break
-#             self.check_current_line()
-        
-#     def skip_block(self, expected_indent):
-#         self.current_line += 1
-#         current_indent = self.lines[self.current_line][1]
-#         skip_count = 0
-
-#         for i in range(self.current_line, len(self.lines)):
-#             line, indent_level = self.lines[i]
-#             if indent_level >= current_indent:
-#                 skip_count += 1
-#             elif indent_level < expected_indent:
-#                 break
-
-#         self.current_line += skip_count
-
-#     def evaluate_condition(self, condition):
-#         # Using eval for simplicity since we're handling simple conditions
-#         return eval(condition, self.primitives, self.variables)
-
-#     def execute_line(self, line):
-#         parts = line.split('(')
-#         func_name = parts[0].strip()
-#         args = parts[1].split(')')[0].split(',')
-#         args = [arg.strip().strip('"') for arg in args if arg]
-#         if func_name in self.primitives:
-#             if args:
-#                 self.primitives[func_name](*args)
-#             else:
-#                 self.primitives[func_name]()
-#         else:
-#             raise ValueError(f"Undefined function: {func_name}")
-
-#     def extract_condition(self, line, keyword):
-#         return line.split(keyword)[1].split(':')[0].strip()
-
-#     def parse_for_loop(self, line):
-#         parts = line.split(':')[0].split(' ')
-#         variable = parts[1]
-#         iterable = eval(parts[3].strip(), self.primitives, self.variables)
-#         return variable, iterable
-
-#     def assign_variable(self, line):
-#         parts = line.split('=')
-#         variable = parts[0].strip()
-#         value = parts[1].strip()
-#         self.variables[variable] = eval(value, self.primitives, self.variables)
-
-#     def define_variable(self, name, value):
-#         self.variables[name] = value
-
-#     def update_variable(self, name, value):
-#         self.variables[name] = value
-
-#     def current_indentation(self, line):
-#         return len(line) - len(line.lstrip())

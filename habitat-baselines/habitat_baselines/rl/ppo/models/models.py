@@ -1,23 +1,32 @@
+# Torch imports
 import torch
 import numpy as np
-from collections import defaultdict
+from PIL import Image
+from torchvision.transforms import ToTensor
 from transformers import (Owlv2Processor, OwlViTProcessor,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
                           DetrImageProcessor, DetrForObjectDetection
                           )
+from torchvision.transforms.functional import rgb_to_grayscale
+
+# Habitat imports
 from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
+from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
+
+# Warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class ObjectDetector:
-    def __init__(self, type, size, thresh=.3, nms_thresh=.5):
+    def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.type = type
         self.thresh = thresh 
         self.nms_thresh = nms_thresh
+        self.store_detections = store_detections
 
         if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
             raise ValueError("Invalid model settings!")
@@ -104,6 +113,12 @@ class ObjectDetector:
                 conf.append(scores[labels.index(label)])
         return bbox, conf, names
 
+    def store_detections_into_dict(self, detections):
+        # TODO: Implement a way to store detections
+        # each label has to be stored once
+        # update detection if label with higher score is found
+        pass
+
     def predict(self,img, obj_name):
         encoding = self.pre_process_detection(img, obj_name)
         encoding = {k:v.to(self.device) for k,v in encoding.items()}
@@ -175,11 +190,57 @@ class VQA:
         pass
 
 class FeatureMatcher:
-    def __init__(self):
-        pass
+    def __init__(self, threshold=25.0):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        superglue_config = {
+            'superpoint': {
+                'nms_radius': 4,
+                'keypoint_threshold': 0.005,
+                'max_keypoints': 1024
+            },
+            'superglue': {
+                'weights': 'indoor',
+                'sinkhorn_iterations': 100,
+                'match_threshold': 0.2,
+            }
+        }    
+        self.matching_model = Matching(superglue_config).eval().to(self.device)
+        self.threshold = threshold
+        self.from_pil_to_tensor = ToTensor()
 
-    def predict(self, observation, target):
-        pass
+    def load_images(self, image1, image2):
+        image1 = rgb_to_grayscale(Image.fromarray(image1))
+        image2 = rgb_to_grayscale(Image.fromarray(image2))
 
-    def feature_match(self, observation, target):
-        pass
+        # save image to disk
+        save_images_to_disk(image2, instance=True)
+
+        image1 = self.from_pil_to_tensor(image1).unsqueeze(0) / 255.
+        image2 = self.from_pil_to_tensor(image2).unsqueeze(0) / 255.
+
+        return image1.to(self.device), image2.to(self.device)
+
+    def predict_keypoints(self, observation, target):
+        
+        img, target_img = self.load_images(observation, target)
+        pred = self.matching_model({'image0': img, 'image1': target_img})
+
+        pred = {k: v[0].detach().cpu().numpy() for k, v in pred.items()}
+        kpts0, kpts1 = pred['keypoints0'], pred['keypoints1']
+        matches, conf = pred['matches0'], pred['matching_scores0']
+        
+        # Keep the matching keypoints.
+        valid = matches > -1
+        mkpts0 = kpts0[valid]
+        mkpts1 = kpts1[matches[valid]]
+        mconf = conf[valid]
+        n_matches = len(mkpts0)
+        tau = np.sum(mconf)
+
+        return tau, n_matches
+
+    def match(self, observation, target):
+
+        self.tau, self.n_matches = self.predict_keypoints(observation, target)
+
+        return self.tau

@@ -457,6 +457,16 @@ class ObjectDetectorConfig(HabitatBaselinesBaseConfig):
     size: str = "large"
     thresh: float = 0.5
     nms_thresh: float = 0.5
+    store_detections: bool = False
+
+@dataclass
+class FeatureMatchingConfig(HabitatBaselinesBaseConfig):
+    """
+    Object detector config settings
+    """
+    use_matcher: bool = False
+    type: str = "indoor"
+    threshold: float = 25.
 
 
 @dataclass
@@ -504,9 +514,11 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     force_torch_single_threaded: bool = False
     # Weights and Biases config
     wb: WBConfig = WBConfig()
+    task_name: str = "objectnav"
     save_obs: SaveObservations = SaveObservations()
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
     object_distance_threshold: float = 0.5
+    feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

@@ -42,12 +42,18 @@ def from_polar_to_xyz(source_position, source_rotation, rho, phi):
 
     return goal_position
 
-
-def save_images_to_disk(img, path='images/', boxes=None, label=None):
+def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=False):
     """
     Function to save an image to disk with a bounding box and label
     """
-    img1 = Image.fromarray(img).copy()
+    if not isinstance(img, Image.Image):
+        img1 = Image.fromarray(img).copy()
+    else:
+        img1 = img.copy()
+
+    if instance:
+        img1.save(path+'instance.jpg')
+        return
 
     if boxes is None or boxes == []:
         img1.save(path+'observation.jpg')

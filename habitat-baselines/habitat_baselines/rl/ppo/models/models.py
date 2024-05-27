@@ -19,7 +19,7 @@ class ObjectDetector:
         self.thresh = thresh 
         self.nms_thresh = nms_thresh
 
-        if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resent50','resnet101']):
+        if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
             raise ValueError("Invalid model settings!")
         
         if type == 'owl-vit2':

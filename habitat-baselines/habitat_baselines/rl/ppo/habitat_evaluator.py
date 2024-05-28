@@ -455,7 +455,7 @@ class HabitatEvaluator(Evaluator):
         possibility to extend to new and better sampling strategies
         """
         hab_simulator = self.call_habitat_sim()
-        min_distance = 20.
+        min_distance = 15.
         max_tries = 1000
         current_pos = self.get_current_position()
         agent_pos = current_pos.position

@@ -19,6 +19,11 @@ class CodeGenerator(object):
         # TODO: Implement image retrieval using VQA
         return object_name
 
+    def get_eqa_target(self):
+        question, gt_answer = self.habitat_env.envs.call(['habitat_env'])[0].current_episode
+        # TODO: Implement image retrieval using VQA
+        return question, gt_answer
+
     def generate_onav_episode(self):
         object_name = refined_names[self.get_objectgoal_target()]
         print('Navigate to', object_name)
@@ -45,6 +50,19 @@ while True:
             stop_navigation()
         else:
             change_target()
+"""
+        return prompt
+
+    def generate_eqa_episode(self):
+        question, gt_answer = self.get_eqa_target()
+        print('Question:', question)
+        prompt = f"""
+while True:
+    explore_scene()
+    object = detect_objects(target)
+    if object:
+        navigate_to(object)
+        answer_question({question})
 """
         return prompt
 

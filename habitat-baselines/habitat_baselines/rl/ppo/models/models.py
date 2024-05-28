@@ -2,16 +2,12 @@
 import torch
 import numpy as np
 from PIL import Image
+import spacy
 from torchvision.transforms import ToTensor
-from transformers import (Owlv2Processor, OwlViTProcessor,
-                          Owlv2ForObjectDetection, OwlViTForObjectDetection,
-                          AutoProcessor, AutoModelForZeroShotObjectDetection,
-                          DetrImageProcessor, DetrForObjectDetection
-                          )
 from torchvision.transforms.functional import rgb_to_grayscale
 
 # Habitat imports
-from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
+from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk, get_detector_model
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
@@ -27,37 +23,15 @@ class ObjectDetector:
         self.thresh = thresh 
         self.nms_thresh = nms_thresh
         self.store_detections = store_detections
+        self.detection_dict = dict()
 
         if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
             raise ValueError("Invalid model settings!")
         
-        if type == 'owl-vit2':
-            if size in ['large']:
-                self.model_name = "google/owlv2-large-patch14-ensemble"
-            elif size in ['base']:
-                self.model_name = "google/owlv2-base-patch16-ensemble"
-            self.processor = AutoProcessor.from_pretrained(self.model_name)
-            self.model = Owlv2ForObjectDetection.from_pretrained(self.model_name).to(self.device)  
-        elif type in ['owl-vit']:
-            if size in ['large']:
-                self.model_name = "google/owlvit-large-patch14"
-            elif size in ['base']:
-                self.model_name = "google/owlvit-base-patch32"
-            self.processor = OwlViTProcessor.from_pretrained(self.model_name)
-            self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
-        elif type in ['grounding-dino']:
-            assert size == 'base', "Only base size available for grounding_dino model."
-            self.model_name = f"IDEA-Research/grounding-dino-{size}"
-            self.processor = AutoProcessor.from_pretrained(self.model_name)
-            self.model = AutoModelForZeroShotObjectDetection.from_pretrained(self.model_name).to(self.device)
-        elif type in ["detr"]:
-            assert self.thresh >= 0.99, "DETR model requires a threshold of at least 0.9"
-            if size in ["resnet50"]:
-                self.model_name = "facebook/detr-resnet-50"
-            elif size in ["resnet101"]:
-                self.model_name = "facebook/detr-resnet-101"
-            self.processor = DetrImageProcessor.from_pretrained(self.model_name, revision="no_timm")
-            self.model = DetrForObjectDetection.from_pretrained(self.model_name, revision="no_timm").to(self.device)
+        if (store_detections) and (type not in ['detr']):
+            raise ValueError("Storing detections is only available using DETR COCO labels")
+        
+        self.model, self.processor = self.get_detector_model(type, size, self.device)
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -113,11 +87,16 @@ class ObjectDetector:
                 conf.append(scores[labels.index(label)])
         return bbox, conf, names
 
-    def store_detections_into_dict(self, detections):
-        # TODO: Implement a way to store detections
-        # each label has to be stored once
-        # update detection if label with higher score is found
-        pass
+    def store_detections_into_dict(self, boxes, scores, labels):
+        """
+        Store all detections into a dictionary
+        """
+        for label, bbox, score in zip(labels, boxes, scores):
+            if label not in self.detection_dict or score > self.detection_dict[label]['score']:
+                    self.detection_dict[self.model.config.id2label[label]] = {'bbox': bbox, 'score': score}
+
+    def get_detection_dict(self):
+        return self.detection_dict
 
     def predict(self,img, obj_name):
         encoding = self.pre_process_detection(img, obj_name)
@@ -127,7 +106,7 @@ class ObjectDetector:
             for k,v in outputs.items():
                 if v is not None:
                     outputs[k] = v.to('cpu') if isinstance(v, torch.Tensor) else v
-        
+
         target_sizes = torch.Tensor([img.shape[:-1]])
         results = self.post_process_detection(outputs, target_sizes, encoding)
 
@@ -137,35 +116,29 @@ class ObjectDetector:
 
         if self.type in ["detr"]:
             labels = results[0]["labels"].cpu().detach().numpy().tolist()
+            # Implement memory of all detections
+            if self.store_detections:
+                self.store_detections_into_dict(boxes, scores, labels)
             boxes, scores, labels = self.class_ids_to_labels(boxes, scores, labels, obj_name)
 
-        if len(boxes)==0:
-            detection_dict = {'boxes': [], 'scores': [], 'labels': []}
-            return detection_dict
+        if not boxes:
+            return {'boxes': [], 'scores': [], 'labels': []}
+        
+        detections = sorted(zip(boxes, scores), key=lambda x: x[1], reverse=True)
+        selected_boxes, selected_scores, selected_labels = [], [], []
 
-        selected_boxes = []
-        selected_scores = []
-        selected_labels = []
-        boxes, scores = zip(*sorted(zip(boxes,scores),key=lambda x: x[1],reverse=True))
-        for i in range(len(scores)):
-            if scores[i] > self.thresh:
-                coord = self.normalize_coord(boxes[i],img.shape[:-1])
-                selected_boxes.append(coord)
-                selected_scores.append(scores[i])
+        for box, score in detections:
+            if score >= self.thresh:
+                selected_boxes.append(self.normalize_coord(box, img.shape[:-1]))
+                selected_scores.append(score)
                 selected_labels.append(obj_name)
 
-        selected_boxes, selected_scores = nms(
-            selected_boxes,selected_scores,self.nms_thresh)
+        selected_boxes, selected_scores = nms(selected_boxes, selected_scores, self.nms_thresh)
 
-        # Sort the final detections by score
-        selected_boxes, selected_scores, selected_labels = zip(*sorted(
-            zip(selected_boxes, selected_scores, selected_labels),
-            key=lambda x: x[1],
-            reverse=True
-        ))
+        final_detections = sorted(zip(selected_boxes, selected_scores, [obj_name] * len(selected_boxes)), 
+                                key=lambda x: x[1], reverse=True)
 
-        detection_dict = {'boxes': selected_boxes[0], 'scores': selected_scores[0], 'labels': selected_labels[0]}
-        return detection_dict
+        return {'boxes': final_detections[0][0], 'scores': final_detections[0][1], 'labels': final_detections[0][2]}
 
     def detect(self, image, target_name, save_obs):
         """
@@ -181,12 +154,23 @@ class ObjectDetector:
 
 class VQA:
     def __init__(self):
-        pass
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.processor = AutoProcessor.from_pretrained("Salesforce/blip-vqa-capfilt-large")
+        self.model = BlipForQuestionAnswering.from_pretrained(
+                "Salesforce/blip-vqa-capfilt-large").to(self.device)
+        self.model.eval()
+        self.nlp = spacy.load('en_core_web_md')
 
-    def predict(self, question, image):
-        pass
-
-    def answer(self, question, image):
+    def predict(self,question, img):
+        encoding = self.processor(img, question, return_tensors='pt')
+        encoding = {k:v.to(self.device) for k,v in encoding.items()}
+        with torch.no_grad():
+            outputs = self.model.generate(**encoding)
+        
+        return self.processor.decode(outputs[0], skip_special_tokens=True)
+    
+    def answer(self):
+        # TODO: fix everything in this class
         pass
 
 class FeatureMatcher:

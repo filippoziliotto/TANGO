@@ -100,3 +100,6 @@ data
 /sandbox
 /plots/outputs
 /wandb/
+/logs/
+/slurm/
+

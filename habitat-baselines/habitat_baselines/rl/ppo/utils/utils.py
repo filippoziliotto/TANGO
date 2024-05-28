@@ -7,6 +7,12 @@ from habitat.utils.geometry_utils import (
     quaternion_rotate_vector,
 )
 
+from transformers import (Owlv2Processor, OwlViTProcessor,
+                          Owlv2ForObjectDetection, OwlViTForObjectDetection,
+                          AutoProcessor, AutoModelForZeroShotObjectDetection,
+                          DetrImageProcessor, DetrForObjectDetection
+                          )
+
 
 def from_xyz_to_polar(source_position, source_rotation, goal_position):
     """
@@ -67,3 +73,37 @@ def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=Fa
             draw.text((box[0], box[1] - 5), label, fill='white')
     img1.save(path+'detection.jpg')
     return img1
+
+def get_detector_model(type, size, device):
+    """
+    Function to get the correct model and processor 
+    for the detector called in models.py
+    """
+    if type == 'owl-vit2':
+        if size in ['large']:
+            model_name = "google/owlv2-large-patch14-ensemble"
+        elif size in ['base']:
+            model_name = "google/owlv2-base-patch16-ensemble"
+        processor = AutoProcessor.from_pretrained(model_name)
+        model = Owlv2ForObjectDetection.from_pretrained(model_name)
+    elif type in ['owl-vit']:
+        if size in ['large']:
+            model_name = "google/owlvit-large-patch14"
+        elif size in ['base']:
+            model_name = "google/owlvit-base-patch32"
+        processor = OwlViTProcessor.from_pretrained(model_name)
+        model = OwlViTForObjectDetection.from_pretrained(model_name)
+    elif type in ['grounding-dino']:
+        assert size == 'base', "Only base size available for grounding_dino model."
+        model_name = f"IDEA-Research/grounding-dino-{size}"
+        processor = AutoProcessor.from_pretrained(model_name)
+        model = AutoModelForZeroShotObjectDetection.from_pretrained(model_name)
+    elif type in ["detr"]:
+        if size in ["resnet50"]:
+            model_name = "facebook/detr-resnet-50"
+        elif size in ["resnet101"]:
+            model_name = "facebook/detr-resnet-101"
+        processor = DetrImageProcessor.from_pretrained(model_name, revision="no_timm")
+        model = DetrForObjectDetection.from_pretrained(model_name, revision="no_timm")
+
+    return model.to(device), processor

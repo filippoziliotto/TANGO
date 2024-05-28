@@ -199,6 +199,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             size=self.habitat_env.object_detector.size,
             thresh=self.habitat_env.object_detector.thresh,
             nms_thresh=self.habitat_env.object_detector.nms_thresh,
+            store_detections=self.habitat_env.object_detector.store_detections,
         )
 
         if self.habitat_env.matcher.use_matcher:
@@ -268,6 +269,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         image = self.habitat_env.get_current_observation(type='rgb')
         bbox = self.object_detector.detect(image, target_name, self.habitat_env.save_obs)
+        memory = self.object_detector.get_detection_dict()
         
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(bbox)    
@@ -279,7 +281,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
     def feature_match(self):
         """
-        (Each frame) match object features with the current scene
+        (Each frame) match target image with the current observation
         The actual class is defined in models.py
         """
         observation = self.habitat_env.get_current_observation(type='rgb')
@@ -290,6 +292,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             return True
         else:
             return False
+        
+    def answer_question(self, question):
+        """
+        VQA module for answering questions
+        The actual class is defined in models.py
+        """
+        # TODO: Implement VQA
+        pass
     
     """
     Python logical modules

@@ -206,6 +206,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.feature_matcher = FeatureMatcher(
                 threshold=self.habitat_env.matcher.threshold,
             )
+
+        if self.habitat_env.vqa.use_vqa:
+            self.vqa = VQA(
+                type=self.habitat_env.vqa.type,
+                size=self.habitat_env.vqa.size,
+            )
     
     """
     Habitat environment modules to define actions
@@ -225,9 +231,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             self.loop_exit_flag = True
             self.habitat_env.execute_action(force_stop=True)
-            self.habitat_env.update_episode_stats(
-                force_stop=True,
-                display=True)
+            self.habitat_env.update_episode_stats(force_stop=True, display=True)
             self.update_variable('episode_is_over', True)
 
     def navigate_to(self, bbox):
@@ -321,8 +325,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         VQA module for answering questions
         The actual class is defined in models.py
         """
-        # TODO: Implement VQA
-        pass
+        img = self.habitat_env.get_current_observation(type='rgb')
+        answer = self.vqa.predict(question, img)
+
+        # TODO: Fix this part
+        ground_truth = self.habitat_env.get_gt_eqa()
+        similarity = self.vqa.calculate_similarity(answer, ground_truth)
+        return answer
     
     """
     Python logical modules

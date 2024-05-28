@@ -468,7 +468,14 @@ class FeatureMatchingConfig(HabitatBaselinesBaseConfig):
     type: str = "indoor"
     threshold: float = 25.
 
-
+@dataclass
+class VQAConfig(HabitatBaselinesBaseConfig):
+    """
+    VQA model config settings
+    """
+    use_vqa: bool = False
+    type: str = "blip"
+    size: str = "base"
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
@@ -519,6 +526,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
     object_distance_threshold: float = 0.5
     feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()
+    vqa: VQAConfig = VQAConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

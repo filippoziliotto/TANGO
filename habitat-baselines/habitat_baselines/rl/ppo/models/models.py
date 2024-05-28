@@ -153,17 +153,21 @@ class VQA:
         self.model.eval()
         self.nlp = spacy.load('en_core_web_md')
 
-    def predict(self,question, img):
+    def predict(self, question, img):
         encoding = self.processor(img, question, return_tensors='pt')
         encoding = {k:v.to(self.device) for k,v in encoding.items()}
         with torch.no_grad():
             outputs = self.model.generate(**encoding)
-        
         return self.processor.decode(outputs[0], skip_special_tokens=True)
     
-    def answer(self):
-        # TODO: fix everything in this class
-        pass
+    def calculate_similarity(self, word1, word2):
+        token1 = self.nlp(word1)
+        token2 = self.nlp(word2)
+        return token1.similarity(token2)
+
+    def answer(self, question, img):
+        # TODO: Fix this function
+        return self.predict(question, img)
 
 class FeatureMatcher:
     def __init__(self, threshold=25.0):

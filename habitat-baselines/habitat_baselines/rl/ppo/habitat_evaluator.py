@@ -52,6 +52,8 @@ class HabitatEvaluator(Evaluator):
         self.object_distance_threshold = self.config.habitat_baselines.object_distance_threshold
         # Feature Matching
         self.matcher = self.config.habitat_baselines.feature_matcher
+        # VQA
+        self.vqa = self.config.habitat_baselines.vqa
 
     def init_env(self):
         self.observations = self.envs.reset()

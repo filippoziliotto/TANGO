@@ -7,14 +7,12 @@ from torchvision.transforms import ToTensor
 from torchvision.transforms.functional import rgb_to_grayscale
 
 # Habitat imports
-from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk, get_detector_model
+from habitat_baselines.rl.ppo.utils.utils import (
+    save_images_to_disk, get_detector_model,
+    get_vqa_model, get_matcher_model
+)
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
-from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
-
-# Warnings
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -24,14 +22,7 @@ class ObjectDetector:
         self.nms_thresh = nms_thresh
         self.store_detections = store_detections
         self.detection_dict = dict()
-
-        if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
-            raise ValueError("Invalid model settings!")
-        
-        if (store_detections) and (type not in ['detr']):
-            raise ValueError("Storing detections is only available using DETR COCO labels")
-        
-        self.model, self.processor = self.get_detector_model(type, size, self.device)
+        self.model, self.processor = get_detector_model(type, size, store_detections, self.device)
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -153,11 +144,9 @@ class ObjectDetector:
         return detection['boxes']
 
 class VQA:
-    def __init__(self):
+    def __init__(self, type, size):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.processor = AutoProcessor.from_pretrained("Salesforce/blip-vqa-capfilt-large")
-        self.model = BlipForQuestionAnswering.from_pretrained(
-                "Salesforce/blip-vqa-capfilt-large").to(self.device)
+        self.model, self.processor = get_vqa_model(type, size, self.device)
         self.model.eval()
         self.nlp = spacy.load('en_core_web_md')
 
@@ -176,19 +165,7 @@ class VQA:
 class FeatureMatcher:
     def __init__(self, threshold=25.0):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        superglue_config = {
-            'superpoint': {
-                'nms_radius': 4,
-                'keypoint_threshold': 0.005,
-                'max_keypoints': 1024
-            },
-            'superglue': {
-                'weights': 'indoor',
-                'sinkhorn_iterations': 100,
-                'match_threshold': 0.2,
-            }
-        }    
-        self.matching_model = Matching(superglue_config).eval().to(self.device)
+        self.matching_model = get_matcher_model(self.device)
         self.threshold = threshold
         self.from_pil_to_tensor = ToTensor()
 
@@ -196,7 +173,7 @@ class FeatureMatcher:
         image1 = rgb_to_grayscale(Image.fromarray(image1))
         image2 = rgb_to_grayscale(Image.fromarray(image2))
 
-        # save image to disk
+        # Save target image to disk (only for debugging)
         save_images_to_disk(image2, instance=True)
 
         image1 = self.from_pil_to_tensor(image1).unsqueeze(0) / 255.

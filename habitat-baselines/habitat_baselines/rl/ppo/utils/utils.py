@@ -10,10 +10,13 @@ from habitat.utils.geometry_utils import (
 from transformers import (Owlv2Processor, OwlViTProcessor,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
-                          DetrImageProcessor, DetrForObjectDetection
+                          DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering
                           )
+from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
 
-
+"""
+Polar and cartesian object coordinates utils
+"""
 def from_xyz_to_polar(source_position, source_rotation, goal_position):
     """
     Function to convert a xyz object position to polar coordinates
@@ -48,6 +51,9 @@ def from_polar_to_xyz(source_position, source_rotation, rho, phi):
 
     return goal_position
 
+"""
+Visualization utils
+"""
 def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=False):
     """
     Function to save an image to disk with a bounding box and label
@@ -74,11 +80,20 @@ def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=Fa
     img1.save(path+'detection.jpg')
     return img1
 
-def get_detector_model(type, size, device):
+"""
+Models and processors utils
+"""
+def get_detector_model(type, size, store_detections, device):
     """
     Function to get the correct model and processor 
     for the detector called in models.py
     """
+    if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
+        raise ValueError("Invalid model settings!")
+        
+    if (store_detections) and (type not in ['detr']):
+        raise ValueError("Storing detections is only available using DETR COCO labels")
+        
     if type == 'owl-vit2':
         if size in ['large']:
             model_name = "google/owlv2-large-patch14-ensemble"
@@ -107,3 +122,39 @@ def get_detector_model(type, size, device):
         model = DetrForObjectDetection.from_pretrained(model_name, revision="no_timm")
 
     return model.to(device), processor
+
+def get_vqa_model(type, size, device):
+    """
+    Function to get the correct model and processor
+    for the VQA model called in models.py
+    """
+    if (type not in ['blip']) or (size not in ['base', 'large']):
+        raise ValueError("Invalid model settings!")
+    
+    if type in ['blip']:
+        if size in ['base']:
+            model_name = "Salesforce/blip-vqa-capfilt-base"
+        elif size in ['large']:
+            model_name = "Salesforce/blip-vqa-capfilt-large"
+        processor = AutoProcessor.from_pretrained(model_name)
+        model = BlipForQuestionAnswering.from_pretrained(model_name)
+    
+    return model.to(device), processor
+    
+def get_matcher_model(device):
+    """
+    Function to get the correct model for the matcher
+    """
+    superglue_config = {
+        'superpoint': {
+            'nms_radius': 4,
+            'keypoint_threshold': 0.005,
+            'max_keypoints': 1024
+        },
+        'superglue': {
+            'weights': 'indoor',
+            'sinkhorn_iterations': 100,
+            'match_threshold': 0.2,
+        }
+    }    
+    return Matching(superglue_config).eval().to(device)

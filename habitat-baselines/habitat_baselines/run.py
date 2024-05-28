@@ -20,6 +20,8 @@ from habitat_baselines.config.default_structured_configs import (
 if TYPE_CHECKING:
     from omegaconf import DictConfig
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 @hydra.main(
     version_base=None,

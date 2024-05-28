@@ -453,6 +453,7 @@ class ObjectDetectorConfig(HabitatBaselinesBaseConfig):
     """
     Object detector config settings
     """
+    use_detector: bool = False
     type: str = "owl-vit2"
     size: str = "large"
     thresh: float = 0.5

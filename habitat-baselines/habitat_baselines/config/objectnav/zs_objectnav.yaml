@@ -84,6 +84,7 @@ habitat_baselines:
   video_dir: "video_dir/objectgoal/"
   # Object Detector settings
   object_detector:
+    use_detector: True
     type: "detr"
     size: "resnet101"
     thresh: 0.99

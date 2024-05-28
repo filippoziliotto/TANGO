@@ -10,7 +10,9 @@
     - [x] ablation study on object detector
     - [ ] ablation study on object_distance_threshold
     - [ ] ablation study on threshold open-set
-- [ ] implement storing all detections into memory
+- [x] implement storing all detections into memory
+    - [ ] "ask-fo-help" function hat uses phi3 or llm of seen objects
+
 
 ### IIN
 - [x] Implement Match module

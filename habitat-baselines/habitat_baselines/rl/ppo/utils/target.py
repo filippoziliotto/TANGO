@@ -15,7 +15,7 @@ class Target:
         self.polar_coords = [None, None]
         self.cartesian_coords = [None, None, None]
         self.exploration = True
-
+    
     def from_bbox_to_polar(self, norm_depth, bbox):
         """
         Function that returns the polar coordinates of the target
@@ -27,30 +27,28 @@ class Target:
             return [None, None]
         
         # calculate the distance of the object
-        max_depth = 10.
-        min_depth = 0.
-        depth = min_depth + (norm_depth * (max_depth - min_depth))
-        coord_box_centroid = [(bbox[0]+bbox[2])/2., (bbox[1]+bbox[3])/2]
+        self.get_camera_params()
+        depth = self.min_depth + (norm_depth * (self.max_depth - self.min_depth))
+
+        # Calculate centroid of bounding box
+        bbox_centroid = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
 
         # Ensure the centroid coordinates are within image dimensions
         h, w = depth.shape[:2]
-        if not (0 <= coord_box_centroid[0] < w and 0 <= coord_box_centroid[1] < h):
+        if not (0 <= bbox_centroid[0] < w and 0 <= bbox_centroid[1] < h):
             raise ValueError("Bounding box centroid is out of image bounds.")
+        
+        # Get distance from depth map at the centroid
+        distance = depth[int(bbox_centroid[1]), int(bbox_centroid[0]), 0]
 
-        distance = depth[int(coord_box_centroid[1]),int(coord_box_centroid[0])][0]
+        # Calculate the angle
+        img_centroid = np.array([w / 2, h / 2])
+        delta_x = bbox_centroid[0] - img_centroid[0]
+        focal_length = self.get_camera_focal_lenght(self.camera_width, self.camera_hfov)
+        theta = np.arctan(delta_x / focal_length)
+        theta = np.clip(theta, np.deg2rad(-45), np.deg2rad(45))
 
-        # Handle potential NaN values in distance
-        if np.isnan(distance):
-            raise ValueError("Distance value is NaN.")
- 
-        # Calculate the angle of the object
-        coord_img_centroid = np.array([w / 2, h / 2])
-        delta_x = coord_box_centroid[0] - coord_img_centroid[0]
-        focal_length = 128.
-        angle = np.arctan(delta_x / focal_length)
-        theta = np.clip(angle, np.deg2rad(-45), np.deg2rad(45))
-
-        # return the polar coordinates in correct tensor format
+        # Convert to tensor
         distance = torch.tensor(distance, dtype=torch.float32)
         theta = torch.tensor(theta, dtype=torch.float32)
 
@@ -144,3 +142,20 @@ class Target:
             return True
         else:
             return False
+        
+    def get_camera_focal_lenght(self, camera_width, camera_hfov):
+        """
+        Function that returns the focal length of the camera
+        """
+        camera_hfov = np.deg2rad(camera_hfov)
+        return camera_width / (2 * np.tan(camera_hfov / 2))
+
+    def get_camera_params(self):
+        """
+        Function that returns the camera parameters
+        """
+        self.camera_width = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.width
+        self.camera_height = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.height
+        self.camera_hfov = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.hfov
+        self.max_depth = 10.
+        self.min_depth = 0.

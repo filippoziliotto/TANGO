@@ -194,13 +194,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env = habitat_env
         self.target = Target(habitat_env)
 
-        self.object_detector = ObjectDetector(
-            type=self.habitat_env.object_detector.type, 
-            size=self.habitat_env.object_detector.size,
-            thresh=self.habitat_env.object_detector.thresh,
-            nms_thresh=self.habitat_env.object_detector.nms_thresh,
-            store_detections=self.habitat_env.object_detector.store_detections,
-        )
+        if self.habitat_env.object_detector.use_detector:
+            self.object_detector = ObjectDetector(
+                type=self.habitat_env.object_detector.type, 
+                size=self.habitat_env.object_detector.size,
+                thresh=self.habitat_env.object_detector.thresh,
+                nms_thresh=self.habitat_env.object_detector.nms_thresh,
+                store_detections=self.habitat_env.object_detector.store_detections,
+            )
 
         if self.habitat_env.matcher.use_matcher:
             self.feature_matcher = FeatureMatcher(
@@ -326,7 +327,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
         img = self.habitat_env.get_current_observation(type='rgb')
-        answer = self.vqa.predict(question, img)
+        answer = self.vqa.answer(question, img)
 
         # TODO: Fix this part
         ground_truth = self.habitat_env.get_gt_eqa()

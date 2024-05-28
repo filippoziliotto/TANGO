@@ -259,6 +259,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
 
+        if self.habitat_env.object_detector.store_detections:   
+            self.object_detector.reset_detection_dict()
+
     """
     Computer Vision modules
     """
@@ -267,12 +270,19 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         (Each frame) detect objects in the scene using object detection model
         The actual class is defined in models.py
         """
-        image = self.habitat_env.get_current_observation(type='rgb')
-        bbox = self.object_detector.detect(image, target_name, self.habitat_env.save_obs)
-        memory = self.object_detector.get_detection_dict()
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        depth_obs = self.habitat_env.get_current_observation(type='depth')
+        
+        bbox = self.object_detector.detect(obs, target_name, self.habitat_env.save_obs)
+
+        if self.habitat_env.object_detector.store_detections:
+            self.memory_dict = self.object_detector.get_detection_dict()
+            for label in self.memory_dict:
+                if 'xyz' not in self.memory_dict[label]:  
+                    self.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(self.memory_dict[label]['bbox'])
         
         if bbox:
-            self.target.polar_coords = self.target.from_bbox_to_polar(bbox)    
+            self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox)    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
 
 

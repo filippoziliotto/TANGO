@@ -16,7 +16,7 @@ class Target:
         self.cartesian_coords = [None, None, None]
         self.exploration = True
 
-    def from_bbox_to_polar(self, bbox):
+    def from_bbox_to_polar(self, norm_depth, bbox):
         """
         Function that returns the polar coordinates of the target
         given a bounding box
@@ -27,7 +27,6 @@ class Target:
             return [None, None]
         
         # calculate the distance of the object
-        norm_depth = self.habitat_env.get_current_observation(type='depth')
         max_depth = 10.
         min_depth = 0.
         depth = min_depth + (norm_depth * (max_depth - min_depth))
@@ -47,9 +46,6 @@ class Target:
         # Calculate the angle of the object
         coord_img_centroid = np.array([w / 2, h / 2])
         delta_x = coord_box_centroid[0] - coord_img_centroid[0]
-        delta_y = np.abs(coord_box_centroid[1] - coord_img_centroid[1])
-        theta = np.arctan(delta_y / delta_x)
-        
         focal_length = 128.
         angle = np.arctan(delta_x / focal_length)
         theta = np.clip(angle, np.deg2rad(-45), np.deg2rad(45))
@@ -84,6 +80,15 @@ class Target:
         agent_pos = agent_pos.position
 
         return from_xyz_to_polar(agent_pos, agent_ang, cartesian_coords)
+
+    def from_bbox_to_cartesian(self, bbox):
+        """
+        Function that returns the cartesian coordinates of the target
+        given a bounding box
+        """
+        polar_coords = self.from_bbox_to_polar(bbox)
+        cartesian_coords = self.from_polar_to_cartesian(polar_coords)
+        return cartesian_coords
 
     def get_exploration_target(self):
         """

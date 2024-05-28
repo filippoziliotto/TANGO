@@ -89,6 +89,9 @@ class ObjectDetector:
     def get_detection_dict(self):
         return self.detection_dict
 
+    def reset_detection_dict(self):
+        self.detection_dict = dict()
+
     def predict(self,img, obj_name):
         encoding = self.pre_process_detection(img, obj_name)
         encoding = {k:v.to(self.device) for k,v in encoding.items()}

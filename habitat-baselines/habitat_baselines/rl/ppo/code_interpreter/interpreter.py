@@ -247,6 +247,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             self.update_variable('object', bbox)
 
+    def look_around(self):
+        """
+        Look around primitive of 360° for convention
+        turning to the left for a full rotation
+        """
+        views = []
+        for rot in range(360 // self.habitat_env.config.habitat.simulator.turn_angle):
+            self.habitat_env.execute_action(look_around=True)
+            self.habitat_env.update_episode_stats()
+            views.append(self.habitat_env.get_current_observation(type='rgb'))
+
+        # stack list of image into single image
+        stacked_views = np.stack(views, axis=0)
+
     def stop_navigation(self):
         """
         Target reached stopping the navigation
@@ -272,7 +286,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
-        
+
         bbox = self.object_detector.detect(obs, target_name, self.habitat_env.save_obs)
 
         if self.habitat_env.object_detector.store_detections:
@@ -284,7 +298,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox)    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
-
 
         self.update_variable('objects', bbox)
         return bbox

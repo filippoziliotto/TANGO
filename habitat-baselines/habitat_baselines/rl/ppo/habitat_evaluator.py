@@ -175,7 +175,7 @@ class HabitatEvaluator(Evaluator):
             else:
                 self.step_data = [a.item() for a in self.action_data.env_actions.cpu()]
 
-    def execute_step(self, force_stop=False):
+    def execute_step(self, force_stop=False, look_around=False):
         """
         Execute the predicted action in the environment
         and update all the necessary variables
@@ -189,6 +189,9 @@ class HabitatEvaluator(Evaluator):
             self.step_data = [torch.randint(1, 4, (1,), device=self.device).item()]
         else:
             pass
+
+        if look_around:
+            self.step_data = [2] 
             
         self.outputs = self.envs.step(self.step_data)
         self.observations, self.rewards_l, self.dones, self.infos = [
@@ -393,10 +396,12 @@ class HabitatEvaluator(Evaluator):
             print(f"Average episode {k}: {v:.4f}")
         print('-----------------------')       
 
-    def execute_action(self, coords=None, force_stop=False):
+    def execute_action(self, coords=None, force_stop=False, look_around=False):
         if coords is not None:
             self.predict_action(coords)
             self.execute_step(force_stop)
+        elif look_around:
+            self.execute_step(look_around)
         else:
             self.execute_step(force_stop)
 

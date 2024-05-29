@@ -79,12 +79,12 @@ class Target:
 
         return from_xyz_to_polar(agent_pos, agent_ang, cartesian_coords)
 
-    def from_bbox_to_cartesian(self, bbox):
+    def from_bbox_to_cartesian(self, depth, bbox):
         """
         Function that returns the cartesian coordinates of the target
         given a bounding box
         """
-        polar_coords = self.from_bbox_to_polar(bbox)
+        polar_coords = self.from_bbox_to_polar(depth, bbox)
         cartesian_coords = self.from_polar_to_cartesian(polar_coords)
         return cartesian_coords
 
@@ -154,8 +154,12 @@ class Target:
         """
         Function that returns the camera parameters
         """
-        self.camera_width = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.width
-        self.camera_height = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.height
-        self.camera_hfov = self.habitat_env.config.habitat.simulator.ages.main_agent.sim_sensor.rgb_sensor.hfov
+        # TODO: Fix this retrieval
+        # self.camera_width = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.width
+        # self.camera_height = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.height
+        # self.camera_hfov = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.hfov
+        self.camera_width = 256
+        self.camera_height = 256
+        self.camera_hfov = 90
         self.max_depth = 10.
         self.min_depth = 0.

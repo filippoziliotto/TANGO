@@ -163,6 +163,8 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'navigate_to': self.navigate_to,
             'feature_match': self.feature_match,
             'stop_navigation': self.stop_navigation,    
+            'answer_question': self.answer_question,
+            'look_around': self.look_around,
         }
 
 
@@ -182,6 +184,12 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def stop_navigation(self):
+        pass
+
+    def answer_question(self, question):
+        pass
+
+    def look_around(self):
         pass
 
 class PseudoCodeExecuter(PseudoCodePrimitives):
@@ -257,14 +265,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Look around primitive of 360° for convention
         turning to the left for a full rotation
         """
-        views = []
-        for rot in range(360 // self.habitat_env.config.habitat.simulator.turn_angle):
-            self.habitat_env.execute_action(look_around=True)
-            self.habitat_env.update_episode_stats()
-            views.append(self.habitat_env.get_current_observation(type='rgb'))
-
-        # stack list of image into single image
-        stacked_views = np.stack(views, axis=0)
+        views = self.habitat_env.get_360_view(save=True)
+        return views
 
     def stop_navigation(self):
         """
@@ -298,7 +300,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.memory_dict = self.object_detector.get_detection_dict()
             for label in self.memory_dict:
                 if 'xyz' not in self.memory_dict[label]:  
-                    self.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(self.memory_dict[label]['bbox'])
+                    self.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.memory_dict[label]['bbox'])
         
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox)    

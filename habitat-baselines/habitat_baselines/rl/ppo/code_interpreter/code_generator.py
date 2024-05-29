@@ -33,6 +33,7 @@ while True:
     object = detect_objects('{object_name}')
     if object:
         navigate_to(object)
+        look_around()
         stop_navigation()"""
         return prompt
     

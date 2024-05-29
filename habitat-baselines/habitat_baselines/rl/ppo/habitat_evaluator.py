@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import tqdm
 import wandb
+from PIL import Image
 
 from habitat import logger
 from habitat.tasks.rearrange.rearrange_sensors import GfxReplayMeasure
@@ -32,6 +33,7 @@ from habitat_baselines.rl.ppo.code_interpreter.code_generator import CodeGenerat
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
+from habitat_baselines.rl.ppo.utils.utils import match_images
 
 class HabitatEvaluator(Evaluator):
     def __init__(self):
@@ -193,7 +195,7 @@ class HabitatEvaluator(Evaluator):
             pass
 
         if look_around:
-            self.step_data = [2] 
+            self.step_data = [3]
             
         self.outputs = self.envs.step(self.step_data)
         self.observations, self.rewards_l, self.dones, self.infos = [
@@ -399,13 +401,14 @@ class HabitatEvaluator(Evaluator):
         print('-----------------------')       
 
     def execute_action(self, coords=None, force_stop=False, look_around=False):
+        # TODO: instead of variables make name of action
         if coords is not None:
             self.predict_action(coords)
-            self.execute_step(force_stop)
+            self.execute_step(force_stop=force_stop)
         elif look_around:
-            self.execute_step(look_around)
+            self.execute_step(look_around=look_around)
         else:
-            self.execute_step(force_stop)
+            self.execute_step(force_stop=force_stop)
 
     def episode_iterator(self):
         if (len(self.stats_episodes) < (self.number_of_eval_episodes * self.evals_per_ep)
@@ -485,6 +488,26 @@ class HabitatEvaluator(Evaluator):
         Check if the max steps are reached
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
+
+    def get_360_view(self, save=False):
+        """
+        Get a 360 view of the current observation
+        it also saves the jpeg image for debugging purposes
+        """
+        views = []
+        for rot_idx in range(360 // self.config.habitat.simulator.turn_angle):
+            self.execute_action(look_around=True)
+            self.update_episode_stats()
+            views.append(self.get_current_observation(type='rgb'))
+            
+        stacked_views = np.hstack(views)
+        stacked_views = match_images(stacked_views)
+
+        if save:
+            image = Image.fromarray(stacked_views)
+            image.save("images/360_view.jpg")            
+
+        return stacked_views
 
     def evaluate_agent(
         self,

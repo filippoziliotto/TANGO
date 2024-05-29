@@ -1,6 +1,8 @@
 import numpy as np
 from habitat_baselines.rl.ppo.utils.target import Target
-from habitat_baselines.rl.ppo.models.models import ObjectDetector, VQA, FeatureMatcher
+from habitat_baselines.rl.ppo.models.models import (
+    ObjectDetector, VQA, FeatureMatcher, ImageCaptioner
+)
 
 class PseudoCodeInterpreter:
     """
@@ -165,6 +167,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'stop_navigation': self.stop_navigation,    
             'answer_question': self.answer_question,
             'look_around': self.look_around,
+            'describe_scene': self.describe_scene,
         }
 
 
@@ -192,6 +195,8 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
     def look_around(self):
         pass
 
+    def describe_scene(self):
+        pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Primitive functions interactive with habitat
@@ -222,6 +227,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 size=self.habitat_env.vqa.size,
             )
     
+        if self.habitat_env.captioner.use_captioner:
+            self.captioner = ImageCaptioner(
+                type=self.habitat_env.captioner.type,
+                size=self.habitat_env.captioner.size,
+                quantization=self.habitat_env.captioner.quantization
+            )
+
     """
     Habitat environment modules to define actions
     """
@@ -259,14 +271,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.coords = self.target.update_polar_coords()
 
             self.update_variable('object', bbox)
-
-    def look_around(self):
-        """
-        Look around primitive of 360° for convention
-        turning to the left for a full rotation
-        """
-        views = self.habitat_env.get_360_view(save=True)
-        return views
 
     def stop_navigation(self):
         """
@@ -335,10 +339,35 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         ground_truth = self.habitat_env.get_gt_eqa()
         similarity = self.vqa.calculate_similarity(answer, ground_truth)
         return answer
+
+    def describe_scene(self, type='frontal'):
+        """
+        Describe the scene with a caption possibly
+        differentiating between the 360° degree views and the normal one
+        """
+        assert type in ['frontal', 'stereo'], "Type should be either 'current' or '360'"
+        
+        type='stereo'
+        if type in ['frontal']:
+            img = self.habitat_env.get_current_observation(type='rgb')
+        else:
+            img = self.habitat_env.get_stereo_view()
+
+        question = 'Give a detailed description of the image'
+        caption = self.captioner.generate_caption(img, question)
+        return caption
+
+    """
+    Python subroutines or logical modules
+    """
+    def look_around(self):
+        """
+        Look around primitive of 360° for convention
+        turning to the left for a full rotation
+        """
+        views = self.habitat_env.get_stereo_view(save=True)
+        return views
     
-    """
-    Python logical modules
-    """
     def count(self):
         """
         Evaluate the statement if needed

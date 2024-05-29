@@ -478,6 +478,16 @@ class VQAConfig(HabitatBaselinesBaseConfig):
     type: str = "blip"
     size: str = "base"
 @dataclass
+class CaptionerConfig(HabitatBaselinesBaseConfig):
+    """
+    VQA model config settings
+    """
+    use_captioner: bool = False
+    type: str = "blip2"
+    size: str = "opt2.7b"
+    quantization: str = "32"
+
+@dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
     # If habitat_baselines.evaluate is true, the run will be in evaluation mode
@@ -528,6 +538,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     object_distance_threshold: float = 0.5
     feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()
     vqa: VQAConfig = VQAConfig()
+    captioner: CaptionerConfig = CaptionerConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

@@ -93,6 +93,12 @@ habitat_baselines:
   # Feature Matcher settings
   feature_matcher:
     use_matcher: False
+  # Captioner settings
+  captioner:
+    use_captioner: True
+    type: 'git'
+    size: 'large'
+    quantization: '8'
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )

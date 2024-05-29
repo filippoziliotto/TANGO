@@ -12,7 +12,8 @@
     - [ ] ablation study on threshold open-set
 - [x] implement storing all detections into memory
     - [ ] "ask-fo-help" function hat uses phi3 or llm of seen objects
-
+- [ ] implement image captioner
+    - [ ] divide the captioner into (360 view and noral view)
 
 ### IIN
 - [x] Implement Match module

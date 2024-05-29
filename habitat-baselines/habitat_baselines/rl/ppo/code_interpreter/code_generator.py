@@ -34,6 +34,7 @@ while True:
     if object:
         navigate_to(object)
         look_around()
+        describe_scene()
         stop_navigation()"""
         return prompt
     

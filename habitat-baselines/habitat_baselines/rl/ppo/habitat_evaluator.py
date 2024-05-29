@@ -56,6 +56,8 @@ class HabitatEvaluator(Evaluator):
         self.matcher = self.config.habitat_baselines.feature_matcher
         # VQA
         self.vqa = self.config.habitat_baselines.vqa
+        # Captioner
+        self.captioner = self.config.habitat_baselines.captioner
 
     def init_env(self):
         self.observations = self.envs.reset()
@@ -489,7 +491,7 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
 
-    def get_360_view(self, save=False):
+    def get_stereo_view(self, save=False):
         """
         Get a 360 view of the current observation
         it also saves the jpeg image for debugging purposes

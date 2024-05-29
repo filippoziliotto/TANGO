@@ -9,7 +9,7 @@ from torchvision.transforms.functional import rgb_to_grayscale
 # Habitat imports
 from habitat_baselines.rl.ppo.utils.utils import (
     save_images_to_disk, get_detector_model,
-    get_vqa_model, get_matcher_model
+    get_vqa_model, get_matcher_model, get_captioner_model
 )
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
@@ -212,3 +212,25 @@ class FeatureMatcher:
         self.tau, self.n_matches = self.predict_keypoints(observation, target)
 
         return self.tau
+    
+class ImageCaptioner():
+    def __init__(self, type, size, quantization=False):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.captioner_model, self.processor = get_captioner_model(type, size, quantization, self.device)
+        self.type = type
+
+    def predict(self, img, question):
+        if self.type in ["blip2"]:
+            encoding = self.processor(img, question, return_tensors='pt').to("cuda")
+            with torch.no_grad():
+                outputs = self.captioner_model.generate(**encoding)
+            return self.processor.decode(outputs[0], skip_special_tokens=True).strip()
+        elif self.type in ["git"]:
+            # TODO: VQA and captioning have different implementations
+            pixel_values = self.processor(images=img, return_tensors="pt").pixel_values.to(self.device)
+            generated_ids = self.captioner_model.generate(pixel_values=pixel_values, max_length=50)
+            return self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        
+    def generate_caption(self, img, question):
+        img = torch.tensor(img).unsqueeze(0).to(self.device)
+        return self.predict(img, question)

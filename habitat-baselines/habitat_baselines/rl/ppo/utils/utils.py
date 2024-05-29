@@ -11,7 +11,9 @@ from habitat.utils.geometry_utils import (
 from transformers import (Owlv2Processor, OwlViTProcessor,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
-                          DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering
+                          DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
+                          Blip2Processor, Blip2ForConditionalGeneration,
+                          AutoModelForCausalLM
                           )
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
 
@@ -160,15 +162,43 @@ def get_matcher_model(device):
     }    
     return Matching(superglue_config).eval().to(device)
 
+def get_captioner_model(type, size, quantization, device):
+    """
+    Function to get the correct model for the captioner
+    """
 
+    # TODO: add quantization for blip2
+    assert quantization in ['32', '16', '8'], "Invalid quantization setting!"
+
+    if type in ['blip2']:
+        if size in ['2.7b']:
+            model_name = "Salesforce/blip2-opt-2.7b"
+        elif size in ['6.7b']:
+            model_name = "Salesforce/blip2-opt-6.7b"
+        processor = Blip2Processor.from_pretrained(model_name)
+        model = Blip2ForConditionalGeneration.from_pretrained(model_name, load_in_8bit=True, device_map="auto")
+
+    # TODO: check different finetuned models
+    elif type in ['git']:
+        if size in ['base']:
+            model_name = "microsoft/git-base"
+        elif size in ['large']:
+            model_name = "microsoft/git-large"
+        processor = AutoProcessor.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+
+        # TODO: implement other captioners
+            
+
+    return model.eval().to(device), processor
 
 """
 Camera related or similar utils
 """
 def match_images(frames):
 
-    num_frames = frames.shape[0]
-    frame_width = frames.shape[2] // num_frames
+    num_frames = frames.shape[1] // frames.shape[0]
+    frame_width = frames.shape[0]
     frames_list = [frames[:, i * frame_width:(i + 1) * frame_width, :] for i in range(num_frames)]
 
     # Initialize the stitcher

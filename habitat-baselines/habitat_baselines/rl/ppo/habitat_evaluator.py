@@ -496,23 +496,25 @@ class HabitatEvaluator(Evaluator):
         Get a 360 view of the current observation
         it also saves the jpeg image for debugging purposes
         """
-        views_depth = []
-        views_rgb = []
+        views_depth, views_rgb, states = [], [], []
         for rot_idx in range(360 // self.config.habitat.simulator.turn_angle):
             self.execute_action(look_around=True)
             self.update_episode_stats()
             views_depth.append(self.get_current_observation(type='depth'))
             views_rgb.append(self.get_current_observation(type='rgb'))
+            states.append(self.get_current_position())
             
         stacked_views_rgb = np.hstack(views_rgb)
         stacked_views_depth = np.hstack(views_depth)
-        stacked_views = match_images(stacked_views_rgb, stacked_views_depth)
+        stacked_views = match_images(stacked_views_rgb)
 
-        if save:
+        if save:     
+            image = Image.fromarray(stacked_views_rgb)  
+            image.save("images/360_view_single.jpg")  
             image = Image.fromarray(stacked_views)
-            image.save("images/360_view.jpg")            
+            image.save('images/360_view_match.jpg') 
 
-        return stacked_views, np.array(views_rgb), np.array(views_depth)
+        return stacked_views, np.array(views_rgb), np.array(views_depth), np.array(states)
 
     def evaluate_agent(
         self,

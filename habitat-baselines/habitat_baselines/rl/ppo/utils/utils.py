@@ -75,7 +75,8 @@ def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=Fa
         return 
     
     draw = ImageDraw.Draw(img1)
-    for i, box in enumerate([boxes]):
+    for i, box1 in enumerate(boxes):
+        box = box1[0]
         color = 'red'
         draw.rectangle(box, outline=color, width=5)
         if label is not None:
@@ -195,11 +196,11 @@ def get_captioner_model(type, size, quantization, device):
 """
 Camera related or similar utils
 """
-def match_images(frames_rgb, frames_depth):
+def match_images(frames_rgb):
 
     num_frames = frames_rgb.shape[1] // frames_rgb.shape[0]
     frame_width = frames_rgb.shape[0]
-    frames_list = [frames_rgb[:, i * frame_width:(i + 1) * frame_width, :]*10 for i in range(num_frames)]
+    frames_list = [frames_rgb[:, i * frame_width:(i + 1) * frame_width, :] for i in range(num_frames)]
 
     # Convert frames to a list of images for stitching
     images = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames_list]
@@ -209,4 +210,5 @@ def match_images(frames_rgb, frames_depth):
     _ , stitched_image = stitcher.stitch(images)
 
     stitched_image = cv2.cvtColor(stitched_image, cv2.COLOR_BGR2RGB)
+
     return stitched_image

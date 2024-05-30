@@ -151,7 +151,6 @@ class PseudoCodeInterpreter:
 
     def current_indentation(self, line):
         return len(line) - len(line.lstrip())
-
 class PseudoCodePrimitives(PseudoCodeInterpreter): 
     """
     Primitive functions interpreter if primitives are added
@@ -168,6 +167,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'answer_question': self.answer_question,
             'look_around': self.look_around,
             'describe_scene': self.describe_scene,
+            'count_objects': self.count_objects,
         }
 
 
@@ -307,7 +307,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     self.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.memory_dict[label]['bbox'])
         
         if bbox:
-            self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox)    
+            self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox[0][0])    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
 
         self.update_variable('objects', bbox)
@@ -346,24 +346,24 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         differentiating between the 360° degree views and the normal one
         """
         assert type in ['frontal', 'stereo'], "Type should be either 'current' or '360'"
-        
+
+        stacked_view, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view(save=True)
+        question = 'Give a detailed description of the image'
+        caption_stereo = self.captioner.generate_caption(stacked_view, question)
+        caption_frontal = self.captioner.generate_caption(single_rgb_views, question)
+
         if type in ['frontal']:
-            img = self.habitat_env.get_current_observation(type='rgb')
-            caption = self.captioner.generate_caption(img, question)[0]
-        elif type in ['stereo']:
-            stacked_view, single_rgb_views, single_depth_views = self.habitat_env.get_stereo_view()
-            question = 'Give a detailed description of the image'
-            caption_stereo = self.captioner.generate_caption(stacked_view, question)
-            caption_frontal = self.captioner.generate_caption(single_rgb_views, question)
-            caption = {
+            return caption_frontal[-1]
+        
+        caption = {
                 'stereo': caption_stereo,
                 'frontal': {
                     'rgb': single_rgb_views,
                     'depth': single_depth_views,
-                    'captions': caption_frontal
-                            }}
-            return caption
-
+                    'captions': caption_frontal,
+                    'agent_state': states,
+                    }}
+        return caption
 
 
     """
@@ -374,14 +374,18 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Look around primitive of 360° for convention
         turning to the left for a full rotation
         """
-        views = self.habitat_env.get_stereo_view(save=True)
-        return views
+        return self.habitat_env.get_stereo_view()
     
-    def count(self):
+    def count_objects(self, target='chair'):
         """
-        Evaluate the statement if needed
+        Count how many objects can you see in the scene
+        given a certain target
         """
-        return NotImplementedError
+        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
+        boxes = self.object_detector.detect(stacked_views, target, False)
+        self.update_variable('n_objects', len(boxes))
+        return len(boxes)
+
 
 
 

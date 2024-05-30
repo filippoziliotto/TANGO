@@ -132,7 +132,7 @@ class ObjectDetector:
         final_detections = sorted(zip(selected_boxes, selected_scores, [obj_name] * len(selected_boxes)), 
                                 key=lambda x: x[1], reverse=True)
 
-        return {'boxes': final_detections[0][0], 'scores': final_detections[0][1], 'labels': final_detections[0][2]}
+        return {'boxes': final_detections, 'scores': final_detections, 'labels': final_detections}
 
     def detect(self, image, target_name, save_obs):
         """

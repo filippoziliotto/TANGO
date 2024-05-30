@@ -195,23 +195,18 @@ def get_captioner_model(type, size, quantization, device):
 """
 Camera related or similar utils
 """
-def match_images(frames):
+def match_images(frames_rgb, frames_depth):
 
-    num_frames = frames.shape[1] // frames.shape[0]
-    frame_width = frames.shape[0]
-    frames_list = [frames[:, i * frame_width:(i + 1) * frame_width, :] for i in range(num_frames)]
-
-    # Initialize the stitcher
-    stitcher = cv2.Stitcher_create()
+    num_frames = frames_rgb.shape[1] // frames_rgb.shape[0]
+    frame_width = frames_rgb.shape[0]
+    frames_list = [frames_rgb[:, i * frame_width:(i + 1) * frame_width, :]*10 for i in range(num_frames)]
 
     # Convert frames to a list of images for stitching
     images = [cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) for frame in frames_list]
 
     # Perform stitching
-    status, stitched_image = stitcher.stitch(images)
+    stitcher = cv2.Stitcher_create()
+    _ , stitched_image = stitcher.stitch(images)
 
-    if status == cv2.Stitcher_OK:
-        # Convert the stitched image back to RGB format
-        stitched_image = cv2.cvtColor(stitched_image, cv2.COLOR_BGR2RGB)
-
+    stitched_image = cv2.cvtColor(stitched_image, cv2.COLOR_BGR2RGB)
     return stitched_image

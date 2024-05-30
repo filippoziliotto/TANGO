@@ -340,22 +340,31 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         similarity = self.vqa.calculate_similarity(answer, ground_truth)
         return answer
 
-    def describe_scene(self, type='frontal'):
+    def describe_scene(self, type='stereo'):
         """
         Describe the scene with a caption possibly
         differentiating between the 360° degree views and the normal one
         """
         assert type in ['frontal', 'stereo'], "Type should be either 'current' or '360'"
         
-        type='stereo'
         if type in ['frontal']:
             img = self.habitat_env.get_current_observation(type='rgb')
-        else:
-            img = self.habitat_env.get_stereo_view()
+            caption = self.captioner.generate_caption(img, question)[0]
+        elif type in ['stereo']:
+            stacked_view, single_rgb_views, single_depth_views = self.habitat_env.get_stereo_view()
+            question = 'Give a detailed description of the image'
+            caption_stereo = self.captioner.generate_caption(stacked_view, question)
+            caption_frontal = self.captioner.generate_caption(single_rgb_views, question)
+            caption = {
+                'stereo': caption_stereo,
+                'frontal': {
+                    'rgb': single_rgb_views,
+                    'depth': single_depth_views,
+                    'captions': caption_frontal
+                            }}
+            return caption
 
-        question = 'Give a detailed description of the image'
-        caption = self.captioner.generate_caption(img, question)
-        return caption
+
 
     """
     Python subroutines or logical modules

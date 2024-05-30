@@ -229,8 +229,11 @@ class ImageCaptioner():
             # TODO: VQA and captioning have different implementations
             pixel_values = self.processor(images=img, return_tensors="pt").pixel_values.to(self.device)
             generated_ids = self.captioner_model.generate(pixel_values=pixel_values, max_length=50)
-            return self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            return self.processor.batch_decode(generated_ids, skip_special_tokens=True)
         
     def generate_caption(self, img, question):
-        img = torch.tensor(img).unsqueeze(0).to(self.device)
-        return self.predict(img, question)
+        if len(img.shape) == 3:
+            img = torch.tensor(img).unsqueeze(0)
+        else:
+            img = torch.tensor(img)
+        return self.predict(img.to(self.device), question)

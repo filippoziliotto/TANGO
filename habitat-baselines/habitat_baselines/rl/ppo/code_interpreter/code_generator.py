@@ -27,7 +27,6 @@ class CodeGenerator(object):
     def generate_onav_episode(self):
         object_name = refined_names[self.get_objectgoal_target()]
         print('Navigate to', object_name)
-        object_name='chair'
         prompt = f"""        
 while True:
     explore_scene()

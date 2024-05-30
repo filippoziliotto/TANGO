@@ -381,6 +381,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Count how many objects can you see in the scene
         given a certain target
         """
+        # TODO: check why target is not updated with the target
+        # specified in the prompt
         stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
         boxes = self.object_detector.detect(stacked_views, target, False)
         self.update_variable('n_objects', len(boxes))

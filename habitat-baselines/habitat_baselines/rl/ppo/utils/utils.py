@@ -13,7 +13,7 @@ from transformers import (Owlv2Processor, OwlViTProcessor,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
                           DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
                           Blip2Processor, Blip2ForConditionalGeneration,
-                          AutoModelForCausalLM
+                          AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
                           )
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
 
@@ -132,7 +132,7 @@ def get_vqa_model(type, size, device):
     Function to get the correct model and processor
     for the VQA model called in models.py
     """
-    if (type not in ['blip']) or (size not in ['base', 'large']):
+    if (type not in ['blip', 'git']) or (size not in ['base', 'large']):
         raise ValueError("Invalid model settings!")
     
     if type in ['blip']:
@@ -142,6 +142,14 @@ def get_vqa_model(type, size, device):
             model_name = "Salesforce/blip-vqa-capfilt-large"
         processor = AutoProcessor.from_pretrained(model_name)
         model = BlipForQuestionAnswering.from_pretrained(model_name)
+
+    elif type in ['git']:
+        if size in ['base']:
+            model_name = "microsoft/git-base-vqav2"
+        elif size in ['large']:
+            model_name = "microsoft/git-large-vqav2"
+        processor = AutoProcessor.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
     
     return model.to(device), processor
     
@@ -188,10 +196,16 @@ def get_captioner_model(type, size, quantization, device):
         processor = AutoProcessor.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
 
-        # TODO: implement other captioners
+    # TODO: implement other captioners
             
 
     return model.eval().to(device), processor
+
+def get_segmentation_model(device):
+    model_name = "facebook/maskformer-swin-base-coco"
+    feature_extractor = MaskFormerFeatureExtractor.from_pretrained(model_name)
+    model = MaskFormerForInstanceSegmentation.from_pretrained(model_name).to(device)
+    return model, feature_extractor
 
 """
 Camera related or similar utils

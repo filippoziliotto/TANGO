@@ -58,6 +58,8 @@ class HabitatEvaluator(Evaluator):
         self.vqa = self.config.habitat_baselines.vqa
         # Captioner
         self.captioner = self.config.habitat_baselines.captioner
+        # Segmentation
+        self.segmenter = self.config.habitat_baselines.segmenter
 
     def init_env(self):
         self.observations = self.envs.reset()
@@ -491,7 +493,7 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
 
-    def get_stereo_view(self, save=False):
+    def get_stereo_view(self):
         """
         Get a 360 view of the current observation
         it also saves the jpeg image for debugging purposes
@@ -508,7 +510,7 @@ class HabitatEvaluator(Evaluator):
         stacked_views_depth = np.hstack(views_depth)
         stacked_views = match_images(stacked_views_rgb)
 
-        if save:     
+        if self.save_obs:     
             image = Image.fromarray(stacked_views_rgb)  
             image.save("images/360_view_single.jpg")  
             image = Image.fromarray(stacked_views)

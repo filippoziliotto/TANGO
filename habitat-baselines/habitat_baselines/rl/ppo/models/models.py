@@ -9,7 +9,8 @@ from torchvision.transforms.functional import rgb_to_grayscale
 # Habitat imports
 from habitat_baselines.rl.ppo.utils.utils import (
     save_images_to_disk, get_detector_model,
-    get_vqa_model, get_matcher_model, get_captioner_model
+    get_vqa_model, get_matcher_model, 
+    get_captioner_model, get_segmentation_model
 )
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
@@ -69,13 +70,13 @@ class ObjectDetector:
         names, bbox, conf = [], [], []
         if len(boxes)==0:
             return [], [], []
+
         for label in labels:
             if label in list(desired_classes_ids.keys()):
-                if class_names_coco[desired_classes_ids[label]] not in obj_name:
-                    return [], [], []
-                names.append(class_names_coco[desired_classes_ids[label]])
-                bbox.append(boxes[labels.index(label)])
-                conf.append(scores[labels.index(label)])
+                if class_names_coco[desired_classes_ids[label]] in obj_name:
+                    names.append(class_names_coco[desired_classes_ids[label]])
+                    bbox.append(boxes[labels.index(label)])
+                    conf.append(scores[labels.index(label)])
         return bbox, conf, names
 
     def store_detections_into_dict(self, boxes, scores, labels):
@@ -149,16 +150,25 @@ class ObjectDetector:
 class VQA:
     def __init__(self, type, size):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model, self.processor = get_vqa_model(type, size, self.device)
-        self.model.eval()
+        self.vqa_model, self.processor = get_vqa_model(type, size, self.device)
+        self.type = type
+        self.vqa_model.eval()
         self.nlp = spacy.load('en_core_web_md')
 
     def predict(self, question, img):
-        encoding = self.processor(img, question, return_tensors='pt')
-        encoding = {k:v.to(self.device) for k,v in encoding.items()}
-        with torch.no_grad():
-            outputs = self.model.generate(**encoding)
-        return self.processor.decode(outputs[0], skip_special_tokens=True)
+        if self.type in ["blip2"]:
+            encoding = self.processor(img, question, return_tensors='pt').to("cuda")
+            with torch.no_grad():
+                outputs = self.vqa_model.generate(**encoding)
+            return self.processor.decode(outputs[0], skip_special_tokens=True).strip()
+        
+        elif self.type in ["git"]:
+            pixel_values = self.processor(images=img, return_tensors="pt").pixel_values.to(self.device)
+            input_ids = self.processor(text=question, add_special_tokens=False).input_ids
+            input_ids = [self.processor.tokenizer.cls_token_id] + input_ids
+            input_ids = torch.tensor(input_ids).unsqueeze(0).to(self.device)
+            generated_ids = self.vqa_model.generate(pixel_values=pixel_values, input_ids=input_ids, max_length=50)
+            return self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0].split('? ')[1]
     
     def calculate_similarity(self, word1, word2):
         token1 = self.nlp(word1)
@@ -218,22 +228,71 @@ class ImageCaptioner():
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.captioner_model, self.processor = get_captioner_model(type, size, quantization, self.device)
         self.type = type
+        self.question ='Give a detailed description of the image'
 
-    def predict(self, img, question):
+    def predict(self, img):
         if self.type in ["blip2"]:
-            encoding = self.processor(img, question, return_tensors='pt').to("cuda")
+            encoding = self.processor(img, self.question, return_tensors='pt').to("cuda")
             with torch.no_grad():
                 outputs = self.captioner_model.generate(**encoding)
             return self.processor.decode(outputs[0], skip_special_tokens=True).strip()
+        
         elif self.type in ["git"]:
-            # TODO: VQA and captioning have different implementations
             pixel_values = self.processor(images=img, return_tensors="pt").pixel_values.to(self.device)
             generated_ids = self.captioner_model.generate(pixel_values=pixel_values, max_length=50)
             return self.processor.batch_decode(generated_ids, skip_special_tokens=True)
         
-    def generate_caption(self, img, question):
+    def generate_caption(self, img):
         if len(img.shape) == 3:
             img = torch.tensor(img).unsqueeze(0)
         else:
             img = torch.tensor(img)
-        return self.predict(img.to(self.device), question)
+        return self.predict(img.to(self.device))
+
+class SegmenterModel:
+    def __init__(self, model, size):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.model, self.processor = get_segmentation_model(device=self.device)
+
+    def preprocess(self, img):
+        inputs = self.feature_extractor(images=img, return_tensors="pt")
+        inputs = {k:v.to(self.device) for k,v in inputs.items()}
+        return inputs      
+    
+    def postprocess(self, img, outputs):
+        outputs = self.feature_extractor.post_process_panoptic_segmentation(outputs)[0]
+        instance_map = outputs['segmentation'].cpu().numpy()
+        return outputs, instance_map
+
+    def predict(self, img):
+        inputs = self.preprocess(img)
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+        
+
+        outputs, instance_map = self.postprocess(img, outputs)
+        print(outputs.keys())
+
+        objs = []
+        for seg in outputs['segments_info']:
+            inst_id = seg['id']
+            label_id = seg['label_id']
+            category = self.model.config.id2label[label_id]
+            
+            mask = (instance_map == inst_id).astype(float)
+            resized_mask = np.array(
+                Image.fromarray(mask).resize(img.size, resample=Image.BILINEAR)
+            )
+            Y, X = np.where(resized_mask > 0.5)
+            x1, x2 = np.min(X), np.max(X)
+            y1, y2 = np.min(Y), np.max(Y)
+            objs.append({
+                'mask': resized_mask,
+                'category': category,
+                'box': [x1, y1, x2, y2],
+                'inst_id': inst_id
+            })
+        return objs
+
+    def segment(self, img):
+        return self.predict(img)

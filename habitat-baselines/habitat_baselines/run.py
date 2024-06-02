@@ -29,6 +29,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # config_name="pointnav/ppo_pointnav_example",
     # OBJECTNAV
     config_name="objectnav/zs_objectnav"
+    # config_name="objectnav/ablation/config_1.yaml"
     # IIN
     # config_name="instance_imagenav/zs_instance_imagenav.yaml"
 )

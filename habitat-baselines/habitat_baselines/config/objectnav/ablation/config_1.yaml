@@ -89,10 +89,7 @@ habitat_baselines:
     size: "resnet101"
     thresh: 0.99
     nms_thresh: 0.5
-    store_detections: True
-  # Feature Matcher settings
-  feature_matcher:
-    use_matcher: False
+    store_detections: False
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )

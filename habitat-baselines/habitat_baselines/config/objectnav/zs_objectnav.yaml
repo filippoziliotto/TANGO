@@ -95,10 +95,14 @@ habitat_baselines:
     use_matcher: False
   # Captioner settings
   captioner:
-    use_captioner: True
+    use_captioner: False
     type: 'git'
     size: 'large'
     quantization: '8'
+  vqa:
+    use_vqa: True
+    type: 'git'
+    size: 'large'
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
@@ -121,7 +125,7 @@ habitat_baselines:
   eval_keys_to_include_in_name: []
   eval:
   # minival: 30 episodes , val: 1000 episodes
-    split: minival
+    split: val
     should_load_ckpt: False
     use_ckpt_config: False
     # video_option: [ "disk" ]

@@ -1,7 +1,8 @@
 import numpy as np
 from habitat_baselines.rl.ppo.utils.target import Target
 from habitat_baselines.rl.ppo.models.models import (
-    ObjectDetector, VQA, FeatureMatcher, ImageCaptioner
+    ObjectDetector, VQA, FeatureMatcher,
+    ImageCaptioner, SegmenterModel
 )
 
 class PseudoCodeInterpreter:
@@ -168,6 +169,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'look_around': self.look_around,
             'describe_scene': self.describe_scene,
             'count_objects': self.count_objects,
+            'map_scene': self.map_scene,
         }
 
 
@@ -196,6 +198,12 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def describe_scene(self):
+        pass
+
+    def count_objects(self, target):
+        pass
+
+    def map_scene(self):
         pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -234,6 +242,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 quantization=self.habitat_env.captioner.quantization
             )
 
+        if self.habitat_env.segmenter.use_segmenter:
+            self.segmenter = SegmenterModel(
+                type=self.habitat_env.segmenter.type,
+                size=self.habitat_env.segmenter.size,
+                quantization=self.habitat_env.segmenter.quantization
+            )
     """
     Habitat environment modules to define actions
     """
@@ -333,11 +347,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
         img = self.habitat_env.get_current_observation(type='rgb')
-        answer = self.vqa.answer(question, img)
+
+        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
+        answer = self.vqa.answer(question, stacked_views)
 
         # TODO: Fix this part
-        ground_truth = self.habitat_env.get_gt_eqa()
-        similarity = self.vqa.calculate_similarity(answer, ground_truth)
+        # ground_truth = self.habitat_env.get_gt_eqa()
+        # similarity = self.vqa.calculate_similarity(answer, ground_truth)
         return answer
 
     def describe_scene(self, type='stereo'):
@@ -345,12 +361,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Describe the scene with a caption possibly
         differentiating between the 360° degree views and the normal one
         """
-        assert type in ['frontal', 'stereo'], "Type should be either 'current' or '360'"
+        assert type in ['frontal', 'stereo'], ValueError
 
-        stacked_view, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view(save=True)
+        stacked_view, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
         question = 'Give a detailed description of the image'
-        caption_stereo = self.captioner.generate_caption(stacked_view, question)
-        caption_frontal = self.captioner.generate_caption(single_rgb_views, question)
+        caption_stereo = self.captioner.generate_caption(stacked_view)
+        caption_frontal = self.captioner.generate_caption(single_rgb_views)
 
         if type in ['frontal']:
             return caption_frontal[-1]
@@ -365,7 +381,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     }}
         return caption
 
-
     """
     Python subroutines or logical modules
     """
@@ -376,15 +391,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         return self.habitat_env.get_stereo_view()
     
-    def count_objects(self, target='chair'):
+    def count_objects(self, target_name):
         """
         Count how many objects can you see in the scene
         given a certain target
         """
-        # TODO: check why target is not updated with the target
-        # specified in the prompt
+        try: target_name = eval(target_name)
+        except: pass
+
         stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        boxes = self.object_detector.detect(stacked_views, target, False)
+        boxes = self.object_detector.detect(stacked_views, target_name, False)
+
         self.update_variable('n_objects', len(boxes))
         return len(boxes)
 

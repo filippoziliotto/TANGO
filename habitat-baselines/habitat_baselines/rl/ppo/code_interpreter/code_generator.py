@@ -27,14 +27,16 @@ class CodeGenerator(object):
     def generate_onav_episode(self):
         object_name = refined_names[self.get_objectgoal_target()]
         print('Navigate to', object_name)
+        object_name = 'chair'
         prompt = f"""        
 while True:
     explore_scene()
     object = detect_objects('{object_name}')
     if object:
+        map_scene()
         navigate_to(object)
-        describe_scene()
-        n_objects = count_objects('{object_name}')
+        answer_question('describe the image')
+        count_objects('{object_name}')
         stop_navigation()"""
         return prompt
     

@@ -488,6 +488,14 @@ class CaptionerConfig(HabitatBaselinesBaseConfig):
     quantization: str = "32"
 
 @dataclass
+class SegmenterConfig(HabitatBaselinesBaseConfig):
+    """
+    VQA model config settings
+    """
+    use_segmenter: bool = False
+
+
+@dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
     # If habitat_baselines.evaluate is true, the run will be in evaluation mode
@@ -539,6 +547,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()
     vqa: VQAConfig = VQAConfig()
     captioner: CaptionerConfig = CaptionerConfig()
+    segmenter: SegmenterConfig = SegmenterConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

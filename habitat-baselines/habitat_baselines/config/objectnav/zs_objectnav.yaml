@@ -100,9 +100,12 @@ habitat_baselines:
     size: 'large'
     quantization: '8'
   vqa:
-    use_vqa: True
+    use_vqa: False
     type: 'git'
     size: 'large'
+  # Segmenter settings
+  segmenter:
+    use_segmenter: True
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )

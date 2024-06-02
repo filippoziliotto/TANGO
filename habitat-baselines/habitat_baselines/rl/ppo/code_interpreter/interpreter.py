@@ -170,6 +170,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'describe_scene': self.describe_scene,
             'count_objects': self.count_objects,
             'map_scene': self.map_scene,
+            'segment_scene': self.segment_scene,
         }
 
 
@@ -201,6 +202,9 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def count_objects(self, target):
+        pass
+
+    def segment_scene(self):
         pass
 
     def map_scene(self):
@@ -243,11 +247,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             )
 
         if self.habitat_env.segmenter.use_segmenter:
-            self.segmenter = SegmenterModel(
-                type=self.habitat_env.segmenter.type,
-                size=self.habitat_env.segmenter.size,
-                quantization=self.habitat_env.segmenter.quantization
-            )
+            self.segmenter = SegmenterModel()
     """
     Habitat environment modules to define actions
     """
@@ -380,6 +380,21 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     'agent_state': states,
                     }}
         return caption
+
+    def segment_scene(self, target=None):
+        """
+        Segment the scene using a segmentation model
+        """
+        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
+        segmentation = self.segmenter.segment(stacked_views)
+
+        if target:
+            segmentation = [item for item in segmentation if item['category'] == target]
+                    
+        # TODO: add mask visualization 
+        # if self.habitat_env.save_obs:
+        #     self.habitat_env.save_segmentation(segmentation)
+        return segmentation
 
     """
     Python subroutines or logical modules

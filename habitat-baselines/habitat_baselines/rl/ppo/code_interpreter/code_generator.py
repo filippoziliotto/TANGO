@@ -35,8 +35,7 @@ while True:
     if object:
         map_scene()
         navigate_to(object)
-        answer_question('describe the image')
-        count_objects('{object_name}')
+        segment_scene()
         stop_navigation()"""
         return prompt
     

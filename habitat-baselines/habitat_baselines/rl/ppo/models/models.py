@@ -250,9 +250,9 @@ class ImageCaptioner():
         return self.predict(img.to(self.device))
 
 class SegmenterModel:
-    def __init__(self, model, size):
+    def __init__(self):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model, self.processor = get_segmentation_model(device=self.device)
+        self.model, self.feature_extractor = get_segmentation_model(device=self.device)
 
     def preprocess(self, img):
         inputs = self.feature_extractor(images=img, return_tensors="pt")
@@ -268,10 +268,7 @@ class SegmenterModel:
         inputs = self.preprocess(img)
         with torch.no_grad():
             outputs = self.model(**inputs)
-        
-
         outputs, instance_map = self.postprocess(img, outputs)
-        print(outputs.keys())
 
         objs = []
         for seg in outputs['segments_info']:
@@ -280,9 +277,9 @@ class SegmenterModel:
             category = self.model.config.id2label[label_id]
             
             mask = (instance_map == inst_id).astype(float)
-            resized_mask = np.array(
-                Image.fromarray(mask).resize(img.size, resample=Image.BILINEAR)
-            )
+            mask_img = Image.fromarray(mask)
+            resized_mask = np.array(mask_img.resize((img.shape[0],img.shape[1]), resample=Image.BILINEAR))
+
             Y, X = np.where(resized_mask > 0.5)
             x1, x2 = np.min(X), np.max(X)
             y1, y2 = np.min(Y), np.max(Y)

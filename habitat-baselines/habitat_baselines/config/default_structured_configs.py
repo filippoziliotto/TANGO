@@ -490,7 +490,7 @@ class CaptionerConfig(HabitatBaselinesBaseConfig):
 @dataclass
 class SegmenterConfig(HabitatBaselinesBaseConfig):
     """
-    VQA model config settings
+    Segmentation model config settings
     """
     use_segmenter: bool = False
 

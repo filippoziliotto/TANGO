@@ -384,6 +384,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     def segment_scene(self, target=None):
         """
         Segment the scene using a segmentation model
+        possibly filtering the target category
         """
         stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
         segmentation = self.segmenter.segment(stacked_views)

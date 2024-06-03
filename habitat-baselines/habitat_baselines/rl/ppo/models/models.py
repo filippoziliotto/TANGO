@@ -8,10 +8,11 @@ from torchvision.transforms.functional import rgb_to_grayscale
 
 # Habitat imports
 from habitat_baselines.rl.ppo.utils.utils import (
-    save_images_to_disk, get_detector_model,
+    get_detector_model,
     get_vqa_model, get_matcher_model, 
     get_captioner_model, get_segmentation_model
 )
+from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk 
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
 
@@ -223,7 +224,7 @@ class FeatureMatcher:
 
         return self.tau
     
-class ImageCaptioner():
+class ImageCaptioner:
     def __init__(self, type, size, quantization=False):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.captioner_model, self.processor = get_captioner_model(type, size, quantization, self.device)
@@ -278,7 +279,7 @@ class SegmenterModel:
             
             mask = (instance_map == inst_id).astype(float)
             mask_img = Image.fromarray(mask)
-            resized_mask = np.array(mask_img.resize((img.shape[0],img.shape[1]), resample=Image.BILINEAR))
+            resized_mask = np.array(mask_img.resize((img.shape[1],img.shape[0]), resample=Image.BILINEAR))
 
             Y, X = np.where(resized_mask > 0.5)
             x1, x2 = np.min(X), np.max(X)

@@ -100,10 +100,12 @@ data
 /sandbox
 /plots/outputs
 /wandb/
+
+# Custom outputs
 /logs/
 /slurm/
 /images/
 /logs/
 /slurm/
-
+TODO.md
 

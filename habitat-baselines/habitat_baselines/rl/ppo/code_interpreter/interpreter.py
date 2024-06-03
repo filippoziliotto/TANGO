@@ -4,6 +4,7 @@ from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, VQA, FeatureMatcher,
     ImageCaptioner, SegmenterModel
 )
+from habitat_baselines.rl.ppo.utils.visualizations import overlay_segmentation
 
 class PseudoCodeInterpreter:
     """
@@ -389,12 +390,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
         segmentation = self.segmenter.segment(stacked_views)
 
+        target = ['chair', 'couch']
         if target:
-            segmentation = [item for item in segmentation if item['category'] == target]
-                    
-        # TODO: add mask visualization 
-        # if self.habitat_env.save_obs:
-        #     self.habitat_env.save_segmentation(segmentation)
+            segmentation = [item for item in segmentation if item['category'] in target]
+
+        seg_overlay = overlay_segmentation(stacked_views, segmentation, save=self.habitat_env.save_obs)
         return segmentation
 
     """
@@ -407,16 +407,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         return self.habitat_env.get_stereo_view()
     
-    def count_objects(self, target_name):
+    def count_objects(self, target):
         """
         Count how many objects can you see in the scene
         given a certain target
         """
-        try: target_name = eval(target_name)
+        try: target = eval(target)
         except: pass
 
         stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        boxes = self.object_detector.detect(stacked_views, target_name, False)
+        boxes = self.object_detector.detect(stacked_views, target, False)
 
         self.update_variable('n_objects', len(boxes))
         return len(boxes)

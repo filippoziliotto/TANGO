@@ -3,7 +3,7 @@ import numpy as np
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
-from habitat_baselines.rl.ppo.utils.utils import save_images_to_disk
+from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk
 
 class Target:
     def __init__(self, habitat_env):

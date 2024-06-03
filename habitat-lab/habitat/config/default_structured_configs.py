@@ -1370,6 +1370,9 @@ class DistanceToGoalRewardMeasurementConfig(MeasurementConfig):
 class AnswerAccuracyMeasurementConfig(MeasurementConfig):
     type: str = "AnswerAccuracy"
 
+@dataclass
+class AnswerSimilarityMeasurementConfig(MeasurementConfig):
+    type: str = "AnswerSimilarity"
 
 @dataclass
 class TaskConfig(HabitatBaseConfig):
@@ -2499,6 +2502,12 @@ cs.store(
     group="habitat/task/measurements",
     name="answer_accuracy",
     node=AnswerAccuracyMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.answer_similarity",
+    group="habitat/task/measurements",
+    name="answer_similarity",
+    node=AnswerSimilarityMeasurementConfig,
 )
 cs.store(
     package="habitat.task.measurements.episode_info",

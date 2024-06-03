@@ -132,7 +132,7 @@ class AnswerAccuracy(Measure):
         if episode is None:
             return
 
-        # Modified to support EQA (stop/answer actions is 0)
+        # Modified to support EQA when AnswerAction is np.int(0)
         if action["action"] == AnswerAction.name or action["action"] == 0:
             self._metric = (
                 1
@@ -143,7 +143,7 @@ class AnswerAccuracy(Measure):
 
 @registry.register_measure
 class AnswerSimilarity(Measure):
-    """AnswerAccuracy"""
+    """AnswerSimilarity"""
 
     def __init__(self, dataset, *args: Any, **kwargs: Any):
         self._dataset = dataset

@@ -34,6 +34,8 @@ from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
 from habitat_baselines.rl.ppo.utils.utils import match_images
+from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
+from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 
 class HabitatEvaluator(Evaluator):
     def __init__(self):
@@ -192,8 +194,22 @@ class HabitatEvaluator(Evaluator):
         and update all the necessary variables
         """
 
+        # TODO: improve code elegance for force_stop and look_around
         if force_stop:
             self.step_data = [0] 
+
+            # Added for EQA support
+            if self.task_name in ['eqa']:
+                # TODO: add support for max step reached
+                answer_token, answer_text = eqa_text_to_token(stoi_eqa, self.eqa_vars['pred_answer'])
+                self.step_data = [
+                    {
+                        "action": 0,
+                        "action_args": {"answer_id": answer_token,
+                                        "answer_text": answer_text},
+                    }
+                ]
+
         elif not force_stop and self.action_data.actions.item() == 0:
             self.step_data = [a.item() for a in self.action_data.env_actions.cpu()]
             self.prev_actions.copy_(self.action_data.actions) # type: ignore
@@ -289,7 +305,11 @@ class HabitatEvaluator(Evaluator):
                 self.episode_stats = {
                     "reward": self.current_episode_reward[i].item()
                 }
-                self.episode_stats.update(extract_scalars_from_info(self.infos[i]))
+
+                # Support for EQA task if episode_infos in keys
+                tmp_episode_info = {key: value for key, value in self.infos[i].items() if "episode_info" not in key}
+
+                self.episode_stats.update(extract_scalars_from_info(tmp_episode_info))
                 self.current_episode_reward[i] = 0
                 k = (
                     self.current_episodes_info[i].scene_id,
@@ -359,13 +379,24 @@ class HabitatEvaluator(Evaluator):
             last_key = list(self.stats_episodes.keys())[-1]
             v = self.stats_episodes[last_key]
             episode_info = f"Episode {len(self.stats_episodes)}, {last_key}:"
-            formatted_results = (
-                f"num_steps: {v['num_steps']} | "
-                f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-                f"success: {v['success']:.2f} | "
-                f"spl: {v['spl']:.2f} | "
-                f"soft_spl: {v['soft_spl']:.2f}"
-            )
+
+            # EQA support results prints
+            if self.task_name in ['eqa']:
+                formatted_results = (
+                    f"num_steps: {v['num_steps']} | "
+                    f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+                    f"Answer accuracy: {v['answer_accuracy']:.2f} | "
+                    f"Answer similarity: {v['answer_similarity']:.2f} | "
+                )
+
+            else:
+                formatted_results = (
+                    f"num_steps: {v['num_steps']} | "
+                    f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+                    f"success: {v['success']:.2f} | "
+                    f"spl: {v['spl']:.2f} | "
+                    f"soft_spl: {v['soft_spl']:.2f}"
+                )
             print(f"{episode_info}\n{formatted_results}")
             print('-----------------------')
             return
@@ -540,6 +571,10 @@ class HabitatEvaluator(Evaluator):
 
             # Generate the PseudoCode
             self.pseudo_code = code_generator.generate()
+
+            # EQA support additional variables
+            if self.task_name in ['eqa']:
+                _, self.eqa_vars = code_generator.get_eqa_vars()
 
             # Reset init variables
             self.code_interpreter.parse(self.pseudo_code)

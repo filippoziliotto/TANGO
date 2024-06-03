@@ -349,12 +349,19 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         img = self.habitat_env.get_current_observation(type='rgb')
 
-        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        answer = self.vqa.answer(question, stacked_views)
+        # stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
 
-        # TODO: Fix this part
-        # ground_truth = self.habitat_env.get_gt_eqa()
-        # similarity = self.vqa.calculate_similarity(answer, ground_truth)
+        if self.habitat_env.task_name in ['eqa']:
+            gt_answer = self.habitat_env.eqa_vars['gt_answer']
+            similarity, answer = self.vqa.answer(question, img, gt_answer)
+            self.habitat_env.eqa_vars['pred_answer'] = answer
+        else:
+            answer = self.vqa.answer(question, img)
+
+
+        # EQA support answer means stop
+        self.stop_navigation()
+
         return answer
 
     def describe_scene(self, type='stereo'):

@@ -1,6 +1,5 @@
 from habitat_baselines.rl.ppo.utils.names import refined_names
-from habitat_baselines.rl.ppo.code_interpreter.code_generator import PromptUtils
-
+from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 """
 Prompt examples and utils for IIN task
 """

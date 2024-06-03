@@ -1,5 +1,6 @@
-from habitat_baselines.rl.ppo.utils.names import refined_names
-from habitat_baselines.rl.ppo.code_interpreter.code_generator import PromptUtils
+from habitat_baselines.rl.ppo.utils.utils import PromptUtils
+from habitat_baselines.rl.ppo.utils.names import rooms_eqa, colors_eqa
+import spacy
 
 """
 Prompt examples and utils for EQA task
@@ -64,16 +65,47 @@ def parse_eqa_episode(question, answer):
     object = question_dict_idx['object']
     answer = question_dict_idx['answer']
 
-    return room, color, object, answer
-
-
+    return room, color, object
 
 def generate_eqa_prompt(prompt_utils: PromptUtils):
-    question, gt_answer = prompt_utils.get_eqa_target()
+    question, gt_answer, distance = prompt_utils.get_eqa_target()
+    room, color, object = parse_eqa_episode(question, gt_answer)
 
-
-    print('EQA Question:', question)
+    print(f'{question} {gt_answer}. Distance: {distance:.2f}')
     prompt = f"""
-    todo"""
+while True:
+    explore_scene()
+    object = detect_objects('{object}')
+    if object:
+        navigate_to(object)
+        answer = answer_question('{question}')
+        stop_navigation()"""
 
     return prompt
+
+def eqa_text_to_token(stoi_dict, label):
+    # Convert text to tokens
+    token = stoi_dict.get(label,0)
+    return token, label
+
+def eqa_similarity(nlp, word1, word2):
+    token1 = nlp(word1)
+    token2 = nlp(word2)
+    return token1.similarity(token2)
+
+def eqa_classification(gt_answer, pred_answer):
+    nlp = spacy.load('en_core_web_md')
+    similarity = eqa_similarity(nlp, gt_answer, pred_answer)
+
+    most_similar_word = {}
+    if gt_answer in rooms_eqa:
+        for room in rooms_eqa:
+            most_similar_word[room] = eqa_similarity(nlp, pred_answer, room)
+    elif gt_answer in colors_eqa:
+        for room in colors_eqa:
+            most_similar_word[room] = eqa_similarity(nlp, pred_answer, room)
+
+    # return key with highest similarity
+    pred_answer = max(most_similar_word, key=most_similar_word.get)
+    return similarity, pred_answer
+

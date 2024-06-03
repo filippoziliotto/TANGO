@@ -70,11 +70,11 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "detr"
-    size: "resnet101"
-    thresh: 0.99
+    type: "owl-vit2"
+    size: "base"
+    thresh: 0.3
     nms_thresh: 0.5
-    store_detections: True
+    store_detections: False
   # Feature Matcher settings
   feature_matcher:
     use_matcher: False

@@ -2,7 +2,7 @@
 import torch
 import numpy as np
 from PIL import Image
-import spacy
+
 from torchvision.transforms import ToTensor
 from torchvision.transforms.functional import rgb_to_grayscale
 
@@ -15,6 +15,7 @@ from habitat_baselines.rl.ppo.utils.utils import (
 from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk 
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
+from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_classification
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -154,8 +155,7 @@ class VQA:
         self.vqa_model, self.processor = get_vqa_model(type, size, self.device)
         self.type = type
         self.vqa_model.eval()
-        self.nlp = spacy.load('en_core_web_md')
-
+        
     def predict(self, question, img):
         if self.type in ["blip2"]:
             encoding = self.processor(img, question, return_tensors='pt').to("cuda")
@@ -171,14 +171,17 @@ class VQA:
             generated_ids = self.vqa_model.generate(pixel_values=pixel_values, input_ids=input_ids, max_length=50)
             return self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0].split('? ')[1]
     
-    def calculate_similarity(self, word1, word2):
-        token1 = self.nlp(word1)
-        token2 = self.nlp(word2)
-        return token1.similarity(token2)
+    def similarities_measures(self, gt_answer, answer):
+        return eqa_classification(gt_answer, answer)
 
-    def answer(self, question, img):
-        # TODO: Fix this function
-        return self.predict(question, img)
+    def answer(self, question, img, gt_answer=None):
+        model_answer = self.predict(question, img)
+        
+        if gt_answer is not None:
+            similarity, answer = self.similarities_measures(gt_answer, model_answer)
+            return similarity, answer
+        
+        return model_answer
 
 class FeatureMatcher:
     def __init__(self, threshold=25.0):

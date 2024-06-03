@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional
 
 import attr
 from gym import Space, spaces
+import spacy
 
 from habitat.core.embodied_task import Action, Measure
 from habitat.core.registry import registry
@@ -24,7 +25,7 @@ class QuestionData:
     question_tokens: Optional[List[str]] = None
     answer_token: Optional[List[str]] = None
     question_type: Optional[str] = None
-
+    answer_token_orig: Optional[str] = None # Added for EQA support
 
 @attr.s(auto_attribs=True, kw_only=True)
 class EQAEpisode(NavigationEpisode):
@@ -131,13 +132,41 @@ class AnswerAccuracy(Measure):
         if episode is None:
             return
 
-        if action["action"] == AnswerAction.name:
+        # Modified to support EQA (stop/answer actions is 0)
+        if action["action"] == AnswerAction.name or action["action"] == 0:
             self._metric = (
                 1
                 if episode.question.answer_token
                 == action["action_args"]["answer_id"]
                 else 0
             )
+
+@registry.register_measure
+class AnswerSimilarity(Measure):
+    """AnswerAccuracy"""
+
+    def __init__(self, dataset, *args: Any, **kwargs: Any):
+        self._dataset = dataset
+        self.nlp = spacy.load('en_core_web_md') 
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "answer_similarity"
+
+    def reset_metric(self, episode, *args: Any, **kwargs: Any):
+        self._metric = 0
+
+    def update_metric(
+        self, action=None, episode=None, *args: Any, **kwargs: Any
+    ):
+        if episode is None:
+            return
+
+        if action["action"] == AnswerAction.name or action["action"] == 0:
+            ans_token = self.nlp(action['action_args']['answer_text']) 
+            gt_token = self.nlp(episode.question.answer_text)
+
+            self._metric = ans_token.similarity(gt_token)
 
 
 @registry.register_task(name="EQA-v0")

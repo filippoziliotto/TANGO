@@ -44,6 +44,9 @@ class HabitatEvaluator(Evaluator):
         for key, value in kwargs.items():
             setattr(self, key, value)
         
+    def get_env_variables(self, **kwargs):
+        self._init_variables(**kwargs)
+
         # Task
         self.task_name = self.config.habitat_baselines.task_name
         print('Task:', self.task_name)
@@ -526,7 +529,7 @@ class HabitatEvaluator(Evaluator):
         Evalauate the agent in the habitat environment given a certain predefined task
         we iterate through each episode and execute the pseudo code
         """
-        self._init_variables(**kwargs)
+        self.get_env_variables(**kwargs)
         self.init_env()
 
         code_generator = CodeGenerator(self, task=self.task_name, debug=True)

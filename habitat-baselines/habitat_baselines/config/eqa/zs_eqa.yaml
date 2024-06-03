@@ -4,85 +4,69 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
-    - stop
+    - answer
     - move_forward
     - turn_left
     - turn_right
   - /habitat/task/measurements:
     - num_steps
     - distance_to_goal
-    - success
-    - spl
-    - soft_spl
-    - distance_to_goal_reward
+    - episode_info
+    - answer_accuracy
+    - answer_similarity
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - compass_sensor
-    - gps_sensor
+    - question_sensor
   - /habitat/dataset: dataset_config_schema
-  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
   - /habitat_baselines: habitat_baselines_rl_config_base
+  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.resize_shortest_edge: resize_shortest_edge_base
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.center_cropper: center_cropper_base
   - _self_
 
 habitat:
-  task:
-    success_reward: 2.5
-    slack_reward: -1e-3
-    type: ObjectNav-v1
-    end_on_success: True
-    reward_measure: "distance_to_goal_reward"
-    success_measure: "spl"
-    goal_sensor_uuid: objectgoal
-    measurements:
-      distance_to_goal:
-        distance_to: VIEW_POINTS
-      success:
-        success_distance: 0.2
 
   dataset:
-    type: ObjectNav-v1
+    type: MP3DEQA-v1
     split: train
-    scenes_dir: data/scene_datasets
-    data_path: data/datasets/objectnav/hm3d/v2/{split}/{split}.json.gz
+    data_path: data/datasets/eqa/mp3d/v1/{split}/{split}.json.gz
+    scenes_dir: "data/scene_datasets/"
+
+  task:
+    type: EQA-v0
+    reward_measure: answer_accuracy
+    success_measure: answer_accuracy
 
   environment:
-    max_episode_steps: 500
-    iterator_options:
-      max_scene_repeat_steps: 50000
+    max_episode_steps: 100
   simulator:
-    # forward_step_size: 0.15
-    turn_angle: 30
     agents:
       main_agent:
         sim_sensors:
-          depth_sensor:
-            position: [0, 0.88, 0]
           rgb_sensor:
-            position: [0, 0.88, 0]
-        height: 0.88
-        radius: 0.18
-
+            width: 256
+            height: 256
+          depth_sensor:
+            width: 256
+            height: 256
     habitat_sim_v0:
       gpu_device_id: 0
 
 habitat_baselines:
-  trainer_name: "ddppo"
   torch_gpu_id: 0
-  task_name: objectnav
+  task_name: eqa
   # Visualization settings
-  video_dir: "video_dir/objectgoal/"
+  # tensorboard_dir: tb
+  video_dir: video_dir/eqa/
   # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_onav_minival
+    run_name: zs_eqa_minival
   save_obs:
     save_to_disk: True 
     image_path: "images/"
-
   # Object Detector settings
   object_detector:
     use_detector: True
@@ -101,21 +85,22 @@ habitat_baselines:
     size: 'large'
     quantization: '8'
   vqa:
-    use_vqa: False
+    use_vqa: True
     type: 'git'
     size: 'large'
   # Segmenter settings
   segmenter:
-    use_segmenter: True
+    use_segmenter: False
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 0.5
-  # To evaluate on all episodes, set this to -1
-  test_episode_count: 5 # n° of evaluation episodes
+  object_distance_threshold: 1.5
+  
+  test_episode_count: 5
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"
+  trainer_name: ddppo
   num_updates: -1
   total_num_steps: 2.5e9
   log_interval: 10
@@ -126,9 +111,9 @@ habitat_baselines:
   evaluate: True
   load_resume_state_config: False
   verbose: False
-  eval_keys_to_include_in_name: []
+  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
+
   eval:
-  # minival: 30 episodes , val: 1000 episodes
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
@@ -137,7 +122,11 @@ habitat_baselines:
   rl:
     policy:
       main_agent:
-        name: "PointNavResNetPolicy"
+        name: PointNavResNetPolicy
+        obs_transforms:
+          resize_shortest_edge:
+            trans_keys: [rgb, depth]
+
     ppo:
       # ppo params
       clip_param: 0.2
@@ -149,7 +138,6 @@ habitat_baselines:
       eps: 1e-5
       max_grad_norm: 0.2
       num_steps: 128
-      hidden_size: 512
       use_gae: True
       gamma: 0.99
       tau: 0.95
@@ -157,7 +145,7 @@ habitat_baselines:
       use_linear_lr_decay: False
       reward_window_size: 50
       use_normalized_advantage: False
-
+      hidden_size: 512
       # Use double buffered sampling, typically helps
       # when environment time is similar or large than
       # policy inference time during rollout generation
@@ -169,7 +157,7 @@ habitat_baselines:
       distrib_backend: NCCL
       # Visual encoder backbone
       # pretrained_weights: data/ddppo-models/gibson-2plus-resnet50.pth
-      pretrained_weights: data/ddppo-models/hm3d-depth/ckpt_60.pth
+      pretrained_weights: data/ddppo-models/gibson-2plus-resnet50.pth
       # Initialize with pretrained weights
       pretrained: True
       # Initialize just the visual encoder backbone with pretrained weights

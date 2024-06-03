@@ -1,15 +1,10 @@
-from habitat_baselines.rl.ppo.utils.names import refined_names
+from habitat_baselines.rl.ppo.code_interpreter.prompts.objectnav import generate_onav_prompt
+from habitat_baselines.rl.ppo.code_interpreter.prompts.instance_imagenav import generate_iinav_prompt
+from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import generate_eqa_prompt
 
-class CodeGenerator(object):
+class PromptUtils:
     def __init__(self, habitat_env, task='objectnav', debug=False):
-        self.debug = debug
         self.habitat_env = habitat_env
-        self.target_name = None
-        self.task_name = task
-        
-    def initialize_llm(self):
-        # TODO: Implement LLM initialization
-        pass
 
     def get_objectgoal_target(self):
         return self.habitat_env.envs.call(['habitat_env'])[0].current_episode.goals[0].object_category
@@ -18,79 +13,32 @@ class CodeGenerator(object):
         object_name = self.habitat_env.envs.call(['habitat_env'])[0].current_episode.object_category
         # TODO: Implement image retrieval using VQA
         return object_name
-
+    
     def get_eqa_target(self):
         question, gt_answer = self.habitat_env.envs.call(['habitat_env'])[0].current_episode
-        # TODO: Implement image retrieval using VQA
         return question, gt_answer
-
-    def generate_onav_episode(self):
-        object_name = refined_names[self.get_objectgoal_target()]
-        print('Navigate to', object_name)
-        object_name = 'chair'
-        prompt = f"""        
-while True:
-    explore_scene()
-    object = detect_objects('{object_name}')
-    if object:
-        map_scene()
-        navigate_to(object)
-        segment_scene()
-        stop_navigation()"""
-        return prompt
     
-    def generate_iinav_episode(self):
-        object_name = refined_names[self.get_instanceimagegoal_target()]
-        print('Navigate to', object_name)
-        prompt = f"""
-target = answer_question(image, 'What is the object in the image?')
-while True:
-    explore_scene()
-    object = detect_objects(target)
-    if object:
-        navigate_to(object)
-        if feature_match():
-            stop_navigation()
-        else:
-            change_target()
-"""
-        return prompt
-
-    def generate_eqa_episode(self):
-        question, gt_answer = self.get_eqa_target()
-        print('Question:', question)
-        prompt = f"""
-while True:
-    explore_scene()
-    object = detect_objects(target)
-    if object:
-        navigate_to(object)
-        answer_question({question})
-"""
-        return prompt
-
+class CodeGenerator(object):
+    def __init__(self, habitat_env, task='objectnav', debug=False):
+        self.debug = debug
+        self.habitat_env = habitat_env
+        self.target_name = None
+        self.task_name = task
+        self.prompt_utils = PromptUtils(habitat_env, self.task_name)
+        
     def generate(self):
         if self.debug:
             if self.task_name == 'objectnav':
-                prompt = self.generate_onav_episode()
+                prompt = generate_onav_prompt(self.prompt_utils)
             elif self.task_name == 'instance_imagenav':
-                prompt = self.generate_iinav_episode()
+                prompt = generate_iinav_prompt(self.prompt_utils)
+            elif self.task_name == 'eqa':
+                prompt = generate_eqa_prompt(self.prompt_utils)
 
         else:
-            # TODO: Implement real LLM call generation
-            return NotImplementedError
+            llm_model, tokenizer = self.initialize_llm()
         return prompt
-
-
-
-# prompt = f"""
-# while True:
-#     explore_scene():
-#     objects = detect_objects('chair')
-#     if objects:
-#         for object in objects:
-#             navigate_to(object)
-#             stop_navigation()
-# """  
-
-
+    
+    def initialize_llm(self):
+        # TODO: Implement LLM initialization
+        pass

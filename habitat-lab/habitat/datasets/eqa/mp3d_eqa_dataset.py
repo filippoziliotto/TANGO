@@ -92,6 +92,12 @@ class Matterport3dDatasetV1(Dataset):
                     ]
                 episode.scene_id = os.path.join(scenes_dir, episode.scene_id)
             episode.question = QuestionData(**episode.question)
+
+            # Support EQA dictionary format additions
+            episode.question.answer_token_orig = episode.question.answer_token
+            try: episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
+            except: episode.question.answer_token = self.answer_vocab.stoi['<unk>']
+            
             for g_index, goal in enumerate(episode.goals):
                 episode.goals[g_index] = ObjectGoal(**goal)
                 new_goal = episode.goals[g_index]

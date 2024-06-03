@@ -303,6 +303,13 @@ class Env:
             not self._episode_force_changed
         ), "Episode was changed either by setting current_episode or changing the episodes list. Call reset before stepping the environment again."
 
+        # Support EQA additions
+        if isinstance(action, dict) and "action" in action and isinstance(action['action'], dict):
+            action = {
+                "action": action["action"]["action"],
+                "action_args": action["action"]['action_args']
+            }
+
         # Support simpler interface as well
         if isinstance(action, (str, int, np.integer)):
             action = {"action": action}

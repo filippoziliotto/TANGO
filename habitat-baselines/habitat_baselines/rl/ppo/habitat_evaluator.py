@@ -200,7 +200,11 @@ class HabitatEvaluator(Evaluator):
 
             # Added for EQA support
             if self.task_name in ['eqa']:
-                # TODO: add support for max step reached
+
+                # Case in which the agent does not reach the goal
+                if self.max_steps_reached() and 'pred_answer' not in list(self.eqa_vars.keys()):
+                    self.eqa_vars['pred_answer'] = ' '
+
                 answer_token, answer_text = eqa_text_to_token(stoi_eqa, self.eqa_vars['pred_answer'])
                 self.step_data = [
                     {

@@ -105,8 +105,10 @@ def eqa_classification(gt_answer, pred_answer):
         for room in colors_eqa:
             most_similar_word[room] = eqa_similarity(nlp, pred_answer, room)
 
-    # return key with highest similarity
-    pred_answer = max(most_similar_word, key=most_similar_word.get)
+    # Return key with highest similarity, dataset contains 
+    # some errors let's handle them with try except
+    try: pred_answer = max(most_similar_word, key=most_similar_word.get)
+    except: pass
     return similarity, pred_answer
 
 

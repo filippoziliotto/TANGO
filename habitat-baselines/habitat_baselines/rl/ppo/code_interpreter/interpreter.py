@@ -350,7 +350,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         img = self.habitat_env.get_current_observation(type='rgb')
 
         # stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)

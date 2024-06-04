@@ -435,6 +435,7 @@ class HabitatEvaluator(Evaluator):
 
         # Support for EQA task infinite values distance_to_goal
         # this is a nightmare to debug
+        # TODO: Check how to handle the difference between 10,30,50 steps
         if self.task_name in ['eqa']:
             self.aggregated_stats['distance_to_goal'] = np.mean(
                 [v['distance_to_goal'] for v in self.stats_episodes.values() if v['distance_to_goal'] != float('inf')]

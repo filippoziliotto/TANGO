@@ -15,9 +15,9 @@ class CodeGenerator(object):
         self.eqa_vars = {}
 
         # LLM configurations
-        self.use_llm = self.habitat_env.config.LLM.use_llm
-        self.type = self.habitat_env.config.LLM.type
-        self.quantization = self.habitat_env.config.LLM.quantization
+        self.use_llm = self.habitat_env.LLM.use_llm
+        self.type = self.habitat_env.LLM.type
+        self.quantization = self.habitat_env.LLM.quantization
         
     def generate(self):
         if self.debug:

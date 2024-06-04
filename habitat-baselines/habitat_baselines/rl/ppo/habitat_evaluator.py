@@ -42,6 +42,9 @@ class HabitatEvaluator(Evaluator):
         self.current_step = 0
         pass
 
+    """
+    Getting Habitat variables methods
+    """
     def _init_variables(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -65,7 +68,13 @@ class HabitatEvaluator(Evaluator):
         self.captioner = self.config.habitat_baselines.captioner
         # Segmentation
         self.segmenter = self.config.habitat_baselines.segmenter
+        # LLM
+        self.LLM = self.config.habitat_baselines.LLM
 
+    """
+    Methods for initializing/executing/evauluating
+    the agent in Habitat environment
+    """
     def init_env(self):
         self.observations = self.envs.reset()
         self.observations = self.envs.post_step(self.observations)
@@ -461,6 +470,10 @@ class HabitatEvaluator(Evaluator):
         else:
             return False
 
+    """
+    Calling Habitat simulator methods
+    Getting current variables of the agent
+    """
     def get_habitat_sim(self):
         """
         Call habitat simulator for the current environment

@@ -1,13 +1,14 @@
 import torch
 import numpy as np
 import cv2
+import os
 
 from habitat.tasks.utils import cartesian_to_polar
 from habitat.utils.geometry_utils import (
     quaternion_rotate_vector,
 )
 
-from transformers import (OwlViTProcessor,
+from transformers import (OwlViTProcessor, AutoTokenizer, set_seed,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
                           DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
@@ -175,6 +176,49 @@ def get_segmentation_model(device):
     feature_extractor = MaskFormerFeatureExtractor.from_pretrained(model_name)
     model = MaskFormerForInstanceSegmentation.from_pretrained(model_name).to(device)
     return model, feature_extractor
+
+def get_llm_model(type, quantization, device):
+    """
+    Function to get the correct LLM model 
+    for open-source LLMs we use Huggingface while the usual 
+    API call for GPT 
+    """
+    set_seed(12345)
+    if quantization in ['32']:
+        torch_dtype = torch.float32
+    elif quantization in ['16']:
+        torch_dtype = torch.bfloat16
+    elif quantization in ['8']:
+        torch_dtype = torch.int8
+
+    if type in ['phi2']:
+        model_name = "microsoft/phi-2"
+        processor = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, 
+            torch_dtype=torch_dtype,
+            trust_remote_code=True).to(device)
+        
+    elif type in ['phi3']:
+        model_name = "microsoft/Phi-3-mini-4k-instruct"
+        processor = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, 
+            torch_dtype=torch_dtype,
+            trust_remote_code=True).to(device)
+        
+    elif type in ['gpt3.5']:
+        # TODO: implement openai request
+        from openai import OpenAI
+        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        return client
+    
+    else:
+        raise ValueError("Invalid LLM model type! Not implemeted yet.")
+
+   
+    return model, processor
+
 
 """
 Camera related or similar utils

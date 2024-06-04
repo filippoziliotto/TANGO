@@ -203,7 +203,7 @@ class HabitatEvaluator(Evaluator):
 
                 # Case in which the agent does not reach the goal
                 if self.max_steps_reached() and 'pred_answer' not in list(self.eqa_vars.keys()):
-                    self.eqa_vars['pred_answer'] = ' '
+                    self.eqa_vars['pred_answer'] = '_'
 
                 answer_token, answer_text = eqa_text_to_token(stoi_eqa, self.eqa_vars['pred_answer'])
                 self.step_data = [
@@ -461,7 +461,7 @@ class HabitatEvaluator(Evaluator):
         else:
             return False
 
-    def call_habitat_sim(self):
+    def get_habitat_sim(self):
         """
         Call habitat simulator for the current environment
         """
@@ -471,7 +471,7 @@ class HabitatEvaluator(Evaluator):
         """
         Get current agent state position & rotation
         """
-        return self.call_habitat_sim().get_agent_state()
+        return self.get_habitat_sim().get_agent_state()
 
     def get_current_observation(self, type='rgb'):
         """
@@ -499,7 +499,7 @@ class HabitatEvaluator(Evaluator):
         we try different method to achieve this
         possibility to extend to new and better sampling strategies
         """
-        hab_simulator = self.call_habitat_sim()
+        hab_simulator = self.get_habitat_sim()
         min_distance = 15.
         max_tries = 1000
         current_pos = self.get_current_position()

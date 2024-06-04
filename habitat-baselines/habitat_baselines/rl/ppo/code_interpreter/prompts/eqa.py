@@ -109,3 +109,16 @@ def eqa_classification(gt_answer, pred_answer):
     pred_answer = max(most_similar_word, key=most_similar_word.get)
     return similarity, pred_answer
 
+
+class PromptEQA:
+    def __init__(self, prompt_utils: PromptUtils):
+        self.prompt_utils = prompt_utils
+
+    def get_prompt(self):
+        return generate_eqa_prompt(self.prompt_utils)
+
+    def get_token(self, label):
+        return eqa_text_to_token(self.prompt_utils.stoi_dict, label)
+
+    def get_classification(self, gt_answer, pred_answer):
+        return eqa_classification(gt_answer, pred_answer)

@@ -1,16 +1,23 @@
+import torch
+from habitat_baselines.rl.ppo.utils.utils import get_llm_model
+
 from habitat_baselines.rl.ppo.code_interpreter.prompts.objectnav import generate_onav_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.instance_imagenav import generate_iinav_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import generate_eqa_prompt
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
-  
+
 class CodeGenerator(object):
     def __init__(self, habitat_env, task='objectnav', debug=False):
         self.debug = debug
         self.habitat_env = habitat_env
-        self.target_name = None
         self.task_name = task
         self.prompt_utils = PromptUtils(habitat_env)
         self.eqa_vars = {}
+
+        # LLM configurations
+        self.use_llm = self.habitat_env.config.LLM.use_llm
+        self.type = self.habitat_env.config.LLM.type
+        self.quantization = self.habitat_env.config.LLM.quantization
         
     def generate(self):
         if self.debug:
@@ -21,8 +28,17 @@ class CodeGenerator(object):
             elif self.task_name == 'eqa':
                 prompt = generate_eqa_prompt(self.prompt_utils)
         else:
-            llm_model, tokenizer = self.initialize_llm()
+            if self.use_llm:
+                self.llm_model, self.llm_tokenizer = self.initialize_llm(self.type, self.quantization, self.device)
         return prompt
+    
+    def initialize_llm(self, type, quantization):
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if self.type not in ['gpt3.5']:
+            self.model, self.tokenizer = get_llm_model(type, quantization, self.device)
+        else:
+            self.client = get_llm_model(type, quantization, self.device)
+
 
     def get_eqa_vars(self):
         prompt, gt_answer, distance = self.prompt_utils.get_eqa_target()
@@ -32,6 +48,3 @@ class CodeGenerator(object):
         }
         return prompt, self.eqa_vars
     
-    def initialize_llm(self):
-        # TODO: Implement LLM initialization
-        pass

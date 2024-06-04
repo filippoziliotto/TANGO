@@ -428,8 +428,15 @@ class HabitatEvaluator(Evaluator):
         for stat_key in self.all_ks:
             self.aggregated_stats[stat_key] = np.mean(
                 [v[stat_key] for v in self.stats_episodes.values() if stat_key in v]
-            )
+            )    
 
+        # Support for EQA task infinite values distance_to_goal
+        # this is a nightmare to debug
+        if self.task_name in ['eqa']:
+            self.aggregated_stats['distance_to_goal'] = np.mean(
+                [v['distance_to_goal'] for v in self.stats_episodes.values() if v['distance_to_goal'] != float('inf')]
+            )
+                
         self.metrics = {k: v for k, v in self.aggregated_stats.items() if k != "reward"}
         for k, v in self.metrics.items():
             self.writer.add_scalar(f"eval_metrics/{k}", v, self.step_id)        
@@ -479,6 +486,12 @@ class HabitatEvaluator(Evaluator):
         Call habitat simulator for the current environment
         """
         return self.envs.call(['habitat_env'])[0].sim
+
+    def get_current_episode_info(self):
+        """
+        Get the current episode information
+        """
+        return self.envs.call(['habitat_env'])[0].current_episode
 
     def get_current_position(self):
         """
@@ -580,7 +593,7 @@ class HabitatEvaluator(Evaluator):
         self.get_env_variables(**kwargs)
         self.init_env()
 
-        code_generator = CodeGenerator(self, task=self.task_name, debug=True)
+        code_generator = CodeGenerator(self, debug=True)
         self.code_interpreter = PseudoCodeExecuter(self)
 
         while self.episode_iterator():

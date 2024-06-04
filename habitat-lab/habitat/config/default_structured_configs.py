@@ -36,6 +36,10 @@ __all__ = [
     "SPLMeasurementConfig",
     "SoftSPLMeasurementConfig",
     "DistanceToGoalRewardMeasurementConfig",
+    # EQA MEASURES
+    "AnswerAccuracyMeasurementConfig",
+    "AnswerSimilarityMeasurementConfig",
+    "MinimumNumberOfActionsMeasurementConfig"
     # NAVIGATION LAB SENSORS
     "ObjectGoalSensorConfig",
     "InstanceImageGoalSensorConfig",
@@ -1375,6 +1379,15 @@ class AnswerSimilarityMeasurementConfig(MeasurementConfig):
     type: str = "AnswerSimilarity"
 
 @dataclass
+class MinimumNumberOfActionsMeasurementConfig(MeasurementConfig):
+    type: str = "MinimumNumberOfActions"
+
+@dataclass
+class StopBeforeEpisodeEndMeasurementConfig(MeasurementConfig):
+    type: str = "StopBeforeEpisodeEnd"
+    max_steps: int = 500
+
+@dataclass
 class TaskConfig(HabitatBaseConfig):
     r"""
     The definition of the task in Habitat.
@@ -2508,6 +2521,18 @@ cs.store(
     group="habitat/task/measurements",
     name="answer_similarity",
     node=AnswerSimilarityMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.minimum_number_of_actions",
+    group="habitat/task/measurements",
+    name="minimum_number_of_actions",
+    node=MinimumNumberOfActionsMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.stop_before_episode_end",
+    group="habitat/task/measurements",
+    name="stop_before_episode_end",
+    node=StopBeforeEpisodeEndMeasurementConfig,
 )
 cs.store(
     package="habitat.task.measurements.episode_info",

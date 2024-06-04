@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING,Any, Dict, List, Optional
 
 import attr
 from gym import Space, spaces
@@ -17,6 +17,8 @@ from habitat.core.spaces import ListSpace
 from habitat.core.utils import not_none_validator
 from habitat.tasks.nav.nav import NavigationEpisode, NavigationTask
 
+if TYPE_CHECKING:
+    from omegaconf import DictConfig
 
 @attr.s(auto_attribs=True)
 class QuestionData:
@@ -168,6 +170,104 @@ class AnswerSimilarity(Measure):
 
             self._metric = ans_token.similarity(gt_token)
 
+@registry.register_measure
+class MinimumNumberOfActions(Measure):
+    """
+    Minimum number of actions required to reach target
+    This should be divided in 10, 30, 50.
+    """
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "minimum_number_of_actions"
+
+    def reset_metric(self, episode, *args: Any, **kwargs: Any):
+        self.len_shortest_path = len(episode.shortest_paths[0])
+
+        if self.len_shortest_path < 10:
+            self._metric = 10.
+        elif self.len_shortest_path >= 10 and self.len_shortest_path < 30:
+            self._metric = 30.
+        else:
+            self._metric = 50.
+
+    def update_metric(self, episode=None, *args: Any, **kwargs: Any):
+        pass
+
+@registry.register_measure
+class StopBeforeEpisodeEnd(Measure):
+    """Stops before episode end, 1. == yes, 0. == no"""
+
+    def __init__(self, config, sim, *args: Any, **kwargs: Any):
+        self._sim = sim
+        self._config = config
+        self._max_steps = self._config.max_steps
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "stop_before_episode_end"
+
+    def reset_metric(self, task,  *args: Any, **kwargs: Any):
+        task.measurements.check_measure_dependencies(
+            self.uuid, ['num_steps']
+        )
+        self._metric = 0.
+
+    def update_metric(
+        self, task, episode, action=None,  *args: Any, **kwargs: Any
+    ):
+        if episode is None:
+            return
+        
+        current_step = task.measurements.measures[
+            'num_steps'
+        ].get_metric()
+
+        self._metric = (
+                1.
+                if (action["action"] == AnswerAction.name or action["action"] == 0) \
+                and (current_step < self._max_steps)
+                else 0.
+            )
+
+@registry.register_measure
+class SmallestDistanceToTarget(Measure):
+    """Smallest distance to target during episode"""
+
+    def __init__(self, sim, config, *args: Any, **kwargs: Any):
+        self._sim = sim
+        self._config = config
+
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "smallest_distance_to_target"
+
+    def reset_metric(self, episode, *args: Any, **kwargs: Any):
+        self._metric = vars(episode).copy()
+
+    def update_metric(self, episode, *args: Any, **kwargs: Any):
+        pass
+
+@registry.register_measure
+class StopInCorrectRoom(Measure):
+    """TODO:"""
+
+    def __init__(self, sim, config, *args: Any, **kwargs: Any):
+        self._sim = sim
+        self._config = config
+
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "stop_before_episode_end"
+
+    def reset_metric(self, episode, *args: Any, **kwargs: Any):
+        self._metric = vars(episode).copy()
+
+    def update_metric(self, episode, *args: Any, **kwargs: Any):
+        pass
 
 @registry.register_task(name="EQA-v0")
 class EQATask(NavigationTask):

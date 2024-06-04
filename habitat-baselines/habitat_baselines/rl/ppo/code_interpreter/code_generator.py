@@ -7,10 +7,10 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import generate_eqa_p
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 
 class CodeGenerator(object):
-    def __init__(self, habitat_env, task='objectnav', debug=False):
+    def __init__(self, habitat_env, debug=False):
         self.debug = debug
         self.habitat_env = habitat_env
-        self.task_name = task
+        self.task_name = self.habitat_env.task_name
         self.prompt_utils = PromptUtils(habitat_env)
         self.eqa_vars = {}
 
@@ -21,6 +21,8 @@ class CodeGenerator(object):
         
     def generate(self):
         if self.debug:
+            # prompt = self.prompt_utils.get_prompt()
+
             if self.task_name == 'objectnav':
                 prompt = generate_onav_prompt(self.prompt_utils)
             elif self.task_name == 'instance_imagenav':

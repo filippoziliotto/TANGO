@@ -494,6 +494,15 @@ class SegmenterConfig(HabitatBaselinesBaseConfig):
     """
     use_segmenter: bool = False
 
+@dataclass
+class LLMConfig(HabitatBaselinesBaseConfig):
+    """
+    Language model config settings
+    """
+    use_llm: bool = False
+    type: str = "phi3"
+    quantization: str = "8"
+    
 
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
@@ -548,6 +557,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     vqa: VQAConfig = VQAConfig()
     captioner: CaptionerConfig = CaptionerConfig()
     segmenter: SegmenterConfig = SegmenterConfig()
+    LLM: LLMConfig = LLMConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

@@ -967,6 +967,13 @@ class DistanceToGoal(Measure):
                 for goal in episode.goals
                 for view_point in goal.view_points
             ]
+        # Support EQA task
+        elif self._distance_to == "EQA_POINTS":
+            self._episode_view_points = [
+                view_point.position
+                for goal in episode.goals
+                for view_point in goal.view_points
+            ]
         self.update_metric(episode=episode, *args, **kwargs)  # type: ignore
 
     def update_metric(
@@ -987,6 +994,14 @@ class DistanceToGoal(Measure):
                 distance_to_target = self._sim.geodesic_distance(
                     current_position, self._episode_view_points, episode
                 )
+            # Support EQA task
+            # EQA-MP3D task is a mess on Habitat we need to handle
+            # non-navigable points to avoid np.inf distance to goal
+            # still this does not solve completely the problem 
+            elif self._distance_to == "EQA_POINTS":
+                distance_to_target = self._sim.geodesic_distance(
+                    current_position, self._episode_view_points, episode
+                )           
             else:
                 logger.error(
                     f"Non valid distance_to parameter was provided: {self._distance_to }"

@@ -1388,6 +1388,10 @@ class StopBeforeEpisodeEndMeasurementConfig(MeasurementConfig):
     max_steps: int = 500
 
 @dataclass
+class SmallestDistanceToTargetMeasurementConfig(MeasurementConfig):
+    type: str = "SmallestDistanceToTarget"
+
+@dataclass
 class TaskConfig(HabitatBaseConfig):
     r"""
     The definition of the task in Habitat.
@@ -2533,6 +2537,12 @@ cs.store(
     group="habitat/task/measurements",
     name="stop_before_episode_end",
     node=StopBeforeEpisodeEndMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.smallest_distance_to_target",
+    group="habitat/task/measurements",
+    name="smallest_distance_to_target",
+    node=SmallestDistanceToTargetMeasurementConfig,
 )
 cs.store(
     package="habitat.task.measurements.episode_info",

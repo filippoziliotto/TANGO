@@ -176,7 +176,8 @@ class MinimumNumberOfActions(Measure):
     Minimum number of actions required to reach target
     This should be divided in 10, 30, 50.
     """
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, sim, *args: Any, **kwargs: Any):
+        self._sim = sim
         super().__init__(**kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
@@ -208,7 +209,7 @@ class StopBeforeEpisodeEnd(Measure):
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
         return "stop_before_episode_end"
 
-    def reset_metric(self, task,  *args: Any, **kwargs: Any):
+    def reset_metric(self, episode, task,  *args: Any, **kwargs: Any):
         task.measurements.check_measure_dependencies(
             self.uuid, ['num_steps']
         )
@@ -237,37 +238,32 @@ class SmallestDistanceToTarget(Measure):
 
     def __init__(self, sim, config, *args: Any, **kwargs: Any):
         self._sim = sim
-        self._config = config
 
         super().__init__(**kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
         return "smallest_distance_to_target"
 
-    def reset_metric(self, episode, *args: Any, **kwargs: Any):
-        self._metric = vars(episode).copy()
+    def reset_metric(self, task, episode, *args: Any, **kwargs: Any):
+        task.measurements.check_measure_dependencies(
+            self.uuid, ['distance_to_goal']
+        )
+        # Since we have non-navigable points problems
+        # let's initialize with infinity
+        self._metric = float('inf')
 
-    def update_metric(self, episode, *args: Any, **kwargs: Any):
-        pass
+    def update_metric(self, task, episode, *args: Any, **kwargs: Any):
+        current_distante_to_target = task.measurements.measures[
+            'distance_to_goal'
+        ].get_metric()
+
+        if current_distante_to_target < self._metric:
+            self._metric = current_distante_to_target
 
 @registry.register_measure
 class StopInCorrectRoom(Measure):
     """TODO:"""
-
-    def __init__(self, sim, config, *args: Any, **kwargs: Any):
-        self._sim = sim
-        self._config = config
-
-        super().__init__(**kwargs)
-
-    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
-        return "stop_before_episode_end"
-
-    def reset_metric(self, episode, *args: Any, **kwargs: Any):
-        self._metric = vars(episode).copy()
-
-    def update_metric(self, episode, *args: Any, **kwargs: Any):
-        pass
+    pass
 
 @registry.register_task(name="EQA-v0")
 class EQATask(NavigationTask):

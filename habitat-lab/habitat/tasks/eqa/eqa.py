@@ -177,7 +177,7 @@ class MinimumNumberOfActions(Measure):
     """
     def __init__(self, sim, *args: Any, **kwargs: Any):
         self._sim = sim
-        self._cls_distance = {
+        self._cls_distance = { # Check arXiv:2405.16559 for more details on the numbers
             '10': 3.45,
             '30': 5.71,
             '50': 8.21

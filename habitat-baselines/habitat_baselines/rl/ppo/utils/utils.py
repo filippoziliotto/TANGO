@@ -14,6 +14,7 @@ from transformers import (OwlViTProcessor, AutoTokenizer, set_seed,
                           DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
+                          BlipProcessor,
                           )
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
 
@@ -102,16 +103,22 @@ def get_vqa_model(type, size, device):
     Function to get the correct model and processor
     for the VQA model called in models.py
     """
-    if (type not in ['blip', 'git']) or (size not in ['base', 'large']):
+    if (type not in ['blip2', 'blip', 'git']) or (size not in ['base', 'large', '2.7b', '6.7b']):
         raise ValueError("Invalid model settings!")
     
     if type in ['blip']:
-        if size in ['base']:
-            model_name = "Salesforce/blip-vqa-capfilt-base"
-        elif size in ['large']:
-            model_name = "Salesforce/blip-vqa-capfilt-large"
-        processor = AutoProcessor.from_pretrained(model_name)
+        # Only large size model available
+        model_name = "Salesforce/blip-vqa-capfilt-large"
+        processor = BlipProcessor.from_pretrained(model_name)
         model = BlipForQuestionAnswering.from_pretrained(model_name)
+
+    if type in ['blip2']:
+        if size in ['2.7b']:
+            model_name = "Salesforce/blip2-opt-2.7b"
+        elif size in ['6.7b']:
+            model_name = "Salesforce/blip2-opt-6.7b"
+        processor = Blip2Processor.from_pretrained(model_name)
+        model = Blip2ForConditionalGeneration.from_pretrained(model_name, device_map="auto")
 
     elif type in ['git']:
         if size in ['base']:
@@ -174,8 +181,8 @@ def get_captioner_model(type, size, quantization, device):
 def get_segmentation_model(device):
     model_name = "facebook/maskformer-swin-base-coco"
     feature_extractor = MaskFormerFeatureExtractor.from_pretrained(model_name)
-    model = MaskFormerForInstanceSegmentation.from_pretrained(model_name).to(device)
-    return model, feature_extractor
+    model = MaskFormerForInstanceSegmentation.from_pretrained(model_name)
+    return model.to(device), feature_extractor
 
 def get_llm_model(type, quantization, device):
     """

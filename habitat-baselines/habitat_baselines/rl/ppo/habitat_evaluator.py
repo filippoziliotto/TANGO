@@ -589,7 +589,7 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
 
-    def get_stereo_view(self):
+    def get_stereo_view(self, degrees=180):
         """
         Get a 360 view of the current observation
         it also saves the jpeg image for debugging purposes

@@ -158,7 +158,7 @@ class VQA:
         self.vqa_model.eval()
         
     def predict(self, question, img):
-        if self.type in ["blip2"]:
+        if self.type in ["blip", "blip2"]:
             encoding = self.processor(img, question, return_tensors='pt').to("cuda")
             with torch.no_grad():
                 outputs = self.vqa_model.generate(**encoding)
@@ -177,7 +177,8 @@ class VQA:
 
     def answer(self, question, img, gt_answer=None):
         # TODO: check if this is useful
-        # question = generate_eqa_question(question, gt_answer)
+        if self.type in ["blip", "blip2"]:
+            question = generate_eqa_question(question, gt_answer)
         model_answer = self.predict(question, img)
         
         if gt_answer is not None:

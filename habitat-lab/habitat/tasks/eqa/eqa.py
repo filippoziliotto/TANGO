@@ -177,39 +177,34 @@ class MinimumNumberOfActions(Measure):
     """
     def __init__(self, sim, *args: Any, **kwargs: Any):
         self._sim = sim
+        self._cls_distance = {
+            '10': 3.45,
+            '30': 5.71,
+            '50': 8.21
+        }
         super().__init__(**kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
         return "minimum_number_of_actions"
 
     def reset_metric(self, episode, *args: Any, **kwargs: Any):
-        # Default angle rotation: 10°
-        # Default forward step: 0.25
-        # This is more robust than caluclating the shortest path
-        # w.r.t. the goal position which is not always navigable
-        for view_point in episode.goals[0].view_points:
-            shortest_path = get_action_shortest_path(
-                    self._sim,
-                    episode.start_position,
-                    episode.start_rotation,
-                    view_point.position,
-                    success_distance = 0.1,
-                    max_episode_steps = 500
-            )
-            if len(shortest_path) > 0:
-                break
-        len_shortest_path = len(shortest_path)
-        print(len_shortest_path)
 
-        # Define 3 types (less than 10, 30, 50 actions)
-        if len_shortest_path == 0:
-            # No path found
-            self._metric = 50
-        elif len_shortest_path <= 10 and len_shortest_path > 0:
+        self._episode_view_points = [
+            view_point.position
+            for view_point in episode.goals[0].view_points
+        ]
+
+        distance_to_target = self._sim.geodesic_distance(
+            episode.start_position, 
+            self._episode_view_points,
+            episode
+        )    
+
+        if distance_to_target <= self._cls_distance['10']:
             self._metric = 10
-        elif len_shortest_path > 10 and len_shortest_path <= 30:
+        elif distance_to_target > self._cls_distance['10'] and distance_to_target <= self._cls_distance['30']:
             self._metric = 30
-        elif len_shortest_path > 30:
+        elif distance_to_target > self._cls_distance['30'] or distance_to_target is float('inf'):
             self._metric = 50
 
     def update_metric(self, episode=None, *args: Any, **kwargs: Any):

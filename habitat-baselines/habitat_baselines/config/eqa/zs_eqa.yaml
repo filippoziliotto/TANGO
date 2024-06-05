@@ -45,7 +45,7 @@ habitat:
         distance_to: EQA_POINTS
 
   environment:
-    max_episode_steps: 10
+    max_episode_steps: 3
   simulator:
     # turn_angle: 30
     agents:
@@ -103,7 +103,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.5
   
-  test_episode_count: 10
+  test_episode_count: 100
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

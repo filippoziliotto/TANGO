@@ -3,7 +3,6 @@ import numpy as np
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
-from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk
 
 class Target:
     def __init__(self, habitat_env):
@@ -124,11 +123,6 @@ class Target:
         also save image to disk (only for debugging purposes)
         """
         self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
-
-        if self.habitat_env.save_obs:
-            img = self.habitat_env.get_current_observation(type='rgb')
-            save_images_to_disk(img)
-
         return self.polar_coords
 
     def target_reached(self):

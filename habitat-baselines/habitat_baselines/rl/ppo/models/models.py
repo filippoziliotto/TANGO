@@ -12,7 +12,6 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_vqa_model, get_matcher_model, 
     get_captioner_model, get_segmentation_model
 )
-from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk 
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
@@ -138,15 +137,13 @@ class ObjectDetector:
 
         return {'boxes': final_detections, 'scores': final_detections, 'labels': final_detections}
 
-    def detect(self, image, target_name, save_obs):
+    def detect(self, image, target_name):
         """
         Actual function that detects target_name in the environment
         it also saves to disk the images (observation and detection)
         returns the bounding box of the detected object
         """
         detection = self.predict(image, target_name)
-        if save_obs:
-            save_images_to_disk(image, boxes=detection['boxes'], label=target_name)
 
         return detection['boxes']
 
@@ -197,9 +194,6 @@ class FeatureMatcher:
     def load_images(self, image1, image2):
         image1 = rgb_to_grayscale(Image.fromarray(image1))
         image2 = rgb_to_grayscale(Image.fromarray(image2))
-
-        # Save target image to disk (only for debugging)
-        save_images_to_disk(image2, instance=True)
 
         image1 = self.from_pil_to_tensor(image1).unsqueeze(0) / 255.
         image2 = self.from_pil_to_tensor(image2).unsqueeze(0) / 255.

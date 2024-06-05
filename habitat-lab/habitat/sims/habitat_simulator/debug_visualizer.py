@@ -10,20 +10,79 @@ from typing import List, Optional, Tuple, Union
 import magnum as mn
 import numpy as np
 from PIL import Image
+import random
+import cv2
 
 import habitat_sim
 from habitat.core.logging import logger
 from habitat.utils.common import check_make_dir
 from habitat_sim.physics import ManagedArticulatedObject, ManagedRigidObject
 
+from habitat_sim.utils import viz_utils as vut
+from PIL import Image, ImageDraw
+
+def generate_unique_color():
+    """Generate a random color."""
+    return tuple(random.randint(0, 255) for _ in range(3))
+
+def overlay_segmentation(image, segmentation_outputs):
+    """
+    Overlay segmentation mask on the image
+    save the image into scene_segmentation.jpg
+    """
+    overlay_image = image.copy()
+    assert image.shape[:2] == segmentation_outputs[0]['mask'].shape, "Image and overlay image must have the same height"
+    
+    # Define a color map for different categories (for simplicity, we'll define a few colors)
+    color_map = {}
+    
+    # Iterate over the segmentation outputs
+    for output in segmentation_outputs:
+        mask = output['mask']
+        category = output['category']
+        
+        # Assign a unique color to each category
+        if category not in color_map:
+            color_map[category] = generate_unique_color()
+        color = color_map[category]
+        
+        # Create a colored mask
+        colored_mask = np.zeros_like(image)
+        for i in range(3):  # Apply the same mask to all three channels
+            colored_mask[:, :, i] = mask * color[i]
+        
+        # Overlay the colored mask on the image
+        overlay_image = cv2.addWeighted(overlay_image, 1, colored_mask.astype(np.uint8), 0.5, 0)
+
+        # Find the center of the mask for placing the label
+        mask_indices = np.where(mask == 1)
+        
+        if len(mask_indices[0]) > 0 and len(mask_indices[1]) > 0:
+            center_y = int(np.mean(mask_indices[0]))
+            center_x = int(np.mean(mask_indices[1]))
+            if False:
+                cv2.putText(overlay_image, category, (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv2.LINE_AA)
+    
+    # Create a legend
+    legend_image = np.zeros((image.shape[0], 120, 3), dtype=np.uint8) + 255  # White background for the legend
+    y_offset = 20
+    for category, color in color_map.items():
+        cv2.putText(legend_image, category, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+        cv2.rectangle(legend_image, (90, y_offset - 10), (110, y_offset + 10), color, -1)
+        y_offset += 25
+    
+    # Combine the legend with the image
+    combined_image = np.hstack((overlay_image, legend_image))
+
+    return overlay_image
 
 class DebugObservation:
     """
     Observation wrapper to provide a simple interface for managing debug observations and caching the image.
     """
-
-    def __init__(self, obs_data: np.ndarray):
-        self.obs_data: np.ndarray = obs_data
+    def __init__(self, obs_data: Optional[np.ndarray] = None):
+        
+        self.obs_data: Optional[np.ndarray] = obs_data
         self.image: Image.Image = (
             None  # creation deferred to show or save time
         )
@@ -32,8 +91,6 @@ class DebugObservation:
         """
         Creates a PIL Image from the ndarray which can then be shown/saved or otherwise processed.
         """
-
-        from habitat_sim.utils import viz_utils as vut
 
         self.image = vut.observation_to_image(self.obs_data, "color")
 
@@ -45,6 +102,45 @@ class DebugObservation:
         if self.image is None:
             self.create_image()
         return self.image
+
+    def save_obs(self, 
+                   image: np.ndarray, 
+                   prefix: str = "",
+                   bboxes = None,
+                   segmentation=None,
+                   output_path: str = 'images/',
+                   ):
+        """
+        Save the Image as png to a given location.
+
+        :param output_path: Directory path for saving the image.
+        :param prefix: Optional prefix for output filename. Filename format: "<prefix>month_day_year_hourminutesecondmicrosecond.png"
+        """
+        check_make_dir(output_path)
+
+        if segmentation is not None:
+            assert bboxes is None, "Cannot have both segmentation and bboxes"
+            image = overlay_segmentation(image, segmentation)
+
+        # check if RGB or depth
+        is_rgb = image.shape[-1] == 3
+        if is_rgb:
+            image = vut.observation_to_image(image, "color")
+
+        else:
+            image = vut.observation_to_image(image, "depth")
+
+        # TODO: add labels
+        if bboxes is not None:
+            assert segmentation is None, "Cannot have both segmentation and bboxes"
+            draw = ImageDraw.Draw(image)
+            for i, box1 in enumerate(bboxes):
+                box = box1[0]
+                color = 'red'
+                draw.rectangle(box, outline=color, width=5)
+
+        file_path = os.path.join(output_path, prefix + ".png")
+        image.save(file_path)
 
     def show(self) -> None:
         """

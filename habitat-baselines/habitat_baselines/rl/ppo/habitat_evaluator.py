@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import tqdm
 import wandb
-from PIL import Image
 
 from habitat import logger
 from habitat.tasks.rearrange.rearrange_sensors import GfxReplayMeasure
@@ -36,10 +35,12 @@ from habitat_baselines.rl.ppo.utils.utils import (
 from habitat_baselines.rl.ppo.utils.utils import match_images
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
+from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
 class HabitatEvaluator(Evaluator):
     def __init__(self):
         self.current_step = 0
+        self.debugger = DebugObservation()
         pass
 
     """
@@ -589,11 +590,12 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
 
-    def get_stereo_view(self, degrees=180):
+    def get_stereo_view(self):
         """
         Get a 360 view of the current observation
         it also saves the jpeg image for debugging purposes
         """
+        # TODO: maybe 360° is too much only have 180°?
         views_depth, views_rgb, states = [], [], []
         for rot_idx in range(360 // self.config.habitat.simulator.turn_angle):
             self.execute_action(look_around=True)
@@ -607,10 +609,8 @@ class HabitatEvaluator(Evaluator):
         stacked_views = match_images(stacked_views_rgb)
 
         if self.save_obs:     
-            image = Image.fromarray(stacked_views_rgb)  
-            image.save("images/360_view_single.jpg")  
-            image = Image.fromarray(stacked_views)
-            image.save('images/360_view_match.jpg') 
+            self.debugger.save_obs(stacked_views_rgb, prefix='360')
+            self.debugger.save_obs(stacked_views, prefix='360_match')
 
         return stacked_views, np.array(views_rgb), np.array(views_depth), np.array(states)
 

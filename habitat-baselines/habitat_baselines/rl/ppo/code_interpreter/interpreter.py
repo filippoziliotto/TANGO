@@ -4,7 +4,6 @@ from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, VQA, FeatureMatcher,
     ImageCaptioner, SegmenterModel
 )
-from habitat_baselines.rl.ppo.utils.visualizations import overlay_segmentation
 
 class PseudoCodeInterpreter:
     """
@@ -263,6 +262,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.execute_action(coords=self.coords)
         self.habitat_env.update_episode_stats()
 
+        # For debugging purposes
+        if self.habitat_env.save_obs:
+            obs = self.habitat_env.get_current_observation(type='rgb')
+            self.habitat_env.debugger.save_obs(obs, 'observation')
+        
         # If max steps is reached without target located
         if self.habitat_env.max_steps_reached():
             # Support for EQA in the case max step is reached
@@ -287,8 +291,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # update polar coordinates given the new agent step
             self.coords = self.target.update_polar_coords()
-
             self.update_variable('object', bbox)
+
+            # For debugging purposes
+            if self.habitat_env.save_obs:
+                obs = self.habitat_env.get_current_observation(type='rgb')
+                self.habitat_env.debugger.save_obs(obs, 'observation')
 
     def stop_navigation(self):
         """
@@ -316,7 +324,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
-        bbox = self.object_detector.detect(obs, target_name, self.habitat_env.save_obs)
+        bbox = self.object_detector.detect(obs, target_name)
 
         if self.habitat_env.object_detector.store_detections:
             self.memory_dict = self.object_detector.get_detection_dict()
@@ -327,7 +335,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox[0][0])    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
-
+            # For debugging purposes
+            if self.habitat_env.save_obs:
+                self.habitat_env.debugger.save_obs(obs, 'detection', bbox)
+        
         self.update_variable('objects', bbox)
         return bbox
 
@@ -338,6 +349,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         observation = self.habitat_env.get_current_observation(type='rgb')
         target = self.habitat_env.get_current_observation(type='instance_imagegoal')
+        # For debugging purposes
+        if self.habitat_env.save_obs:
+            self.habitat_env.debugger.save_obs(target, 'iin_target', target)
+            
         tau = self.feature_matcher.match(observation, target)
 
         if tau >= self.habitat_env.matcher.threshold:
@@ -352,7 +367,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         img = self.habitat_env.get_current_observation(type='rgb')
 
-        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
+        # stacked_views, single_rgb_views, single_depth_views, states = self.look_around()
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
@@ -360,8 +375,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             answer = self.vqa.answer(question, img)
 
-
-        # EQA support answer means stop
+        # EQA support, answer means stop action
         if take_agent_step:
             self.stop_navigation()
 
@@ -374,8 +388,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         assert type in ['frontal', 'stereo'], ValueError
 
-        stacked_view, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        question = 'Give a detailed description of the image'
+        stacked_view, single_rgb_views, single_depth_views, states = self.look_around()
+
         caption_stereo = self.captioner.generate_caption(stacked_view)
         caption_frontal = self.captioner.generate_caption(single_rgb_views)
 
@@ -388,8 +402,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     'rgb': single_rgb_views,
                     'depth': single_depth_views,
                     'captions': caption_frontal,
-                    'agent_state': states,
-                    }}
+                    'agent_state': states}}
         return caption
 
     def segment_scene(self, target=None):
@@ -397,14 +410,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Segment the scene using a segmentation model
         possibly filtering the target category
         """
-        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        segmentation = self.segmenter.segment(stacked_views)
 
-        target = ['chair', 'couch']
-        if target:
-            segmentation = [item for item in segmentation if item['category'] in target]
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        segmentation = self.segmenter.segment(obs)
 
-        seg_overlay = overlay_segmentation(stacked_views, segmentation, save=self.habitat_env.save_obs)
+        # target = ['chair', 'couch']
+        # if target:
+        #     segmentation = [item for item in segmentation if item['category'] in target]
+
+        if self.habitat_env.save_obs:
+            self.habitat_env.debugger.save_obs(obs, 'segmentation', segmentation=segmentation)
+        # seg_overlay = overlay_segmentation(stacked_views, segmentation, save=self.habitat_env.save_obs)
         return segmentation
 
     """
@@ -425,8 +441,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         try: target = eval(target)
         except: pass
 
-        stacked_views, single_rgb_views, single_depth_views, states = self.habitat_env.get_stereo_view()
-        boxes = self.object_detector.detect(stacked_views, target, False)
+        stacked_views, single_rgb_views, single_depth_views, states = self.look_around()
+        boxes = self.object_detector.detect(stacked_views, target)
 
         self.update_variable('n_objects', len(boxes))
         return len(boxes)

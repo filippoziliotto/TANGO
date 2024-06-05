@@ -15,7 +15,8 @@ from habitat_baselines.rl.ppo.utils.utils import (
 from habitat_baselines.rl.ppo.utils.visualizations import save_images_to_disk 
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
-from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_classification
+from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
+    eqa_classification, generate_eqa_question)
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -175,6 +176,8 @@ class VQA:
         return eqa_classification(gt_answer, answer)
 
     def answer(self, question, img, gt_answer=None):
+        # TODO: check if this is useful
+        # question = generate_eqa_question(question, gt_answer)
         model_answer = self.predict(question, img)
         
         if gt_answer is not None:

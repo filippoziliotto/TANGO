@@ -207,7 +207,9 @@ def get_action_shortest_path(
         step_count += 1
         action = follower.get_next_action(goal_position)
 
-    # Set agent to original state
+    # Set agent to original state (support for EQA)
+    # Basically sim.step moves the agent but we want that to be reset
+    # at the start of an episode
     sim.reset()
     sim.set_agent_state(source_position, source_rotation)
 

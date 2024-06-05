@@ -265,10 +265,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # If max steps is reached without target located
         if self.habitat_env.max_steps_reached():
-            self.loop_exit_flag = True
-            self.habitat_env.execute_action(force_stop=True)
-            self.habitat_env.update_episode_stats(force_stop=True, display=True)
-            self.update_variable('episode_is_over', True)
+            # Support for EQA in the case max step is reached
+            if self.habitat_env.task_name in ['eqa']:
+                answer = self.answer_question(
+                    question=self.habitat_env.eqa_vars['question'],
+                    take_agent_step=False
+                )
+            self.stop_navigation()
 
     def navigate_to(self, bbox):
         """
@@ -342,7 +345,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             return False
         
-    def answer_question(self, question):
+    def answer_question(self, question, take_agent_step=True):
         """
         VQA module for answering questions
         The actual class is defined in models.py
@@ -359,7 +362,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
 
         # EQA support answer means stop
-        self.stop_navigation()
+        if take_agent_step:
+            self.stop_navigation()
 
         return answer
 

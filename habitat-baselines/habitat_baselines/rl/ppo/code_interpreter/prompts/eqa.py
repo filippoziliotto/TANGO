@@ -111,6 +111,22 @@ def eqa_classification(gt_answer, pred_answer):
     except: pass
     return similarity, pred_answer
 
+def generate_eqa_question(question, answer):
+    if answer is None:
+        return question
+    
+    if answer in rooms_eqa:
+        room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
+        question = f"Consider the following room choices: {room_choices}. Question: {question}"
+
+    elif answer in colors_eqa:
+        color_choices = "\n".join([f"{i+1}. {color}" for i, color in enumerate(colors_eqa)])
+        question = f"Consider the following room choices:\n{color_choices}\n\nQuestion: {question}"
+
+    # Cases in which the dataset is wrongly labeled
+    else:
+        pass
+    return question
 
 class PromptEQA:
     def __init__(self, prompt_utils: PromptUtils):

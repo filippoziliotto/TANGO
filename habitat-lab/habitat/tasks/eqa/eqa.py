@@ -199,6 +199,7 @@ class MinimumNumberOfActions(Measure):
             if len(shortest_path) > 0:
                 break
         len_shortest_path = len(shortest_path)
+        print(len_shortest_path)
 
         # Define 3 types (less than 10, 30, 50 actions)
         if len_shortest_path == 0:

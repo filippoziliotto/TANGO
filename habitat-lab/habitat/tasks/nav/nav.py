@@ -971,8 +971,7 @@ class DistanceToGoal(Measure):
         elif self._distance_to == "EQA_POINTS":
             self._episode_view_points = [
                 view_point.position
-                for goal in episode.goals
-                for view_point in goal.view_points
+                for view_point in episode.goals[0].view_points
             ]
         self.update_metric(episode=episode, *args, **kwargs)  # type: ignore
 

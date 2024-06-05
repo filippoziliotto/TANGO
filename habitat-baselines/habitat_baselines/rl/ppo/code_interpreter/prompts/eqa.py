@@ -68,10 +68,10 @@ def parse_eqa_episode(question, answer):
     return room, color, object
 
 def generate_eqa_prompt(prompt_utils: PromptUtils):
-    question, gt_answer, distance = prompt_utils.get_eqa_target()
+    question, gt_answer = prompt_utils.get_eqa_target()
     room, color, object = parse_eqa_episode(question, gt_answer)
 
-    print(f'{question} {gt_answer}. Distance: {distance:.2f}')
+    print(f'{question} {gt_answer}.')
     prompt = f"""
 while True:
     explore_scene()

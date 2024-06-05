@@ -257,19 +257,4 @@ class PromptUtils:
         ep_infos = self.habitat_env.get_current_episode_info()
         question = ep_infos.question.question_text
         gt_answer = ep_infos.question.answer_text
-        distance = self.get_eqa_distance(ep_infos)
-        return question, gt_answer, distance
-
-    def get_eqa_distance(self, ep_infos):
-        hab_simulator = self.habitat_env.get_habitat_sim()  
-        start_pos = ep_infos.start_position
-        goal_pos = ep_infos.goals[0].position
-        distance_to_target = hab_simulator.geodesic_distance(start_pos, goal_pos)
-
-        # See habitat/tasks/nav/nav.py
-        # to check why we do this (lines 1004-1021)
-        if distance_to_target == float('inf'):
-            episode_view_points = [view_point.position for view_point in ep_infos.goals[0].view_points]
-            distance_to_target =  hab_simulator.geodesic_distance(
-                    start_pos, episode_view_points)
-        return distance_to_target
+        return question, gt_answer

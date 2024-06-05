@@ -207,6 +207,10 @@ def get_action_shortest_path(
         step_count += 1
         action = follower.get_next_action(goal_position)
 
+    # Set agent to original state
+    sim.reset()
+    sim.set_agent_state(source_position, source_rotation)
+
     if step_count == max_episode_steps:
         logger.warning("Shortest path wasn't found.")
     return shortest_path

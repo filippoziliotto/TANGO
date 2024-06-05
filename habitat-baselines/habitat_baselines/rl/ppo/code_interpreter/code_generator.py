@@ -41,12 +41,11 @@ class CodeGenerator(object):
         else:
             self.client = get_llm_model(type, quantization, self.device)
 
-
     def get_eqa_vars(self):
-        prompt, gt_answer, distance = self.prompt_utils.get_eqa_target()
+        question, gt_answer = self.prompt_utils.get_eqa_target()
         self.eqa_vars = {
             "gt_answer": gt_answer,
-            "distance": distance
+            "question": question
         }
-        return prompt, self.eqa_vars
+        return question, self.eqa_vars
     

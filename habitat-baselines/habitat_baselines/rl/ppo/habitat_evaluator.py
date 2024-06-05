@@ -428,42 +428,67 @@ class HabitatEvaluator(Evaluator):
         for ep in self.stats_episodes.values():
             self.all_ks.update(ep.keys())
 
-        for stat_key in self.all_ks:
-            self.aggregated_stats[stat_key] = np.mean(
-                [v[stat_key] for v in self.stats_episodes.values() if stat_key in v]
-            )    
-
-        # Support for EQA task infinite values distance_to_goal
-        # this is a nightmare to debug
-        # TODO: Check how to handle the difference between 10,30,50 steps
-        if self.task_name in ['eqa']:
-            self.aggregated_stats['distance_to_goal'] = np.mean(
-                [v['distance_to_goal'] for v in self.stats_episodes.values() if v['distance_to_goal'] != float('inf')]
-            )
-            self.aggregated_stats['smallest_distance_to_target'] = np.mean(
-                [v['smallest_distance_to_target'] for v in self.stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
-            )
+        if self.task_name in ['objectnav', 'instance_imagenav']:
+            for stat_key in self.all_ks:
+                self.aggregated_stats[stat_key] = np.mean(
+                    [v[stat_key] for v in self.stats_episodes.values() if stat_key in v]
+                )    
+            self.metrics = {k: v for k, v in self.aggregated_stats.items() if k != "reward"}
+            for k, v in self.metrics.items():
+                self.writer.add_scalar(f"eval_metrics/{k}", v, self.step_id)        
                 
-        self.metrics = {k: v for k, v in self.aggregated_stats.items() if k != "reward"}
-        for k, v in self.metrics.items():
-            self.writer.add_scalar(f"eval_metrics/{k}", v, self.step_id)        
+            self.writer.add_scalar(
+                    "eval_reward/average_reward", self.aggregated_stats["reward"], self.step_id
+                )
             
-        self.writer.add_scalar(
-                "eval_reward/average_reward", self.aggregated_stats["reward"], self.step_id
-            )
+            # Print final results
+            print('-----------------------')
+            print('| EVALUATION FINISHED |')
+            print('-----------------------')
+
+            for k, v in self.aggregated_stats.items():
+                print(f"Average episode {k}: {v:.4f}")
+            print('-----------------------')      
+
+        elif self.task_name in ['eqa']:
+        # Support for EQA task infinite values distance_to_goal
+        # also support division in 10/30/50 actions required for shortest path
+            eqa_actions_dict = {'10': [], '30': [], '50': []}
+            for _, stats in self.stats_episodes.items():
+                min_actions = stats['minimum_number_of_actions']
+                if str(int(min_actions)) in eqa_actions_dict:
+                    eqa_actions_dict[str(int(min_actions))].append(stats)
+
+            mean_values = {}
+
+            for key, dict_list in eqa_actions_dict.items():
+                valid_dicts = [d for d in dict_list if d['distance_to_goal'] != float('inf') and d['smallest_distance_to_target'] != float('inf')]
+                
+                if not valid_dicts:
+                    mean_values[key] = {}
+                    continue
+                
+                sum_dict = {k: sum(d[k] for d in valid_dicts) for k in valid_dicts[0].keys()}
+                mean_dict = {k: sum_dict[k] / len(valid_dicts) for k in sum_dict.keys()}
+                
+                mean_values[key] = mean_dict
+            self.aggregated_stats = mean_values
+
+            # Print final results
+            print('-----------------------')
+            print('| EVALUATION FINISHED |')
+            print('-----------------------')
+
+            for k, v in self.aggregated_stats.items():
+                print('Number of actions:', k)
+                for i, j in v.items():
+                    print(f"Average episode {i}: {j:.4f}")
+                print('-----------------------')      
 
         # logging to wandb
+        # TODO: log eqa results 10/30/50 inot a table???
         if self.config.habitat_baselines.writer_type in ['wb']:
             wandb.log(self.aggregated_stats)
-
-        # Print final results
-        print('-----------------------')
-        print('| EVALUATION FINISHED |')
-        print('-----------------------')
-
-        for k, v in self.aggregated_stats.items():
-            print(f"Average episode {k}: {v:.4f}")
-        print('-----------------------')       
 
     def execute_action(self, coords=None, force_stop=False, look_around=False):
         # TODO: instead of variables make name of action

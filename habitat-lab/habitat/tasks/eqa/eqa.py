@@ -17,8 +17,7 @@ from habitat.core.spaces import ListSpace
 from habitat.core.utils import not_none_validator
 from habitat.tasks.nav.nav import NavigationEpisode, NavigationTask
 
-if TYPE_CHECKING:
-    from omegaconf import DictConfig
+from habitat.datasets.utils import get_action_shortest_path
 
 @attr.s(auto_attribs=True)
 class QuestionData:
@@ -184,14 +183,33 @@ class MinimumNumberOfActions(Measure):
         return "minimum_number_of_actions"
 
     def reset_metric(self, episode, *args: Any, **kwargs: Any):
-        self.len_shortest_path = len(episode.shortest_paths[0])
+        # Default angle rotation: 10°
+        # Default forward step: 0.25
+        # This is more robust than caluclating the shortest path
+        # w.r.t. the goal position which is not always navigable
+        for view_point in episode.goals[0].view_points:
+            shortest_path = get_action_shortest_path(
+                    self._sim,
+                    episode.start_position,
+                    episode.start_rotation,
+                    view_point.position,
+                    success_distance = 0.1,
+                    max_episode_steps = 500
+            )
+            if len(shortest_path) > 0:
+                break
+        len_shortest_path = len(shortest_path)
 
-        if self.len_shortest_path < 10:
-            self._metric = 10.
-        elif self.len_shortest_path >= 10 and self.len_shortest_path < 30:
-            self._metric = 30.
-        else:
-            self._metric = 50.
+        # Define 3 types (less than 10, 30, 50 actions)
+        if len_shortest_path == 0:
+            # No path found
+            self._metric = 50
+        elif len_shortest_path <= 10 and len_shortest_path > 0:
+            self._metric = 10
+        elif len_shortest_path > 10 and len_shortest_path <= 30:
+            self._metric = 30
+        elif len_shortest_path > 30:
+            self._metric = 50
 
     def update_metric(self, episode=None, *args: Any, **kwargs: Any):
         pass

@@ -99,6 +99,10 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
+  LLM:
+    use_LLM: False
+    type: "phi3"
+    
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )

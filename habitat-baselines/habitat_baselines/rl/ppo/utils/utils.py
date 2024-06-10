@@ -253,6 +253,7 @@ def match_images(frames_rgb):
 Prompt Utils for code interpreter
 """
 class PromptUtils:
+
     def __init__(self, habitat_env):
         self.habitat_env = habitat_env
 

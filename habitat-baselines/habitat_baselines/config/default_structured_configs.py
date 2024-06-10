@@ -499,7 +499,7 @@ class LLMConfig(HabitatBaselinesBaseConfig):
     """
     Language model config settings
     """
-    use_llm: bool = False
+    use_LLM: bool = False
     type: str = "phi3"
     quantization: str = "8"
     

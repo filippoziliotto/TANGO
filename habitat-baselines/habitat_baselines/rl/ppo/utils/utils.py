@@ -8,14 +8,15 @@ from habitat.utils.geometry_utils import (
     quaternion_rotate_vector,
 )
 
-from transformers import (OwlViTProcessor, AutoTokenizer, set_seed,
+from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
                           AutoProcessor, AutoModelForZeroShotObjectDetection,
                           DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
-                          BlipProcessor,
+                          BlipProcessor, ViTForImageClassification, ViTImageProcessor
                           )
+
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
 
 """
@@ -198,23 +199,18 @@ def get_llm_model(type, quantization, device):
     elif quantization in ['8']:
         torch_dtype = torch.int8
 
-    if type in ['phi2']:
-        model_name = "microsoft/phi-2"
-        processor = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name, 
-            torch_dtype=torch_dtype,
-            trust_remote_code=True).to(device)
-        
-    elif type in ['phi3']:
-        model_name = "microsoft/Phi-3-mini-4k-instruct"
+    # TODO: add Phi-2 support
+    if type in ['phi3']:
+        model_name = "microsoft/Phi-3-mini-128k-instruct"
         processor = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
             model_name, 
             torch_dtype=torch_dtype,
             trust_remote_code=True).to(device)
+        pipe = pipeline('text-generation', model=model, tokenizer=processor)
+        return pipe
         
-    elif type in ['gpt3.5']:
+    elif type in ['gpt3.5', 'gpt4']:
         # TODO: implement openai request
         from openai import OpenAI
         client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -222,9 +218,17 @@ def get_llm_model(type, quantization, device):
     
     else:
         raise ValueError("Invalid LLM model type! Not implemeted yet.")
-    return model, processor
 
+def get_roomcls_model(path, device):
+    # Assert files exist
+    assert os.path.exists(path + 'pytorch_model.bin'), "Room classification model not found!"
+    assert os.path.exists(path + 'config.json'), "config file not found!"
+    assert os.path.exists(path + 'preprocessor_config.json'), "preprocessor config not found!"
 
+    processor = ViTImageProcessor.from_pretrained(path)
+    model = ViTForImageClassification.from_pretrained(path)
+    model.eval()
+    return model.to(device), processor
 """
 Camera related or similar utils
 """

@@ -1,8 +1,9 @@
 import numpy as np
 from habitat_baselines.rl.ppo.utils.target import Target
+from habitat_baselines.rl.ppo.utils.helper import LLMHelper
 from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, VQA, FeatureMatcher,
-    ImageCaptioner, SegmenterModel
+    ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel
 )
 
 class PseudoCodeInterpreter:
@@ -171,6 +172,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'count_objects': self.count_objects,
             'map_scene': self.map_scene,
             'segment_scene': self.segment_scene,
+            'classify_room': self.classify_room,
         }
 
 
@@ -248,6 +250,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.habitat_env.segmenter.use_segmenter:
             self.segmenter = SegmenterModel()
+    
+        if self.habitat_env.room_classifier.use_room_classifier:
+            self.room_classifier = RoomClassifier(self.habitat_env.room_classifier.model_path)
+    
+        if self.habitat_env.LLM.use_LLM:
+            type = self.habitat_env.LLM.type
+            quantization = self.habitat_env.LLM.quantization
+            self.helper = LLMHelper(habitat_env)
+            self.LLM_model = LLMmodel(type, quantization, self.helper)
+    
     """
     Habitat environment modules to define actions
     """
@@ -272,9 +284,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # Support for EQA in the case max step is reached
             if self.habitat_env.task_name in ['eqa']:
                 _ = self.answer_question(
-                    question=self.habitat_env.eqa_vars['question'],
-                    take_agent_step=False
-                )
+                    question=self.habitat_env.eqa_vars['question'])
             self.stop_navigation()
 
     def navigate_to(self, bbox):
@@ -302,17 +312,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Target reached stopping the navigation
         """
-        self.habitat_env.execute_action(force_stop=True)
-        self.habitat_env.update_episode_stats(
-            force_stop=True,
-            display=True)
+        self.habitat_env.execute_action(action='stop')
+        self.habitat_env.update_episode_stats()
 
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
 
         if self.habitat_env.object_detector.store_detections:   
             self.object_detector.reset_detection_dict()
-
     """
     Computer Vision modules
     """
@@ -327,10 +334,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         bbox = self.object_detector.detect(obs, target_name)
 
         if self.habitat_env.object_detector.store_detections:
-            self.memory_dict = self.object_detector.get_detection_dict()
+            self.habitat_env.target_name = target_name
+            self.habitat_env.memory_dict = self.object_detector.get_detection_dict()
             for label in self.memory_dict:
-                if 'xyz' not in self.memory_dict[label]:  
-                    self.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.memory_dict[label]['bbox'])
+                if 'xyz' not in self.habitat_env.memory_dict[label]:  
+                    self.habitat_env.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.habitat_env.memory_dict[label]['bbox'])
         
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox[0][0])    
@@ -360,7 +368,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             return False
         
-    def answer_question(self, question, take_agent_step=True):
+    def answer_question(self, question):
         """
         VQA module for answering questions
         The actual class is defined in models.py
@@ -375,10 +383,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             answer = self.vqa.answer(question, img)
 
-        # EQA support, answer means stop action
-        if take_agent_step:
-            self.stop_navigation()
-
         return answer
 
     def describe_scene(self, type='stereo'):
@@ -388,10 +392,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         assert type in ['frontal', 'stereo'], ValueError
 
-        stacked_view, single_rgb_views, single_depth_views, states = self.look_around()
+        views = self.look_around()
 
-        caption_stereo = self.captioner.generate_caption(stacked_view)
-        caption_frontal = self.captioner.generate_caption(single_rgb_views)
+        caption_stereo = self.captioner.generate_caption(views['stacked'])
+        caption_frontal = self.captioner.generate_caption(views['rgb'])
 
         if type in ['frontal']:
             return caption_frontal[-1]
@@ -399,10 +403,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         caption = {
                 'stereo': caption_stereo,
                 'frontal': {
-                    'rgb': single_rgb_views,
-                    'depth': single_depth_views,
+                    'rgb': views['rgb'],
+                    'depth': views['depth'],
                     'captions': caption_frontal,
-                    'agent_state': states}}
+                    'agent_state': views['state']}}
         return caption
 
     def segment_scene(self, target=None):
@@ -410,28 +414,50 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Segment the scene using a segmentation model
         possibly filtering the target category
         """
+        # TODO: ideal code would be
+        # while True:
+        #     explore_scene()
+        #     object = detect_objects('chair')
+        #     if object:
+        #         navigate_to(object)
+        #         view = look_around()
+        #         segment = segment_scene(view, target='chair')
+        #         answer = answer_question('how many chairs are there?')
+        #         stop_navigation()
 
         obs = self.habitat_env.get_current_observation(type='rgb')
         segmentation = self.segmenter.segment(obs)
 
         # target = ['chair', 'couch']
-        # if target:
-        #     segmentation = [item for item in segmentation if item['category'] in target]
+        if target is not None:
+            segmentation = [item for item in segmentation if item['category'] in target]
 
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, 'segmentation', segmentation=segmentation)
-        # seg_overlay = overlay_segmentation(stacked_views, segmentation, save=self.habitat_env.save_obs)
+
         return segmentation
 
-    """
-    Python subroutines or logical modules
-    """
-    def look_around(self):
+    def classify_room(self):
+        """
+        Classify the room using a room classifier model
+        details in models.py and roomcls_utils folder
+        """
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        views = self.look_around(80)
+ 
+        # This should be better than the 180° view
+        room = self.room_classifier.classify(obs)
+        return room
+        """
+        Python subroutines or logical modules
+        """
+    
+    def look_around(self, degrees=180):
         """
         Look around primitive of 360° for convention
         turning to the left for a full rotation
         """
-        return self.habitat_env.get_stereo_view()
+        return self.habitat_env.get_stereo_view(degrees)
     
     def count_objects(self, target):
         """
@@ -441,8 +467,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         try: target = eval(target)
         except: pass
 
-        stacked_views, single_rgb_views, single_depth_views, states = self.look_around()
-        boxes = self.object_detector.detect(stacked_views, target)
+        views = self.look_around()
+        boxes = self.object_detector.detect(views['stacked'], target)
 
         self.update_variable('n_objects', len(boxes))
         return len(boxes)

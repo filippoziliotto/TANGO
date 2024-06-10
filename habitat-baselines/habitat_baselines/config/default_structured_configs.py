@@ -503,6 +503,13 @@ class LLMConfig(HabitatBaselinesBaseConfig):
     type: str = "phi3"
     quantization: str = "8"
     
+@dataclass
+class RoomClassifierConfig(HabitatBaselinesBaseConfig):
+    """
+    Room classifier model config settings
+    """
+    use_room_classifier: bool = False
+    model_path: str = 'habitat-baselines/habitat_baselines/rl/ppo/models/roomcls_utils/'
 
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
@@ -558,6 +565,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     captioner: CaptionerConfig = CaptionerConfig()
     segmenter: SegmenterConfig = SegmenterConfig()
     LLM: LLMConfig = LLMConfig()
+    room_classifier: RoomClassifierConfig = RoomClassifierConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

@@ -108,4 +108,4 @@ data
 /logs/
 /slurm/
 TODO.md
-
+pytorch_model.bin

@@ -71,12 +71,14 @@ class HabitatEvaluator(Evaluator):
         self.segmenter = self.config.habitat_baselines.segmenter
         # LLM
         self.LLM = self.config.habitat_baselines.LLM
+        # Room classifier
+        self.room_classifier = self.config.habitat_baselines.room_classifier
 
-    """
-    Methods for initializing/executing/evauluating
-    the agent in Habitat environment
-    """
     def init_env(self):
+        """
+        Methods for initializing/executing/evauluating
+        the agent in Habitat environment
+        """
         self.observations = self.envs.reset()
         self.observations = self.envs.post_step(self.observations)
         self.batch = batch_obs(self.observations, device=self.device)
@@ -198,14 +200,14 @@ class HabitatEvaluator(Evaluator):
             else:
                 self.step_data = [a.item() for a in self.action_data.env_actions.cpu()]
 
-    def execute_step(self, force_stop=False, look_around=False):
+    def execute_step(self, action=None):
         """
         Execute the predicted action in the environment
         and update all the necessary variables
         """
 
-        # TODO: improve code elegance for force_stop and look_around
-        if force_stop:
+        self.action_to_take = action
+        if self.action_to_take in ['stop']:
             self.step_data = [0] 
 
             # Added for EQA support
@@ -224,15 +226,16 @@ class HabitatEvaluator(Evaluator):
                     }
                 ]
 
-        elif not force_stop and self.action_data.actions.item() == 0:
+        elif self.action_to_take in ['turn_right']:
+            self.step_data = [3]
+        elif self.action_to_take in ['turn_left']:
+            self.step_data = [2]
+        elif (self.action_to_take is None) and self.action_data.actions.item() == 0:
             self.step_data = [a.item() for a in self.action_data.env_actions.cpu()]
             self.prev_actions.copy_(self.action_data.actions) # type: ignore
             self.step_data = [torch.randint(1, 4, (1,), device=self.device).item()]
         else:
             pass
-
-        if look_around:
-            self.step_data = [3]
             
         self.outputs = self.envs.step(self.step_data)
         self.observations, self.rewards_l, self.dones, self.infos = [
@@ -265,7 +268,7 @@ class HabitatEvaluator(Evaluator):
         ).unsqueeze(1)
         self.current_episode_reward += self.rewards
 
-    def update_episode_stats(self, force_stop=False, display=False):
+    def update_episode_stats(self, display=True):
         """
         After each step, check if the episode is over
         if yes update the stats and generate video
@@ -314,7 +317,7 @@ class HabitatEvaluator(Evaluator):
             self.current_step += 1
 
             # episode ended
-            if not self.not_done_masks[i].any().item() or force_stop:
+            if not self.not_done_masks[i].any().item() or (self.action_to_take in ['stop']):
                 self.pbar.update()
                 self.episode_stats = {
                     "reward": self.current_episode_reward[i].item()
@@ -452,8 +455,35 @@ class HabitatEvaluator(Evaluator):
             print('-----------------------')      
 
         elif self.task_name in ['eqa']:
+            for stat_key in self.all_ks:
+                self.aggregated_stats[stat_key] = np.mean(
+                    [v[stat_key] for v in self.stats_episodes.values() if stat_key in v]
+                )    
+
+            # remove inf values and do mean again
+            self.aggregated_stats['distance_to_goal'] = np.mean(
+                [v['distance_to_goal'] for v in self.stats_episodes.values() if v['distance_to_goal'] != float('inf')]
+            )
+            self.aggregated_stats['smallest_distance_to_target'] = np.mean(
+                [v['smallest_distance_to_target'] for v in self.stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
+            )
+            # delete minimum_action key
+            del self.aggregated_stats['minimum_number_of_actions']
+            self.metrics = {k: v for k, v in self.aggregated_stats.items() if k != "reward"}
+            # Print final results
+            # Print final results
+            print('-----------------------')
+            print('| EVALUATION FINISHED |')
+            print('-----------------------')
+
+            for k, v in self.aggregated_stats.items():
+                print(f"Average episode {k}: {v:.4f}")
+            print('-----------------------')    
+
+        elif self.task_name in ['eqa-v2']:
         # Support for EQA task infinite values distance_to_goal
         # also support division in 10/30/50 actions required for shortest path
+        # TODO: log eqa results 10/30/50 inot a table???
             eqa_actions_dict = {'10': [], '30': [], '50': []}
             for _, stats in self.stats_episodes.items():
                 min_actions = stats['minimum_number_of_actions']
@@ -487,19 +517,16 @@ class HabitatEvaluator(Evaluator):
                 print('-----------------------')      
 
         # logging to wandb
-        # TODO: log eqa results 10/30/50 inot a table???
         if self.config.habitat_baselines.writer_type in ['wb']:
             wandb.log(self.aggregated_stats)
 
-    def execute_action(self, coords=None, force_stop=False, look_around=False):
+    def execute_action(self, coords=None, action=None):
         # TODO: instead of variables make name of action
         if coords is not None:
             self.predict_action(coords)
-            self.execute_step(force_stop=force_stop)
-        elif look_around:
-            self.execute_step(look_around=look_around)
+            self.execute_step(action=action)
         else:
-            self.execute_step(force_stop=force_stop)
+            self.execute_step(action=action)
 
     def episode_iterator(self):
         if (len(self.stats_episodes) < (self.number_of_eval_episodes * self.evals_per_ep)
@@ -510,10 +537,6 @@ class HabitatEvaluator(Evaluator):
         else:
             return False
 
-    """
-    Calling Habitat simulator methods
-    Getting current variables of the agent
-    """
     def get_habitat_sim(self):
         """
         Call habitat simulator for the current environment
@@ -590,29 +613,64 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step >= self.config.habitat.environment.max_episode_steps - 1
 
-    def get_stereo_view(self):
+    def get_stereo_view(self, degrees=180):
         """
-        Get a 360 view of the current observation
-        it also saves the jpeg image for debugging purposes
+        Get a view of the current observation based on the specified degrees.
+        It captures the observation by turning left and right equally.
+        It also saves the jpeg image for debugging purposes.
         """
-        # TODO: maybe 360° is too much only have 180°?
+        if degrees % 2 != 0:
+            # approximate to the closest even number
+            degrees = degrees - 1
+
+        half_degrees = degrees // 2
+        turn_angle = self.config.habitat.simulator.turn_angle
+        num_left_turns = half_degrees // turn_angle
+        num_right_turns = half_degrees // turn_angle
+
         views_depth, views_rgb, states = [], [], []
-        for rot_idx in range(360 // self.config.habitat.simulator.turn_angle):
-            self.execute_action(look_around=True)
-            self.update_episode_stats()
+
+        # Turn left and capture the observation
+        for _ in range(num_left_turns):
+            self.execute_action(action='turn_left')
             views_depth.append(self.get_current_observation(type='depth'))
             views_rgb.append(self.get_current_observation(type='rgb'))
             states.append(self.get_current_position())
-            
+
+        # Reverse the states list for the left turn observations
+        states.reverse()
+
+        # Turn right to go back to the original position
+        for _ in range(num_left_turns):
+            self.execute_action(action='turn_right')
+
+        # Turn right and capture the observation
+        for _ in range(num_right_turns):
+            self.execute_action(action='turn_right')
+            views_depth.append(self.get_current_observation(type='depth'))
+            views_rgb.append(self.get_current_observation(type='rgb'))
+            states.append(self.get_current_position())
+
+        # Turn left to go back to the original position
+        for _ in range(num_right_turns):
+            self.execute_action(action='turn_left')
+        self.update_episode_stats()
+
         stacked_views_rgb = np.hstack(views_rgb)
         stacked_views_depth = np.hstack(views_depth)
         stacked_views = match_images(stacked_views_rgb)
 
-        if self.save_obs:     
-            self.debugger.save_obs(stacked_views_rgb, prefix='360')
-            self.debugger.save_obs(stacked_views, prefix='360_match')
+        if self.save_obs:
+            self.debugger.save_obs(stacked_views_rgb, prefix=f'stereo_single')
+            self.debugger.save_obs(stacked_views, prefix=f'stereo_match')
 
-        return stacked_views, np.array(views_rgb), np.array(views_depth), np.array(states)
+        views = {
+            'rgb': np.array(stacked_views_rgb),
+            'depth': np.array(stacked_views_depth),
+            'stacked': stacked_views,
+            'states': np.array(states)
+        }
+        return views
 
     def evaluate_agent(
         self,

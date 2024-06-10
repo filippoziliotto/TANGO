@@ -1,5 +1,6 @@
 # Torch imports
 import torch
+import torchvision
 import numpy as np
 from PIL import Image
 
@@ -10,7 +11,8 @@ from torchvision.transforms.functional import rgb_to_grayscale
 from habitat_baselines.rl.ppo.utils.utils import (
     get_detector_model,
     get_vqa_model, get_matcher_model, 
-    get_captioner_model, get_segmentation_model
+    get_captioner_model, get_segmentation_model,
+    get_roomcls_model, get_llm_model,
 )
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
@@ -174,7 +176,7 @@ class VQA:
 
     def answer(self, question, img, gt_answer=None):
         # TODO: check if this is useful
-        if self.type in ["blip", "blip2"]:
+        if self.type in ["blip2"]:
             question = generate_eqa_question(question, gt_answer)
         model_answer = self.predict(question, img)
         
@@ -295,3 +297,62 @@ class SegmenterModel:
 
     def segment(self, img):
         return self.predict(img)
+
+class RoomClassifier:
+    def __init__(self, path):
+        self.path = path
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.model, self.processor = get_roomcls_model(self.path, self.device)
+
+    def preprocess(self, img):
+        img = torch.tensor(img)
+        inputs = self.processor(images=img, return_tensors="pt")
+        return inputs.to(self.device)
+
+    def predict(self, img):
+        inputs = self.preprocess(img)
+        with torch.no_grad():
+            outputs = self.model(inputs['pixel_values'])
+        outputs = outputs['logits'].softmax(1).argmax(-1).item()
+        room = self.postprocess(outputs)
+        return room
+    
+    def postprocess(self, output):
+        return self.model.config.id2label[output]
+
+    def classify(self, img):
+        return self.predict(img)
+    
+class LLMmodel:
+    def __init__(self, type, quantization, helper):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.type = type
+        self.helper = helper
+        self.pipeline = get_llm_model(type, quantization, self.device)
+        self.generation_args = {
+            "max_new_tokens": 500,
+            "return_full_text": False,
+            "temperature": 0.0,
+            "do_sample": False,
+        }
+
+    def preprocess(self, prompt):
+        """
+        Create the input for the LLM as a list of dictionaries
+        This is useful for the pipeline of HF as well as OpenAI
+        """
+        messages = [
+            {"role": "user", "content": prompt}
+        ]
+        return messages
+
+    def ask_for_help(self):
+        """
+        Generate LLm prediction of the new target goal 
+        (hopefully :))!
+        """
+        prompt = self.helper.create_llm_prompt()
+        messages = self.preprocess(prompt)
+        output = self.pipeline(messages, **self.generation_args)
+        return output[0]['generated_text']
+

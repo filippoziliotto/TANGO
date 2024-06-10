@@ -67,7 +67,7 @@ stoi_eqa = {
 rooms_eqa = [
     'living room','family room','tv room','closet','laundry room',
     'hallway','dining room','office','bathroom','foyer','kitchen',
-    'lounge','spa','bedroom',
+    'lounge','spa','bedroom', 'rec room',
 ]
 
 colors_eqa = [
@@ -76,3 +76,26 @@ colors_eqa = [
     'yellow pink','orange yellow','light blue','olive green',
     'purple pink','red','purple','yellow',
 ]
+
+roomcls_labels = {
+    'living room': 'living room',
+    'family room': 'living room',
+    'tv room': 'living room',
+    'rec room': 'living room',
+    'closet': 'closet',
+    'laundry room': 'laundry room',
+    'hallway': 'hallway',
+    'dining room': 'dining room',
+    'bathroom': 'bathroom',
+    'kitchen': 'kitchen',
+    'bedroom': 'bedroom',
+}
+
+compact_labels = {
+    'Bathroom': 'bathroom',
+    'Bedroom': 'bedroom',
+    'DinningRoom': 'dining room',
+    'Kitchen': 'kitchen',
+    'Laundry room': 'laundry room',
+    'Livingroom': 'living room',
+}

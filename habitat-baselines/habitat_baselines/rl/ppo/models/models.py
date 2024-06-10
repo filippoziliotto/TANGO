@@ -15,7 +15,7 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_roomcls_model, get_llm_model,
 )
 from habitat_baselines.rl.ppo.utils.nms import nms
-from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids
+from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
 
@@ -318,7 +318,7 @@ class RoomClassifier:
         return room
     
     def postprocess(self, output):
-        return self.model.config.id2label[output]
+        return compact_labels[self.model.config.id2label[output]]
 
     def classify(self, img):
         return self.predict(img)

@@ -26,7 +26,7 @@ class PseudoCodeInterpreter:
         stack = []
         while not self.loop_exit_flag and self.current_line < len(self.lines):
             line, indent_level = self.lines[self.current_line]
-            if '=' in line:
+            if '=' in line and "==" not in line:
                 self.assign_variable(line)
             elif line.startswith('while'):
                 condition = self.extract_condition(line, 'while')
@@ -81,27 +81,6 @@ class PseudoCodeInterpreter:
             else:
                 self.current_line = 0
 
-    def run_block(self, expected_indent):
-        while self.current_line < len(self.lines) - 1:
-            self.current_line += 1
-            line, indent_level = self.lines[self.current_line]
-            if indent_level == expected_indent:
-                if '=' in line:
-                    self.assign_variable(line)
-                elif line.startswith('while'):
-                    condition = self.extract_condition(line, 'while')
-                    self.run_while(condition, indent_level)
-                elif line.startswith('for'):
-                    variable, iterable = self.parse_for_loop(line)
-                    self.run_for(variable, iterable, indent_level)
-                elif line.startswith('if'):
-                    condition = self.extract_condition(line, 'if')
-                    self.run_if(condition, indent_level)
-                else:
-                    self.execute_line(line)
-            elif indent_level < expected_indent:
-                break
-
     def skip_block(self, expected_indent):
         self.current_line += 1
         while self.current_line < len(self.lines):
@@ -153,6 +132,7 @@ class PseudoCodeInterpreter:
 
     def current_indentation(self, line):
         return len(line) - len(line.lstrip())
+    
 class PseudoCodePrimitives(PseudoCodeInterpreter): 
     """
     Primitive functions interpreter if primitives are added
@@ -320,6 +300,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.habitat_env.object_detector.store_detections:   
             self.object_detector.reset_detection_dict()
+    
     """
     Computer Vision modules
     """
@@ -443,15 +424,15 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         details in models.py and roomcls_utils folder
         """
         obs = self.habitat_env.get_current_observation(type='rgb')
-        views = self.look_around(80)
+        # views = self.look_around(80)
  
         # This should be better than the 180° view
         room = self.room_classifier.classify(obs)
         return room
-        """
-        Python subroutines or logical modules
-        """
     
+    """
+    Python subroutines or logical modules
+    """
     def look_around(self, degrees=180):
         """
         Look around primitive of 360° for convention

@@ -1,5 +1,5 @@
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
-from habitat_baselines.rl.ppo.utils.names import rooms_eqa, colors_eqa
+from habitat_baselines.rl.ppo.utils.names import rooms_eqa, colors_eqa, roomcls_labels, compact_labels
 import spacy
 
 """
@@ -70,9 +70,23 @@ def parse_eqa_episode(question, answer):
 def generate_eqa_prompt(prompt_utils: PromptUtils):
     question, gt_answer = prompt_utils.get_eqa_target()
     room, color, object = parse_eqa_episode(question, gt_answer)
-
     print(f'{question} {gt_answer}.')
-    prompt = f"""
+
+    if room is not None:
+        room_label = roomcls_labels[room]
+        prompt = f"""
+while True:
+    explore_scene()
+    room = classify_room()
+    if room == '{room_label}':
+        explore_scene()
+        room = detect_objects('{object}')
+        if object:
+            navigate_to(object)
+            answer = answer_question('{question}')
+            stop_navigation()"""
+    else:
+        prompt = f"""
 while True:
     explore_scene()
     object = detect_objects('{object}')

@@ -45,7 +45,7 @@ habitat:
         distance_to: EQA_POINTS
 
   environment:
-    max_episode_steps: 100
+    max_episode_steps: 15
   simulator:
     turn_angle: 20
     agents:

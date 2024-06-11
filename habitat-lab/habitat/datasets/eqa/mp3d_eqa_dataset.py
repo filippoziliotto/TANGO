@@ -113,3 +113,15 @@ class Matterport3dDatasetV1(Dataset):
                     for p_index, point in enumerate(path):
                         path[p_index] = ShortestPathPoint(**point)
             self.episodes[ep_index] = episode
+
+
+        # location "which room" questions
+        # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['location']]
+        # unique_objects = set([episode.question.question_text.split('is the')[1].split('located')[0].strip() for episode in self.episodes])
+        # color_room "what color is the {object} in {location}"
+        # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['color_room']]
+        # unique_objects = set([episode.question.question_text.split('is the')[1].split('in the')[0].strip() for episode in self.episodes])
+        # color "which color {object}"
+        # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['color']]
+        # unique_objects = set([episode.question.question_text.split('is the')[1].split('?')[0].strip() for episode in self.episodes])
+        

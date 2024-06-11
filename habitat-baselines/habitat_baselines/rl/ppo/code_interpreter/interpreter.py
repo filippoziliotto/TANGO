@@ -255,10 +255,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.update_episode_stats()
 
         # For debugging purposes
-        if self.habitat_env.save_obs:
-            obs = self.habitat_env.get_current_observation(type='rgb')
-            self.habitat_env.debugger.save_obs(obs, 'observation')
-        
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
         # If max steps is reached without target located
         if self.habitat_env.max_steps_reached():
             # Support for EQA in the case max step is reached
@@ -284,9 +282,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.update_variable('object', bbox)
 
             # For debugging purposes
-            if self.habitat_env.save_obs:
-                obs = self.habitat_env.get_current_observation(type='rgb')
-                self.habitat_env.debugger.save_obs(obs, 'observation')
+            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
     def stop_navigation(self):
         """
@@ -324,10 +320,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if bbox:
             self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox[0][0])    
             self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
+
             # For debugging purposes
-            if self.habitat_env.save_obs:
-                self.habitat_env.debugger.save_obs(obs, 'detection', bbox)
-        
+            self.save_observation(obs, 'detection', bbox)
+
         self.update_variable('objects', bbox)
         return bbox
 
@@ -356,7 +352,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         img = self.habitat_env.get_current_observation(type='rgb')
 
-        # stacked_views, single_rgb_views, single_depth_views, states = self.look_around()
+        # img = self.look_around(40)['stacked']
+
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
@@ -454,6 +451,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.update_variable('n_objects', len(boxes))
         return len(boxes)
 
+    def save_observation(self, obs, name, bbox=None):
+        """
+        Save the observation for debugging purposes
+        """
+        if self.habitat_env.save_obs:
+            self.habitat_env.debugger.save_obs(obs, name, bbox)
+        
 
 
 

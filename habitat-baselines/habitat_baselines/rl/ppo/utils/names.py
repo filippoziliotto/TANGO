@@ -99,3 +99,27 @@ compact_labels = {
     'Laundry room': 'laundry room',
     'Livingroom': 'living room',
 }
+
+eqa_objects = {
+    'towel': 'towel',
+    'tv stand': 'tv',
+    'sofa': 'couch',
+    'bed': 'bed',
+    'shelving': 'shelving',
+    'toaster': 'toaster',
+    'clothes dryer': 'clothes dryer',
+    'chair': 'chair',
+    'fireplace': 'fireplace',
+    'curtain': 'curtain',
+    'sink': 'sink',
+    'plant': 'potted plant',
+    'counter': 'counter',
+    'fridge': 'fridge',
+    'door': 'door',
+    'stove': 'stove',
+    'picture': 'picture',
+    'wardrobe': 'wardrobe',
+    'microwave': 'microvawe',
+    'refrigerator': 'refridgerator',
+    'oven': 'oven',
+}

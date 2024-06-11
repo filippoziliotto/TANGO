@@ -29,6 +29,7 @@ class CodeGenerator(object):
                 prompt = generate_iinav_prompt(self.prompt_utils)
             elif self.task_name == 'eqa':
                 prompt = generate_eqa_prompt(self.prompt_utils)
+                self.habitat_env.eqa_vars = self.get_eqa_vars()
         else:
             if self.use_llm:
                 self.llm_model, self.llm_tokenizer = self.initialize_llm(self.type, self.quantization, self.device)
@@ -42,10 +43,11 @@ class CodeGenerator(object):
             self.client = get_llm_model(type, quantization, self.device)
 
     def get_eqa_vars(self):
-        question, gt_answer = self.prompt_utils.get_eqa_target()
+        question, gt_answer, eqa_room, eqa_object = self.prompt_utils.get_eqa_target()
         self.eqa_vars = {
             "gt_answer": gt_answer,
-            "question": question
+            "question": question,
+            "object": eqa_object,
         }
-        return question, self.eqa_vars
+        return self.eqa_vars
     

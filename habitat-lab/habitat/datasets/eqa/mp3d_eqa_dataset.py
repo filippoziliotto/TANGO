@@ -112,6 +112,22 @@ class Matterport3dDatasetV1(Dataset):
                 for path in episode.shortest_paths:
                     for p_index, point in enumerate(path):
                         path[p_index] = ShortestPathPoint(**point)
+
+            # Support for EQA in Navprog
+            if episode.question.question_type in ['location']:
+                eqa_object = episode.question.question_text.split('is the')[1].split('located')[0].strip()
+                eqa_room = None
+            elif episode.question.question_type in ['color_room']:
+                eqa_object = episode.question.question_text.split('is the')[1].split('in the')[0].strip()
+                eqa_room = episode.question.question_text.split('in the')[1].split('?')[0].strip()
+            elif episode.question.question_type in ['color']:
+                eqa_object = episode.question.question_text.split('is the')[1].split('?')[0].strip()
+                eqa_room = None
+            else:
+                raise ValueError(f"Unknown question type: {episode.question.question_type}")
+            episode.question.eqa_object = eqa_object
+            episode.question.eqa_room = eqa_room
+             
             self.episodes[ep_index] = episode
 
 

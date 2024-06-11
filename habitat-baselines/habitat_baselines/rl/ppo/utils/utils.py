@@ -269,4 +269,6 @@ class PromptUtils:
         ep_infos = self.habitat_env.get_current_episode_info()
         question = ep_infos.question.question_text
         gt_answer = ep_infos.question.answer_text
-        return question, gt_answer
+        eqa_room = ep_infos.question.eqa_room
+        eqa_object = ep_infos.question.eqa_object
+        return (question, gt_answer, eqa_room, eqa_object)

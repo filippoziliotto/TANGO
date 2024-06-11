@@ -82,13 +82,17 @@ roomcls_labels = {
     'family room': 'living room',
     'tv room': 'living room',
     'rec room': 'living room',
-    'closet': 'closet',
+    # 'closet': 'closet',
     'laundry room': 'laundry room',
-    'hallway': 'hallway',
+    # 'hallway': 'hallway',
     'dining room': 'dining room',
     'bathroom': 'bathroom',
     'kitchen': 'kitchen',
     'bedroom': 'bedroom',
+    'lounge': 'living room',
+    # 'spa': 'spa',
+    # 'office': 'office',
+    'foyer': 'living room'
 }
 
 compact_labels = {

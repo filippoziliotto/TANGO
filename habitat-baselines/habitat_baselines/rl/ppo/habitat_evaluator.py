@@ -691,11 +691,7 @@ class HabitatEvaluator(Evaluator):
 
             # Generate the PseudoCode
             self.pseudo_code = code_generator.generate()
-
-            # EQA support additional variables
-            if self.task_name in ['eqa']:
-                _, self.eqa_vars = code_generator.get_eqa_vars()
-
+            
             # Reset init variables
             self.code_interpreter.parse(self.pseudo_code)
 

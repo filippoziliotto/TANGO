@@ -16,7 +16,6 @@ from habitat.core.simulator import Observations, Sensor, SensorTypes
 from habitat.core.spaces import ListSpace
 from habitat.core.utils import not_none_validator
 from habitat.tasks.nav.nav import NavigationEpisode, NavigationTask
-
 from habitat.datasets.utils import get_action_shortest_path
 
 @attr.s(auto_attribs=True)
@@ -26,7 +25,10 @@ class QuestionData:
     question_tokens: Optional[List[str]] = None
     answer_token: Optional[List[str]] = None
     question_type: Optional[str] = None
-    answer_token_orig: Optional[str] = None # Added for EQA support
+    # Added for EQA support
+    answer_token_orig: Optional[str] = None 
+    eqa_room: Optional[str] = None
+    eqa_object: Optional[str] = None
 
 @attr.s(auto_attribs=True, kw_only=True)
 class EQAEpisode(NavigationEpisode):

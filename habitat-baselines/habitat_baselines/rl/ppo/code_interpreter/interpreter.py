@@ -5,6 +5,7 @@ from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, VQA, FeatureMatcher,
     ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel
 )
+from habitat_baselines.rl.ppo.utils.names import eqa_objects
 
 class PseudoCodeInterpreter:
     """
@@ -132,7 +133,6 @@ class PseudoCodeInterpreter:
 
     def current_indentation(self, line):
         return len(line) - len(line.lstrip())
-    
 class PseudoCodePrimitives(PseudoCodeInterpreter): 
     """
     Primitive functions interpreter if primitives are added
@@ -209,6 +209,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 nms_thresh=self.habitat_env.object_detector.nms_thresh,
                 store_detections=self.habitat_env.object_detector.store_detections,
             )
+            if self.habitat_env.object_detector.use_additional_detector:
+                self.object_detector_closed = ObjectDetector(
+                    type=self.habitat_env.object_detector.additional_type, 
+                    size=self.habitat_env.object_detector.additional_size,
+                    thresh=self.habitat_env.object_detector.additional_thresh,
+                    nms_thresh=self.habitat_env.object_detector.additional_nms_thresh,
+                    store_detections=False,
+                )
 
         if self.habitat_env.matcher.use_matcher:
             self.feature_matcher = FeatureMatcher(
@@ -308,7 +316,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
-        bbox = self.object_detector.detect(obs, target_name)
+        # This is useful for EQA, to speed things up. Can be done without this part.
+        if (self.habitat_env.object_detector.use_additional_detector) and (target_name in list(eqa_objects.keys())):
+            target_name = eqa_objects[target_name]
+            bbox = self.object_detector_closed.detect(obs, target_name)
+        else:
+            bbox = self.object_detector.detect(obs, target_name)
 
         if self.habitat_env.object_detector.store_detections:
             self.habitat_env.target_name = target_name

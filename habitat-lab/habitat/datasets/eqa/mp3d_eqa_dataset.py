@@ -140,6 +140,8 @@ class Matterport3dDatasetV1(Dataset):
         # unique_objects = set([episode.question.question_text.split('is the')[1].split('in the')[0].strip() for episode in self.episodes])
 
         ##### TYPE:color "which color {object}"
+        # from habitat_baselines.rl.ppo.utils.names import eqa_objects
         # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['color']]
+        # self.episodes = [episode for episode in self.episodes if episode.question.eqa_object in list(eqa_objects.keys())]
         # unique_objects = set([episode.question.question_text.split('is the')[1].split('?')[0].strip() for episode in self.episodes])
         

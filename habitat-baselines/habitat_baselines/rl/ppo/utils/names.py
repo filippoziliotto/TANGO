@@ -14,15 +14,31 @@ class_names_coco = {
     "couch": "couch",
     "bed": "bed",
     "chair": "chair",
+    "couch": "sofa",
+    'microwave': 'microwave',
+    'refrigerator': 'refrigerator',
+    'oven': 'oven',
+    'toaster': 'toaster',
+    'sink': 'sink',
+    'refrigerator': 'fridge',
+    'door': 'door',
 }
 
 desired_classes_ids = {
+    # ObjectNav
     62: "chair",
     63: "couch",
     64: "potted_plant",
     65: "bed",
     70: "toilet",
-    72: "tv"
+    72: "tv",
+    # EQA
+    71: "door",
+    79: "oven",
+    78: "microwave",
+    80: "toaster",
+    81: "sink",
+    82: "refrigerator",
 }
 
 stoi_eqa = {
@@ -62,7 +78,6 @@ stoi_eqa = {
 'yellow':10223,
 'office':11243,
 }
-
 
 rooms_eqa = [
     'living room','family room','tv room','closet','laundry room',
@@ -106,7 +121,7 @@ compact_labels = {
 
 eqa_objects = {
     # 'towel': 'towel',
-    'tv stand': 'tv',
+    # 'tv stand': 'tv',
     'tv': 'tv',
     'sofa': 'couch',
     'bed': 'bed',
@@ -124,7 +139,7 @@ eqa_objects = {
     # 'stove': 'stove',
     # 'picture': 'picture',
     # 'wardrobe': 'wardrobe',
-    'microwave': 'microvawe',
+    'microwave': 'microwave',
     'refrigerator': 'refrigerator',
     'oven': 'oven',
 }

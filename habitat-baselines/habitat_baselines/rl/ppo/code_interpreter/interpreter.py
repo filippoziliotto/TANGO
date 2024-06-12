@@ -209,6 +209,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 nms_thresh=self.habitat_env.object_detector.nms_thresh,
                 store_detections=self.habitat_env.object_detector.store_detections,
             )
+            print('Object detector loaded')
             if self.habitat_env.object_detector.use_additional_detector:
                 self.object_detector_closed = ObjectDetector(
                     type=self.habitat_env.object_detector.additional_type, 
@@ -217,17 +218,21 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     nms_thresh=self.habitat_env.object_detector.additional_nms_thresh,
                     store_detections=False,
                 )
+                print('Additional object detector loaded')
 
         if self.habitat_env.matcher.use_matcher:
             self.feature_matcher = FeatureMatcher(
                 threshold=self.habitat_env.matcher.threshold,
             )
+            print('Feature matcher loaded')
 
         if self.habitat_env.vqa.use_vqa:
             self.vqa = VQA(
                 type=self.habitat_env.vqa.type,
                 size=self.habitat_env.vqa.size,
+                vqa_strategy=self.habitat_env.vqa.vqa_strategy
             )
+            print('VQA-model loaded')
     
         if self.habitat_env.captioner.use_captioner:
             self.captioner = ImageCaptioner(
@@ -235,18 +240,22 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 size=self.habitat_env.captioner.size,
                 quantization=self.habitat_env.captioner.quantization
             )
+            print('Captioner loaded')
 
         if self.habitat_env.segmenter.use_segmenter:
             self.segmenter = SegmenterModel()
+            print('Segmenter loaded')
     
         if self.habitat_env.room_classifier.use_room_classifier:
             self.room_classifier = RoomClassifier(self.habitat_env.room_classifier.model_path)
+            print('Room classifier loaded')
     
         if self.habitat_env.LLM.use_LLM:
             type = self.habitat_env.LLM.type
             quantization = self.habitat_env.LLM.quantization
             self.helper = LLMHelper(habitat_env)
             self.LLM_model = LLMmodel(type, quantization, self.helper)
+            print('LLM model loaded')
     
     """
     Habitat environment modules to define actions
@@ -371,6 +380,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
             self.habitat_env.eqa_vars['pred_answer'] = answer
+            self.habitat_env.eqa_vars['orig_answer'] = self.vqa.original_answer
+
         else:
             answer = self.vqa.answer(question, img)
 

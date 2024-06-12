@@ -150,10 +150,11 @@ class ObjectDetector:
         return detection['boxes']
 
 class VQA:
-    def __init__(self, type, size):
+    def __init__(self, type, size, vqa_strategy):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.vqa_model, self.processor = get_vqa_model(type, size, self.device)
         self.type = type
+        self.vqa_strategy = vqa_strategy
         self.vqa_model.eval()
         
     def predict(self, question, img):
@@ -177,11 +178,12 @@ class VQA:
     def answer(self, question, img, gt_answer=None):
 
         if self.type in ["blip2"]:
-            question = generate_eqa_question(question, gt_answer)
+            question = generate_eqa_question(question, gt_answer, self.vqa_strategy)
         else:
             question = f"Question: {question} Answer:"
 
         model_answer = self.predict(question, img)
+        self.original_answer = model_answer
         
         # Special case for EQA task
         if gt_answer is not None:

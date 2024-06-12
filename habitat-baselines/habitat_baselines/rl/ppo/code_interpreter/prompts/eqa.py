@@ -66,21 +66,33 @@ def eqa_classification(gt_answer, pred_answer):
     except: pass
     return similarity, pred_answer
 
-def generate_eqa_question(question, answer):
-    if answer is None:
-        return question
-    
+def generate_eqa_question(question, answer, strategy='simple-vqa'):
+    assert(strategy in ['simple-vqa', 'one-word-vqa', 'multiple-choice-vqa'])
+
     if answer in rooms_eqa:
-        room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
-        question = f"Consider the following room choices: {room_choices}. Question: {question}"
+        # 1st option
+        if strategy in ['simple-vqa']:
+            question = f"Question: {question} Answer:"
+        # 2nd option
+        elif strategy in ['one-word-vqa']:
+            question = f"Question: {question} Answer only with the room name:"
+        # 3rd option
+        elif strategy in ['multiple-choice-vqa']:
+            room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
+            question = f"Consider the following room choices: {room_choices}. Question: {question} Answer only with the room name:"
 
     elif answer in colors_eqa:
-        color_choices = "\n".join([f"{i+1}. {color}" for i, color in enumerate(colors_eqa)])
-        question = f"Consider the following room choices:\n{color_choices}\n\nQuestion: {question}"
+        # 1st option
+        if strategy in ['simple-vqa']:
+            question = f"Question: {question} Answer:"
+        # 2nd option
+        elif strategy in ['one-word-vqa']:
+            question = f"Question: {question} Answer only with the color:"
+        # 3rd option
+        elif strategy in ['multiple-choice-vqa']:
+            color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
+            question = f"Consider the following color choices: {color_choices}. Question: {question} Answer only with the color:"
 
-    # Cases in which the dataset is wrongly labeled
-    else:
-        pass
     return question
 
 class PromptEQA:

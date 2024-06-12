@@ -407,8 +407,8 @@ class HabitatEvaluator(Evaluator):
                     f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer accuracy: {v['answer_accuracy']:.2f} | "
                     f"Answer similarity: {v['answer_similarity']:.2f} | "
+                    f"Answer Text: {self.eqa_vars['pred_answer']}"
                 )
-
             else:
                 formatted_results = (
                     f"num_steps: {v['num_steps']} | "

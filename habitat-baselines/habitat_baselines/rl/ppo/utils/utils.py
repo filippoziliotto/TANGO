@@ -111,7 +111,7 @@ def get_vqa_model(type, size, device):
         # Only large size model available
         model_name = "Salesforce/blip-vqa-capfilt-large"
         processor = BlipProcessor.from_pretrained(model_name)
-        model = BlipForQuestionAnswering.from_pretrained(model_name)
+        model = BlipForQuestionAnswering.from_pretrained(model_name).to(device)
 
     if type in ['blip2']:
         if size in ['2.7b']:
@@ -119,7 +119,7 @@ def get_vqa_model(type, size, device):
         elif size in ['6.7b']:
             model_name = "Salesforce/blip2-opt-6.7b"
         processor = Blip2Processor.from_pretrained(model_name)
-        model = Blip2ForConditionalGeneration.from_pretrained(model_name, device_map="auto")
+        model = Blip2ForConditionalGeneration.from_pretrained(model_name, load_in_8bit=True, device_map={"": 0}, torch_dtype=torch.float16)
 
     elif type in ['git']:
         if size in ['base']:
@@ -127,9 +127,9 @@ def get_vqa_model(type, size, device):
         elif size in ['large']:
             model_name = "microsoft/git-large-vqav2"
         processor = AutoProcessor.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     
-    return model.to(device), processor
+    return model, processor
     
 def get_matcher_model(device):
     """

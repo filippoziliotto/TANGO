@@ -160,7 +160,7 @@ class VQA:
         if self.type in ["blip", "blip2"]:
             encoding = self.processor(img, question, return_tensors='pt').to("cuda")
             with torch.no_grad():
-                outputs = self.vqa_model.generate(**encoding)
+                outputs = self.vqa_model.generate(**encoding, max_length=200)
             return self.processor.decode(outputs[0], skip_special_tokens=True).strip()
         
         elif self.type in ["git"]:
@@ -168,18 +168,22 @@ class VQA:
             input_ids = self.processor(text=question, add_special_tokens=False).input_ids
             input_ids = [self.processor.tokenizer.cls_token_id] + input_ids
             input_ids = torch.tensor(input_ids).unsqueeze(0).to(self.device)
-            generated_ids = self.vqa_model.generate(pixel_values=pixel_values, input_ids=input_ids, max_length=50)
+            generated_ids = self.vqa_model.generate(pixel_values=pixel_values, input_ids=input_ids, max_length=200)
             return self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0].split('? ')[1]
     
     def similarities_measures(self, gt_answer, answer):
         return eqa_classification(gt_answer, answer)
 
     def answer(self, question, img, gt_answer=None):
-        # TODO: check if this is useful
+
         if self.type in ["blip2"]:
             question = generate_eqa_question(question, gt_answer)
+        else:
+            question = f"Question: {question} Answer:"
+
         model_answer = self.predict(question, img)
         
+        # Special case for EQA task
         if gt_answer is not None:
             similarity, answer = self.similarities_measures(gt_answer, model_answer)
             return similarity, answer

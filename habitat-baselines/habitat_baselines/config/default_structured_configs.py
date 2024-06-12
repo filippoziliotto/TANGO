@@ -483,6 +483,7 @@ class VQAConfig(HabitatBaselinesBaseConfig):
     use_vqa: bool = False
     type: str = "blip"
     size: str = "base"
+    vqa_strategy: str = "simple-vqa"
 @dataclass
 class CaptionerConfig(HabitatBaselinesBaseConfig):
     """

@@ -1,0 +1,193 @@
+# @package _global_
+
+defaults:
+  - /habitat: habitat_config_base
+  - /habitat/task: task_config_base
+  - /habitat/task/actions:
+    - answer
+    - move_forward
+    - turn_left
+    - turn_right
+  - /habitat/task/measurements:
+    - num_steps
+    - distance_to_goal
+    # - episode_info
+    - answer_accuracy
+    # - answer_similarity
+    # - minimum_number_of_actions
+    - stop_before_episode_end
+    - smallest_distance_to_target
+    # - top_down_map
+  - /habitat/task/lab_sensors:
+    - pointgoal_with_gps_compass_sensor
+    - question_sensor
+  - /habitat/dataset: dataset_config_schema
+  - /habitat_baselines: habitat_baselines_rl_config_base
+  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
+  - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.resize_shortest_edge: resize_shortest_edge_base
+  - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.center_cropper: center_cropper_base
+  - _self_
+
+habitat:
+
+  dataset:
+    type: OPENEQA-v1
+    split: val
+    data_path: data/datasets/open_eqa/{split}/{split}.json.gz
+    scenes_dir: "data/scene_datasets/"
+
+  task:
+    type: OPENEQA-v0
+    reward_measure: answer_accuracy
+    success_measure: answer_accuracy
+    measurements:
+      distance_to_goal:
+        distance_to: POINT
+
+  environment:
+    max_episode_steps: 500
+  simulator:
+    # turn_angle: 20
+    agents:
+      main_agent:
+        sim_sensors:
+          rgb_sensor:
+            width: 256
+            height: 256
+          depth_sensor:
+            width: 256
+            height: 256
+    habitat_sim_v0:
+      gpu_device_id: 0
+
+habitat_baselines:
+  torch_gpu_id: 0
+  task_name: eqa
+  # Visualization settings
+  # tensorboard_dir: tb
+  video_dir: video_dir/eqa/
+  # writer_type: wb # to deactivate just comment this
+  wb:
+    entity: ziliottofilippodev
+    project_name: NavProg
+    run_name: zs_eqa_prova
+  save_obs:
+    save_to_disk: True 
+  # Object Detector settings
+  object_detector:
+    use_detector: True
+    type: "owl-vit2"
+    size: "base"
+    thresh: 0.3
+    nms_thresh: 0.5
+    store_detections: False
+    # Additional object detector settings
+    use_additional_detector: True 
+    additional_type: "detr"
+    additional_size: "resnet101"
+    additional_thresh: 0.95
+    additional_nms_thresh: 0.5
+
+  # Feature Matcher settings
+  feature_matcher:
+    use_matcher: False
+  # Captioner settings
+  captioner:
+    use_captioner: False
+    type: 'git'
+    size: 'large'
+    quantization: '8'
+  vqa:
+    use_vqa: True
+    type: 'blip'
+    size: 'large'
+    vqa_strategy: 'simple-vqa'
+  # Segmenter settings
+  segmenter:
+    use_segmenter: False
+  room_classifier:
+    use_room_classifier: True
+  LLM:
+    use_LLM: False
+    type: "phi3"
+    
+  # Eval settings
+  # Distance detection threshold (when the agent should call stop action)
+  # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
+  object_distance_threshold: 2
+  
+  test_episode_count: -1
+  eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
+  num_environments: 1
+  checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"
+  trainer_name: ddppo
+  num_updates: -1
+  total_num_steps: 2.5e9
+  log_interval: 10
+  num_checkpoints: 100
+  # Force PyTorch to be single threaded as
+  # this improves performance considerably
+  force_torch_single_threaded: True
+  evaluate: True
+  load_resume_state_config: False
+  verbose: False
+  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
+
+  eval:
+    split: val
+    should_load_ckpt: False
+    use_ckpt_config: False
+    # video_option: [ "disk" ]
+
+  rl:
+    policy:
+      main_agent:
+        name: PointNavResNetPolicy
+        obs_transforms:
+          resize_shortest_edge:
+            trans_keys: [rgb, depth]
+
+    ppo:
+      # ppo params
+      clip_param: 0.2
+      ppo_epoch: 2
+      num_mini_batch: 2
+      value_loss_coef: 0.5
+      entropy_coef: 0.01
+      lr: 2.5e-4
+      eps: 1e-5
+      max_grad_norm: 0.2
+      num_steps: 128
+      use_gae: True
+      gamma: 0.99
+      tau: 0.95
+      use_linear_clip_decay: False
+      use_linear_lr_decay: False
+      reward_window_size: 50
+      use_normalized_advantage: False
+      hidden_size: 512
+      # Use double buffered sampling, typically helps
+      # when environment time is similar or large than
+      # policy inference time during rollout generation
+      use_double_buffered_sampler: False
+
+    ddppo:
+      sync_frac: 0.6
+      # The PyTorch distributed backend to use
+      distrib_backend: NCCL
+      # Visual encoder backbone
+      # pretrained_weights: data/ddppo-models/gibson-2plus-resnet50.pth
+      pretrained_weights: data/ddppo-models/hm3d-depth/ckpt_60.pth
+      # Initialize with pretrained weights
+      pretrained: True
+      # Initialize just the visual encoder backbone with pretrained weights
+      pretrained_encoder: True
+      # Whether the visual encoder backbone will be trained.
+      train_encoder: False
+      # Whether to reset the critic linear layer
+      reset_critic: False
+
+      # Model parameters
+      backbone: resnet50
+      rnn_type: LSTM
+      num_recurrent_layers: 2

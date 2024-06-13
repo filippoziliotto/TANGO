@@ -10,6 +10,7 @@ from habitat.tasks.eqa import _try_register_eqa_task
 from habitat.tasks.nav import _try_register_nav_task
 from habitat.tasks.rearrange import _try_register_rearrange_task
 from habitat.tasks.vln import _try_register_vln_task
+from habitat.tasks.open_eqa import _try_register_open_eqa_task
 
 
 def make_task(id_task, **kwargs):
@@ -26,3 +27,4 @@ _try_register_eqa_task()
 _try_register_nav_task()
 _try_register_vln_task()
 _try_register_rearrange_task()
+_try_register_open_eqa_task()

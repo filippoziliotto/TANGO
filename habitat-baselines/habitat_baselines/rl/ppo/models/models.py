@@ -179,8 +179,6 @@ class VQA:
 
         if self.type in ["blip2"]:
             question = generate_eqa_question(question, gt_answer, self.vqa_strategy)
-        else:
-            question = f"Question: {question} Answer:"
 
         model_answer = self.predict(question, img)
         self.original_answer = model_answer

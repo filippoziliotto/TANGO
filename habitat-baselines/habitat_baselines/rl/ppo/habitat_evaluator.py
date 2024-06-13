@@ -211,7 +211,7 @@ class HabitatEvaluator(Evaluator):
             self.step_data = [0] 
 
             # Added for EQA support
-            if self.task_name in ['eqa']:
+            if self.task_name in ['eqa', 'open_eqa']:
 
                 # Case in which the agent does not reach the goal
                 if self.max_steps_reached() and 'pred_answer' not in list(self.eqa_vars.keys()):
@@ -407,8 +407,17 @@ class HabitatEvaluator(Evaluator):
                     f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer accuracy: {v['answer_accuracy']:.2f} | "
                     f"Answer similarity: {v['answer_similarity']:.2f} | "
-                    f"Answer: {self.eqa_vars['pred_answer']}"
-                    f"Original Answer: {self.eqa_vars['orig_answer']}"
+                    f"Answer: {self.eqa_vars['pred_answer']} | "
+                    f"Original Answer: {self.eqa_vars['orig_answer']} |"
+                )
+            elif self.task_name in ['open_eqa']:
+                formatted_results = (
+                    f"num_steps: {v['num_steps']} | "
+                    f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+                    f"stop_before_end: {v['stop_before_episode_end']} | "
+                    f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
+                    f"Answer: {self.eqa_vars['pred_answer']} | "
+                    f"Original Answer: {self.eqa_vars['orig_answer']} |"
                 )
             else:
                 formatted_results = (
@@ -481,7 +490,23 @@ class HabitatEvaluator(Evaluator):
                 print(f"Average episode {k}: {v:.4f}")
             print('-----------------------')    
 
-        elif self.task_name in ['eqa-v2']:
+        elif self.task_name in ['open_eqa']:
+            for stat_key in self.all_ks:
+                self.aggregated_stats[stat_key] = np.mean(
+                    [v[stat_key] for v in self.stats_episodes.values() if stat_key in v]
+                )
+            self.metrics = {k: v for k, v in self.aggregated_stats.items() if k != "reward"}
+
+            print('-----------------------')
+            print('| EVALUATION FINISHED |')
+            print('-----------------------')
+
+            for k, v in self.aggregated_stats.items():
+                print(f"Average episode {k}: {v:.4f}")
+            print('-----------------------')    
+
+        # TODO: Distinguish results w.r.t. n° of minimum actions 10/30/50
+        elif self.task_name in ['eqa-TODO']:
         # Support for EQA task infinite values distance_to_goal
         # also support division in 10/30/50 actions required for shortest path
         # TODO: log eqa results 10/30/50 inot a table???

@@ -33,7 +33,9 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # IIN
     # config_name="instance_imagenav/zs_instance_imagenav.yaml"
     # EQA
-    config_name="eqa/zs_eqa.yaml"
+    # config_name="eqa/zs_eqa.yaml"
+    # OPEN-EQA
+    config_name="open_eqa/zs_open_eqa.yaml"
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

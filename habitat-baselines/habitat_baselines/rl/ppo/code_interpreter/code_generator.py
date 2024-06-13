@@ -4,6 +4,7 @@ from habitat_baselines.rl.ppo.utils.utils import get_llm_model
 from habitat_baselines.rl.ppo.code_interpreter.prompts.objectnav import generate_onav_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.instance_imagenav import generate_iinav_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import generate_eqa_prompt
+from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import generate_open_eqa_prompt
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 
 class CodeGenerator(object):
@@ -21,8 +22,6 @@ class CodeGenerator(object):
         
     def generate(self):
         if self.debug:
-            # prompt = self.prompt_utils.get_prompt()
-
             if self.task_name == 'objectnav':
                 prompt = generate_onav_prompt(self.prompt_utils)
             elif self.task_name == 'instance_imagenav':
@@ -30,6 +29,9 @@ class CodeGenerator(object):
             elif self.task_name == 'eqa':
                 prompt = generate_eqa_prompt(self.prompt_utils)
                 self.habitat_env.eqa_vars = self.get_eqa_vars()
+            elif self.task_name == 'open_eqa':
+                prompt = generate_open_eqa_prompt(self.prompt_utils)
+                self.habitat_env.eqa_vars = self.get_open_eqa_vars()
         else:
             if self.use_llm:
                 self.llm_model, self.llm_tokenizer = self.initialize_llm(self.type, self.quantization, self.device)
@@ -48,6 +50,14 @@ class CodeGenerator(object):
             "gt_answer": gt_answer,
             "question": question,
             "object": eqa_object,
+        }
+        return self.eqa_vars
+    
+    def get_open_eqa_vars(self):
+        question, gt_answer = self.prompt_utils.get_open_eqa_target()
+        self.eqa_vars = {
+            "gt_answer": gt_answer,
+            "question": question,
         }
         return self.eqa_vars
     

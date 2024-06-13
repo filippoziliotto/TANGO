@@ -277,7 +277,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # If max steps is reached without target located
         if self.habitat_env.max_steps_reached():
             # Support for EQA in the case max step is reached
-            if self.habitat_env.task_name in ['eqa']:
+            if self.habitat_env.task_name in ['eqa', 'open_eqa']:
                 _ = self.answer_question(
                     question=self.habitat_env.eqa_vars['question'])
             self.stop_navigation()
@@ -373,15 +373,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
         img = self.habitat_env.get_current_observation(type='rgb')
-
         # img = self.look_around(40)['stacked']
 
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
+        elif self.habitat_env.task_name in ['open_eqa']:
+            answer = self.vqa.answer(question, img)
             self.habitat_env.eqa_vars['pred_answer'] = answer
-            self.habitat_env.eqa_vars['orig_answer'] = self.vqa.original_answer
-
         else:
             answer = self.vqa.answer(question, img)
 

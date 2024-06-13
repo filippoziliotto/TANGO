@@ -171,7 +171,7 @@ class SmallestDistanceToTarget(Measure):
             'distance_to_goal'
         ].get_metric()
 
-        if current_distante_to_target < self._metric:
+        if self._metric is None or current_distante_to_target < self._metric:
             self._metric = current_distante_to_target
 
 @registry.register_task(name="OPENEQA-v0")

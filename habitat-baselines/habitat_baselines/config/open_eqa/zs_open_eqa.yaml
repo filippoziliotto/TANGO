@@ -62,7 +62,7 @@ habitat:
 
 habitat_baselines:
   torch_gpu_id: 0
-  task_name: eqa
+  task_name: open_eqa
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/eqa/
@@ -82,7 +82,7 @@ habitat_baselines:
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
-    use_additional_detector: True 
+    use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.95
@@ -116,7 +116,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 2
   
-  test_episode_count: -1
+  test_episode_count: 10
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

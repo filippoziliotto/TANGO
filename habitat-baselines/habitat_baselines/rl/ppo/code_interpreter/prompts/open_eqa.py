@@ -8,11 +8,11 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     question = episode_utils[0]
     gt_answer = episode_utils[1]
     print(f'{question} {gt_answer}.')
-
+        
     prompt = f"""
 while True:
     explore_scene()
-    object = detect_objects('{object}')
+    object = detect_objects('grey bed?')
     if object:
         navigate_to(object)
         answer = answer_question('{question}')

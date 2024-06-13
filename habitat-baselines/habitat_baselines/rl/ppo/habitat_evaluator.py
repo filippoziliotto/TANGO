@@ -417,7 +417,6 @@ class HabitatEvaluator(Evaluator):
                     f"stop_before_end: {v['stop_before_episode_end']} | "
                     f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer: {self.eqa_vars['pred_answer']} | "
-                    f"Original Answer: {self.eqa_vars['orig_answer']} |"
                 )
             else:
                 formatted_results = (

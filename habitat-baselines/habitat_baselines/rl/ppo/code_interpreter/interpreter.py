@@ -481,6 +481,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, name, bbox)
         
-
+    def debug_stop(self):
+        """
+        Stop the execution for debugging purposes
+        """
+        self.answer_question('which room is this?')
+        # self.stop_navigation()
 
 

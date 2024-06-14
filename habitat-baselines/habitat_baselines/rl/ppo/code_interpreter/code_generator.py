@@ -54,7 +54,7 @@ class CodeGenerator(object):
         return self.eqa_vars
     
     def get_open_eqa_vars(self):
-        question, gt_answer = self.prompt_utils.get_open_eqa_target()
+        _, question, gt_answer = self.prompt_utils.get_open_eqa_target()
         self.eqa_vars = {
             "gt_answer": gt_answer,
             "question": question,

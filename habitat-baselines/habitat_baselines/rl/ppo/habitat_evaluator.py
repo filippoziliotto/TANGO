@@ -34,6 +34,7 @@ from habitat_baselines.rl.ppo.utils.utils import (
 )
 from habitat_baselines.rl.ppo.utils.utils import match_images
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
+from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import save_open_eqa_results
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
@@ -418,6 +419,7 @@ class HabitatEvaluator(Evaluator):
                     f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer: {self.eqa_vars['pred_answer']} | "
                 )
+                save_open_eqa_results(self.eqa_vars, self.config)
             else:
                 formatted_results = (
                     f"num_steps: {v['num_steps']} | "

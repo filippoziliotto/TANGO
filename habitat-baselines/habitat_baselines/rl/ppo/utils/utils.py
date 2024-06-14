@@ -275,6 +275,7 @@ class PromptUtils:
 
     def get_open_eqa_target(self):
         ep_infos = self.habitat_env.get_current_episode_info()
+        id_ = ep_infos.episode_id
         question = ep_infos.question.question_text
         gt_answer = ep_infos.question.answer_text
-        return (question, gt_answer)
+        return (id_, question, gt_answer)

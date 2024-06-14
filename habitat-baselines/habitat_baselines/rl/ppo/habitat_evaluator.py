@@ -419,7 +419,7 @@ class HabitatEvaluator(Evaluator):
                     f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer: {self.eqa_vars['pred_answer']} | "
                 )
-                save_open_eqa_results(self.eqa_vars, self.config)
+                save_open_eqa_results(self.eqa_vars, self.config, v['num_steps'])
             else:
                 formatted_results = (
                     f"num_steps: {v['num_steps']} | "
@@ -685,7 +685,8 @@ class HabitatEvaluator(Evaluator):
 
         stacked_views_rgb = np.hstack(views_rgb)
         stacked_views_depth = np.hstack(views_depth)
-        stacked_views = match_images(stacked_views_rgb)
+        try: stacked_views = match_images(stacked_views_rgb)
+        except: stacked_views = stacked_views_rgb[0]
 
         if self.save_obs:
             self.debugger.save_obs(stacked_views_rgb, prefix=f'stereo_single')

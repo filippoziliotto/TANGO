@@ -443,8 +443,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Classify the room using a room classifier model
         details in models.py and roomcls_utils folder
         """
-        obs = self.habitat_env.get_current_observation(type='rgb')
-        # views = self.look_around(80)
+        # obs = self.habitat_env.get_current_observation(type='rgb')
+        obs = self.look_around(80)['stacked']
  
         # This should be better than the 180° view
         room = self.room_classifier.classify(obs)
@@ -486,6 +486,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Stop the execution for debugging purposes
         """
         self.answer_question('which room is this?')
-        # self.stop_navigation()
+        self.stop_navigation()
 
 

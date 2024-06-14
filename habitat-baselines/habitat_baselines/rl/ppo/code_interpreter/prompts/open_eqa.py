@@ -2,6 +2,7 @@ from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 from habitat_baselines.rl.ppo.utils.names import roomcls_labels
 import json
 import os
+import numpy as np
 
 """
 Prompt examples and utils for OPEN-EQA task
@@ -81,18 +82,36 @@ class PromptEQA:
     def get_prompt(self):
         return generate_open_eqa_prompt(self.prompt_utils)
     
-def save_open_eqa_results(vars, config):
+def save_open_eqa_results(vars, config, num_steps, gt_steps=0):
     """
-    Used only in Open-EQA to save the results in a txt file
-    these results then shuold be used to calculate the metrics
+    Used only in Open-EQA to save the results in a txt file.
+    These results should then be used to calculate the metrics.
     """
-    try: txt_name = config.habitat_baselines.wb.run_name + ".txt"
-    except: txt_name = "open_eqa_results.txt"
+    try:
+        txt_name = config.habitat_baselines.wb.run_name + ".txt"
+    except AttributeError:
+        txt_name = "open_eqa_results.txt"
+    
+    file_path = os.path.join("data", "datasets", "open_eqa", txt_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # Check if file exists
-    if not os.path.exists(txt_name):
-        with open(f"data/datasets/open_eqa/{txt_name}", "w") as f:
-            f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']}\n")
-    else:
-        with open(f"data/datasets/open_eqa/{txt_name}", "a") as f:
-            f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']}\n")
+    # Write or append to the file
+    with open(file_path, "a") as f:
+        f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']} | {num_steps} | {gt_steps}\n")
+
+def calculate_correctness(results):
+    """
+    Used only in Open-EQA to calculate the accuracy
+    """
+    return (1/len(results)) * (np.sum(np.array(results) - 1)/4) *100
+
+def calculate_efficiency(results, num_steps, gt_steps):
+    """
+    Used only in Open-EQA to calculate the efficiency
+    """
+    N = len(results)
+    E = (1 / N) * np.sum(
+        ((np.array(results) - 1) / 4) * 
+        (np.array(num_steps) / np.maximum(np.array(gt_steps), np.array(num_steps)))
+    ) * 100
+    return E

@@ -82,7 +82,7 @@ class PromptEQA:
     def get_prompt(self):
         return generate_open_eqa_prompt(self.prompt_utils)
     
-def save_open_eqa_results(vars, config, num_steps, gt_steps=0):
+def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps=0):
     """
     Used only in Open-EQA to save the results in a txt file.
     These results should then be used to calculate the metrics.
@@ -95,6 +95,11 @@ def save_open_eqa_results(vars, config, num_steps, gt_steps=0):
     file_path = os.path.join("data", "datasets", "open_eqa", txt_name)
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
+    # If epsisode start then clean existent txt
+    if is_first:
+        with open(file_path, "w") as f:
+            f.write("")
+
     # Write or append to the file
     with open(file_path, "a") as f:
         f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']} | {num_steps} | {gt_steps}\n")
@@ -103,12 +108,14 @@ def calculate_correctness(results):
     """
     Used only in Open-EQA to calculate the accuracy
     """
-    return (1/len(results)) * (np.sum(np.array(results) - 1)/4) *100
+    C = (1/len(results)) * (np.sum(np.array(results) - 1)/4) *100
+    return C
 
 def calculate_efficiency(results, num_steps, gt_steps):
     """
     Used only in Open-EQA to calculate the efficiency
     """
+    assert len(results) == len(num_steps) == len(gt_steps)
     N = len(results)
     E = (1 / N) * np.sum(
         ((np.array(results) - 1) / 4) * 

@@ -2,6 +2,7 @@ import os
 import pickle
 import json
 from habitat.utils.geometry_utils import quaternion_to_list
+import numpy as np
 
 def load_qa_data(qa_json_path):
     """Load the questions and answers data."""
@@ -56,10 +57,23 @@ def get_scene_name_mapping(scene_dir):
             scene_mapping[scene_id] = scene
     return scene_mapping
 
+def check_crossed_floor(posA, posB): 
+    target_vector = np.array(posB) - np.array(posA) 
+    y = target_vector[1] 
+    target_vector[1] = 0 
+    target_length = np.linalg.norm(np.array([target_vector[0], -target_vector[2]])) 
+    rel_ang = np.arctan2(y, target_length)
+    if np.abs(rel_ang) >= np.pi/6: 
+        delta_height = np.array(posB)[1] - np.array(posA)[1]
+        return True, delta_height 
+    else:
+        return False, 0.
+
 def process_subfolders(base_dir, qa_mapping, scene_mapping):
     """Process each subfolder to generate episodes."""
     episodes_data = {"episodes": []}
     episode_id = 0
+    floor_crossed_episode_data = []
 
     for subfolder in sorted(os.listdir(base_dir)):
         subfolder_path = os.path.join(base_dir, subfolder)
@@ -72,10 +86,15 @@ def process_subfolders(base_dir, qa_mapping, scene_mapping):
             
             first_data = load_pickle_data(os.path.join(subfolder_path, pkl_files[0]))
             last_data = load_pickle_data(os.path.join(subfolder_path, pkl_files[-1]))
+
+            floor_crossed, delta_h = check_crossed_floor(first_data["agent_state"].position, last_data["agent_state"].position)
             
             episode_history_key = f"hm3d-v0/{subfolder}"
             scene_id = subfolder.split("-")[-1]
-            
+
+            if floor_crossed:
+                print(f"{scene_id} | {floor_crossed}")
+                      
             if episode_history_key in qa_mapping and scene_id in scene_mapping:
                 scene_name = scene_mapping[scene_id]
                 
@@ -83,6 +102,8 @@ def process_subfolders(base_dir, qa_mapping, scene_mapping):
                     episode = create_episode(episode_id, scene_name, first_data, last_data, qa)
                     episodes_data["episodes"].append(episode)
                     episode_id += 1
+                    if floor_crossed:
+                        floor_crossed_episode_data.append(episode['question']['question_text'])
 
     return episodes_data
 
@@ -101,7 +122,7 @@ def main():
     qa_mapping = load_qa_data(qa_json_path)
     scene_mapping = get_scene_name_mapping(scene_dir)
     episodes_data = process_subfolders(base_dir, qa_mapping, scene_mapping)
-    save_episodes_data(output_json_path, episodes_data)
+    # save_episodes_data(output_json_path, episodes_data)
     print(f"JSON file created at {output_json_path}")
 
 if __name__ == "__main__":

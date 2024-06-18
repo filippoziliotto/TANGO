@@ -300,6 +300,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+            self.habitat_env.debugger.save_obs(self.habitat_env.get_current_observation(type='semantic'), 'semantic', gt_semantic=True)
 
     def stop_navigation(self):
         """
@@ -378,9 +379,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
+
         elif self.habitat_env.task_name in ['open_eqa']:
             answer = self.vqa.answer(question, img)
             self.habitat_env.eqa_vars['pred_answer'] = answer
+            
         else:
             answer = self.vqa.answer(question, img)
 
@@ -443,8 +446,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Classify the room using a room classifier model
         details in models.py and roomcls_utils folder
         """
-        # obs = self.habitat_env.get_current_observation(type='rgb')
-        obs = self.look_around(80)['stacked']
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        # obs = self.look_around(80)['stacked']
  
         # This should be better than the 180° view
         room = self.room_classifier.classify(obs)

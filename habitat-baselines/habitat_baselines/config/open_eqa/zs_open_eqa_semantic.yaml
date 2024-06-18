@@ -23,7 +23,8 @@ defaults:
     - question_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
-  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
+  # - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
+  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbds_agent
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.resize_shortest_edge: resize_shortest_edge_base
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.center_cropper: center_cropper_base
   - _self_
@@ -57,6 +58,10 @@ habitat:
           depth_sensor:
             width: 256
             height: 256
+          semantic_sensor:
+            width: 256
+            height: 256
+            hfov: 90
     habitat_sim_v0:
       gpu_device_id: 0
 

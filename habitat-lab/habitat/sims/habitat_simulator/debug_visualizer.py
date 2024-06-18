@@ -20,6 +20,7 @@ from habitat_sim.physics import ManagedArticulatedObject, ManagedRigidObject
 
 from habitat_sim.utils import viz_utils as vut
 from PIL import Image, ImageDraw
+from habitat_sim.utils.common import d3_40_colors_rgb
 
 def generate_unique_color():
     """Generate a random color."""
@@ -76,6 +77,16 @@ def overlay_segmentation(image, segmentation_outputs):
 
     return overlay_image
 
+"""
+Convert semantic sensor input to PIL Image
+"""
+def semantic_to_image(semantic_obs):
+    semantic_img = Image.new("P", (semantic_obs.shape[1], semantic_obs.shape[0]))
+    semantic_img.putpalette(d3_40_colors_rgb.flatten())
+    semantic_img.putdata((semantic_obs.flatten() % 40).astype(np.uint8))
+    semantic_img = semantic_img.convert("RGBA")
+    return semantic_img
+
 class DebugObservation:
     """
     Observation wrapper to provide a simple interface for managing debug observations and caching the image.
@@ -109,6 +120,7 @@ class DebugObservation:
                    bboxes = None,
                    segmentation=None,
                    output_path: str = 'images/',
+                   gt_semantic=False
                    ):
         """
         Save the Image as png to a given location.
@@ -117,6 +129,14 @@ class DebugObservation:
         :param prefix: Optional prefix for output filename. Filename format: "<prefix>month_day_year_hourminutesecondmicrosecond.png"
         """
         check_make_dir(output_path)
+
+        # If type is already PIL then return
+        if gt_semantic:
+            image = semantic_to_image(image)
+            file_path = os.path.join(output_path, prefix + ".png")
+            image.save(file_path)
+            return
+
 
         if segmentation is not None:
             assert bboxes is None, "Cannot have both segmentation and bboxes"

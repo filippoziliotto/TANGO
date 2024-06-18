@@ -35,7 +35,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # EQA
     # config_name="eqa/zs_eqa.yaml"
     # OPEN-EQA
-    config_name="open_eqa/zs_open_eqa.yaml"
+    config_name="open_eqa/zs_open_eqa_semantic.yaml"
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

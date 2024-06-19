@@ -28,6 +28,8 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
             object = episode["object"]
             room = episode["room"]
             look_around = episode["turn_around"]
+            try: floor = episode["floor"]
+            except: floor = None
             break
     
     # TODO: add (room in list(roomcls_labels.keys()))
@@ -72,6 +74,12 @@ while True:
     look_around()
     answer = answer_question('{question}')
     stop_navigation()"""
+
+    if floor is not None:
+        if floor == 1:
+            prompt =  "go_upstairs()" + prompt
+        elif floor == -1:
+            prompt =  "go_downstairs()" + prompt
 
     return prompt
 

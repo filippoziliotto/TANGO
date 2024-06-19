@@ -73,10 +73,11 @@ def process_subfolders(base_dir, qa_mapping, scene_mapping):
     """Process each subfolder to generate episodes."""
     episodes_data = {"episodes": []}
     episode_id = 0
-    floor_crossed_episode_data = []
+    floor_crossed_episode_data = {}
 
     for subfolder in sorted(os.listdir(base_dir)):
         subfolder_path = os.path.join(base_dir, subfolder)
+        
         
         if os.path.isdir(subfolder_path):
             pkl_files = sorted([f for f in os.listdir(subfolder_path) if f.endswith('.pkl')])
@@ -94,16 +95,20 @@ def process_subfolders(base_dir, qa_mapping, scene_mapping):
 
             if floor_crossed:
                 print(f"{scene_id} | {floor_crossed}")
+                ep_name = scene_id.split('/')[-1].split('.')[0]
+                floor_crossed_episode_data[ep_name] = []
                       
             if episode_history_key in qa_mapping and scene_id in scene_mapping:
                 scene_name = scene_mapping[scene_id]
-                
+
                 for qa in qa_mapping[episode_history_key]:
                     episode = create_episode(episode_id, scene_name, first_data, last_data, qa)
                     episodes_data["episodes"].append(episode)
                     episode_id += 1
                     if floor_crossed:
-                        floor_crossed_episode_data.append(episode['question']['question_text'])
+                        floor_crossed_episode_data[ep_name].append((episode['question']['question_text'], episode['question']['answer_text']))
+                        with open('/home/ziliottf/repos/navprog/habitat-lab/habitat/datasets/open_eqa/utils/floor_crossed_episodes.json', 'w') as json_file:
+                            json.dump(floor_crossed_episode_data, json_file, indent=4)
 
     return episodes_data
 

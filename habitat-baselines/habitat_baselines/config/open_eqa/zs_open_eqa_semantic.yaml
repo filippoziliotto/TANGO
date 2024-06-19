@@ -87,7 +87,7 @@ habitat_baselines:
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
-    use_additional_detector: False
+    use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.95

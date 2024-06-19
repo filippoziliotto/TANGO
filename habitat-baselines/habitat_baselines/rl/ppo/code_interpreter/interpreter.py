@@ -153,6 +153,8 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'map_scene': self.map_scene,
             'segment_scene': self.segment_scene,
             'classify_room': self.classify_room,
+            'go_downstairs': self.go_downstairs,
+            'go_upstairs': self.go_upstairs,
         }
 
 
@@ -190,6 +192,15 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def map_scene(self):
+        pass
+
+    def classify_room(self):
+        pass
+
+    def go_downstairs(self):
+        pass
+
+    def go_upstairs(self):
         pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -300,7 +311,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
-            self.habitat_env.debugger.save_obs(self.habitat_env.get_current_observation(type='semantic'), 'semantic', gt_semantic=True)
+            # self.habitat_env.debugger.save_obs(self.habitat_env.get_current_observation(type='semantic'), 'semantic', gt_semantic=True)
 
     def stop_navigation(self):
         """
@@ -315,6 +326,26 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.object_detector.store_detections:   
             self.object_detector.reset_detection_dict()
     
+    def go_downstairs(self):
+        """
+        Go downstairs primitive, needed
+        cause pointgoal model is not able to go downstairs
+        """
+        sim = self.habitat_env.get_habitat_sim()
+        final_pos = self.habitat_env.get_current_episode_info().goals[0].position
+        current_rotation = self.habitat_env.get_current_position().rotation
+        sim.set_agent_state(final_pos, current_rotation)
+
+    def go_upstairs(self):
+        """
+        Go upstairs primitive, needed
+        cause pointgoal model is not able to go upstairs
+        """
+        sim = self.habitat_env.get_habitat_sim()
+        final_pos = self.habitat_env.get_current_episode_info().goals[0].position
+        current_rotation = self.habitat_env.get_current_position().rotation
+        sim.set_agent_state(final_pos, current_rotation)
+        
     """
     Computer Vision modules
     """

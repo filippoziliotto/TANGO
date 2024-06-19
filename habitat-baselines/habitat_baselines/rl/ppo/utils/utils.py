@@ -279,3 +279,38 @@ class PromptUtils:
         question = ep_infos.question.question_text
         gt_answer = ep_infos.question.answer_text
         return (id_, question, gt_answer)
+
+"""
+Utils to sample points from different
+floors since HM3D-sem is not fully annotated
+"""
+def sample_random_points(sim, volume_sample_fac=1.0, significance_threshold=0.2):
+    scene_bb = sim.get_active_scene_graph().get_root_node().cumulative_bb
+    scene_volume = scene_bb.size().product()
+    points = np.array([sim.pathfinder.get_random_navigable_point() for _ in range(int(scene_volume * volume_sample_fac))])
+
+    hist, bin_edges = np.histogram(points[:, 1], bins='auto')
+    significant_bins = (hist / len(points)) > significance_threshold
+    l_bin_edges = bin_edges[:-1][significant_bins]
+    r_bin_edges = bin_edges[1:][significant_bins]
+    points_floors = {}
+    for l_edge, r_edge in zip(l_bin_edges, r_bin_edges):
+        points_floor = points[(points[:, 1] >= l_edge) & (points[:, 1] <= r_edge)]
+        height = points_floor[:, 1].mean()
+        points_floors[height] = points_floor
+    return points_floors
+
+def get_floor_levels(current_height, floor_points):
+
+    closest_key = min(floor_points.keys(), key=lambda k: abs(k - current_height))
+    downstairs_keys = [k for k in floor_points.keys() if k < closest_key]
+    upstairs_keys = [k for k in floor_points.keys() if k > closest_key]
+
+    down_level_key = max(downstairs_keys) if downstairs_keys else None
+    upper_level_key = min(upstairs_keys) if upstairs_keys else None
+
+    return {
+        'upper_level': [upper_level_key],
+        'current_floor': [closest_key],
+        'down_level': [down_level_key]
+    }

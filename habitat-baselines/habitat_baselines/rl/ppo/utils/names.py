@@ -106,7 +106,7 @@ roomcls_labels = {
     'bedroom': 'bedroom',
     'lounge': 'living room',
     # 'spa': 'spa',
-    # 'office': 'office',
+    'office room': 'living room',
     'foyer': 'living room'
 }
 

@@ -25,6 +25,7 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     # if "episode_id" key is equal to episode_id, then get the objects/rooms
     for episode in episode_list:
         if episode["episode_id"] == episode_id:
+            question = episode["question"]
             object = episode["object"]
             room = episode["room"]
             look_around = episode["turn_around"]
@@ -116,22 +117,3 @@ def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
     # Write or append to the file
     with open(file_path, "a") as f:
         f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']} | {num_steps} | {gt_steps}\n")
-
-def calculate_correctness(results):
-    """
-    Used only in Open-EQA to calculate the accuracy
-    """
-    C = (1/len(results)) * (np.sum(np.array(results) - 1)/4) *100
-    return C
-
-def calculate_efficiency(results, num_steps, gt_steps):
-    """
-    Used only in Open-EQA to calculate the efficiency
-    """
-    assert len(results) == len(num_steps) == len(gt_steps)
-    N = len(results)
-    E = (1 / N) * np.sum(
-        ((np.array(results) - 1) / 4) * 
-        (np.array(num_steps) / np.maximum(np.array(gt_steps), np.array(num_steps)))
-    ) * 100
-    return E

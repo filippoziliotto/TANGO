@@ -213,7 +213,7 @@ def get_llm_model(type, quantization, device):
         processor = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
             model_name, 
-            torch_dtype=torch_dtype,
+            torch_dtype="auto",
             trust_remote_code=True).to(device)
         pipe = pipeline('text-generation', model=model, tokenizer=processor)
         return pipe

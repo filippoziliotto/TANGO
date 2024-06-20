@@ -101,6 +101,7 @@ habitat_baselines:
     use_vqa: True
     type: 'blip2'
     size: '2.7b'
+    quantization: 8
     vqa_strategy: 'simple-vqa'
   # Segmenter settings
   segmenter:

@@ -42,7 +42,7 @@ class OPENEQAEpisode(NavigationEpisode):
     )
 
 @registry.register_sensor
-class QuestionSensor(Sensor):
+class OpenEQAQuestionSensor(Sensor):
     def __init__(self, dataset, *args: Any, **kwargs: Any):
         self._dataset = dataset
         super().__init__(*args, **kwargs)

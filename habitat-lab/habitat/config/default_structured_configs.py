@@ -719,6 +719,10 @@ class LocalizationSensorConfig(LabSensorConfig):
 class QuestionSensorConfig(LabSensorConfig):
     type: str = "QuestionSensor"
 
+@dataclass
+class OpenEQAQuestionSensorConfig(LabSensorConfig):
+    type: str = "OpenEQAQuestionSensor"
+
 
 @dataclass
 class InstructionSensorConfig(LabSensorConfig):
@@ -2323,6 +2327,12 @@ cs.store(
     group="habitat/task/lab_sensors",
     name="question_sensor",
     node=QuestionSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.openeqa_question_sensor",
+    group="habitat/task/lab_sensors",
+    name="openeqa_question_sensor",
+    node=OpenEQAQuestionSensorConfig,
 )
 cs.store(
     package="habitat.task.lab_sensors.object_sensor",

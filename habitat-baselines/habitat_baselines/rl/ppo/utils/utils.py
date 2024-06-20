@@ -214,7 +214,9 @@ def get_llm_model(type, quantization, device):
         model = AutoModelForCausalLM.from_pretrained(
             model_name, 
             torch_dtype="auto",
-            trust_remote_code=True).to(device)
+            trust_remote_code=True,
+            # attn_implementation="flash_attention_2"
+            ).to(device)
         pipe = pipeline('text-generation', model=model, tokenizer=processor)
         return pipe
         
@@ -237,6 +239,7 @@ def get_roomcls_model(path, device):
     model = ViTForImageClassification.from_pretrained(path)
     model.eval()
     return model.to(device), processor
+
 """
 Camera related or similar utils
 """

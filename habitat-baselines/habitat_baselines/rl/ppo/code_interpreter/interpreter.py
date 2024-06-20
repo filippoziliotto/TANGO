@@ -411,6 +411,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
             similarity, answer = self.vqa.answer(question, img, gt_answer)
+            self.habitat_env.eqa_vars['pred_answer'] = answer
+            self.habitat_env.eqa_vars['orig_answer'] = self.vqa.original_answer
 
         elif self.habitat_env.task_name in ['open_eqa']:
             answer = self.vqa.answer(question, img)

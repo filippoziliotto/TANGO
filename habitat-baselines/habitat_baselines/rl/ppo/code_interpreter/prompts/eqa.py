@@ -66,8 +66,25 @@ def eqa_classification(gt_answer, pred_answer):
     except: pass
     return similarity, pred_answer
 
+def chat_based_prompt(question, answer):
+    template = "Question: {} Answer: {}."
+    if answer in rooms_eqa:
+        room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
+        context = [
+        ("which are the possible room choices?", f"{room_choices}"),
+        ("pick only one room from the list.", "ok")
+        ]
+    elif answer in colors_eqa:
+        color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
+        context = [
+        ("which are the possible color choices?", f"{color_choices}"),
+        ("pick only one color from the list.", "ok")
+        ]
+    prompt = " ".join([template.format(context[i][0], context[i][1]) for i in range(len(context))]) + " Question: " + question + " Answer:"
+    return prompt
+
 def generate_eqa_question(question, answer, strategy='simple-vqa'):
-    assert(strategy in ['simple-vqa', 'one-word-vqa', 'multiple-choice-vqa'])
+    assert(strategy in ['simple-vqa', 'one-word-vqa', 'multiple-choice-vqa', 'chat-based-vqa'])
 
     if answer in rooms_eqa:
         # 1st option
@@ -80,6 +97,9 @@ def generate_eqa_question(question, answer, strategy='simple-vqa'):
         elif strategy in ['multiple-choice-vqa']:
             room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
             question = f"Consider the following room choices: {room_choices}. Question: {question} Answer only with the room name:"
+        # 4th option
+        elif strategy in ['chat-based-vqa']:
+            question = chat_based_prompt(question, answer)
 
     elif answer in colors_eqa:
         # 1st option
@@ -92,11 +112,15 @@ def generate_eqa_question(question, answer, strategy='simple-vqa'):
         elif strategy in ['multiple-choice-vqa']:
             color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
             question = f"Consider the following color choices: {color_choices}. Question: {question} Answer only with the color:"
+        # 4th option
+        elif strategy in ['chat-based-vqa']:
+            question = chat_based_prompt(question, answer)
 
     else:
         question = f"Question: {question} Answer:"
 
     return question
+
 
 class PromptEQA:
     def __init__(self, prompt_utils: PromptUtils):

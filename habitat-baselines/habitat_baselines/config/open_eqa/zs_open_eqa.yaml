@@ -20,7 +20,7 @@ defaults:
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - question_sensor
+    - openeqa_question_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent

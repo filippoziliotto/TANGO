@@ -415,13 +415,14 @@ class HabitatEvaluator(Evaluator):
                 formatted_results = (
                     f"num_steps: {v['num_steps']} | "
                     f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+                    f"minimum_actions: {v['minimum_number_of_actions']} | "
                     f"stop_before_end: {v['stop_before_episode_end']} | "
-                    f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
+                    # f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
                     f"Answer: {self.eqa_vars['pred_answer']} | "
                 )
                 if len(self.stats_episodes) == 1: is_first =  True
                 else: is_first = False
-                save_open_eqa_results(is_first, self.eqa_vars, self.config, v['num_steps'])
+                save_open_eqa_results(is_first, self.eqa_vars, self.config, v['num_steps'], v['minimum_number_of_actions'])
             else:
                 formatted_results = (
                     f"num_steps: {v['num_steps']} | "

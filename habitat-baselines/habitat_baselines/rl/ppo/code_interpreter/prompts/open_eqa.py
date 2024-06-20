@@ -95,7 +95,7 @@ class PromptEQA:
 Metrics for Open-EQA task
 Maybe this should go into Habitat-main metrics
 """
-def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps=0):
+def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
     """
     Used only in Open-EQA to save the results in a txt file.
     These results should then be used to calculate the metrics.

@@ -85,6 +85,27 @@ class CorrectAnswer(Measure):
         pass
 
 @registry.register_measure
+class MinimumNumberOfActions(Measure):
+    """
+    Minimum number of actions required to reach target
+    This should be divided in 10, 30, 50.
+    """
+    def __init__(self, sim, *args: Any, **kwargs: Any):
+        self._sim = sim
+        super().__init__(**kwargs)
+
+    def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
+        return "minimum_number_of_actions"
+
+    def reset_metric(self, episode, *args: Any, **kwargs: Any):
+
+
+        self._metric = len(episode.shortest_paths)
+
+    def update_metric(self, episode=None, *args: Any, **kwargs: Any):
+        pass
+
+@registry.register_measure
 class AnswerAccuracy(Measure):
     """AnswerAccuracy"""
 

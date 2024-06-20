@@ -25,13 +25,15 @@ class LLMScorer:
     def read_outputs(self, file_path):
         with open(file_path, "r") as f:
             lines = f.readlines()
-        questions, gt_answers, model_answers = [], [], []
+        questions, gt_answers, model_answers, num_steps, gt_steps = [], [], [], [], []
         for i in range(len(lines)):
             lines[i] = lines[i].split('|')
             questions.append(lines[i][0].strip())
             gt_answers.append(lines[i][1].strip())
             model_answers.append(lines[i][2].strip())
-        return questions, gt_answers, model_answers
+            num_steps.append(lines[i][3].strip())
+            gt_steps.append(lines[i][4].strip())
+        return questions, gt_answers, model_answers, num_steps, gt_steps
 
     def generate_llm_benchmark_prompt(question, gt_answer, model_answer):
         # load txt file as string
@@ -57,7 +59,7 @@ class LLMScorer:
 
     def score(self, file_path):
 
-        questions, gt_answers, model_answers = self.read_outputs(file_path)
+        questions, gt_answers, model_answers, num_steps, gt_steps = self.read_outputs(file_path)
 
         assert len(questions) == len(gt_answers) == len(model_answers)
         assert isinstance(questions, list) and isinstance(gt_answers, list) and isinstance(model_answers, list)
@@ -69,12 +71,9 @@ class LLMScorer:
 
         results = {}
         results['correctness'] = calculate_correctness(scores)
-
-        # TODO: calucalte efficiency adding num_steps and gt_steps
-        # results['efficiency'] = calculate_efficiency(scores)
+        results['efficiency'] = calculate_efficiency(scores, num_steps, gt_steps)
 
         # TODO: log to wandb
-
         self.print_()
         return scores
     

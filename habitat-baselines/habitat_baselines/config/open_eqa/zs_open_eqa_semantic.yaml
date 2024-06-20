@@ -14,7 +14,7 @@ defaults:
     # - episode_info
     - answer_accuracy
     # - answer_similarity
-    # - minimum_number_of_actions
+    - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
     # - top_down_map
@@ -104,8 +104,8 @@ habitat_baselines:
     quantization: '8'
   vqa:
     use_vqa: True
-    type: 'blip2'
-    size: '2.7b'
+    type: 'blip'
+    size: 'large'
     quantization: 16
     vqa_strategy: 'simple-vqa'
   # Segmenter settings

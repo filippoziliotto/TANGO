@@ -3,6 +3,7 @@ import pickle
 import json
 from habitat.utils.geometry_utils import quaternion_to_list
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 def load_qa_data(qa_json_path):
     """Load the questions and answers data."""
@@ -27,7 +28,7 @@ def load_pickle_data(pickle_path):
     with open(pickle_path, 'rb') as f:
         return pickle.load(f)
 
-def create_episode(episode_id, scene_name, first_data, last_data, qa):
+def create_episode(episode_id, scene_name, first_data, last_data, shortest_path, qa):
     """Create an episode dictionary."""
     scene_name_code = scene_name.split("-")[-1]
     return {
@@ -45,7 +46,7 @@ def create_episode(episode_id, scene_name, first_data, last_data, qa):
             }
         ],
         "question": qa,
-        "shortest_paths": None,
+        "shortest_paths": shortest_path,
     }
 
 def get_scene_name_mapping(scene_dir):
@@ -69,11 +70,46 @@ def check_crossed_floor(posA, posB):
     else:
         return False, 0.
 
+def estimate_actions(positions, quaternions, movement_threshold=0.01):
+    actions = []
+
+    def calculate_distance(pos1, pos2):
+        return np.linalg.norm(np.array(pos2) - np.array(pos1))
+    
+    def quaternion_to_yaw(quaternion):
+        # Extract the yaw angle from the quaternion [0, x1, 0, x2]
+        _, x1, _, x2 = quaternion
+        siny_cosp = 2 * (x1 * x2)
+        cosy_cosp = 1 - 2 * (x1 * x1)
+        yaw = np.arctan2(siny_cosp, cosy_cosp)
+        return yaw
+    
+    for i in range(1, len(positions)):
+        # Calculate the distance moved
+        distance = calculate_distance(positions[i-1], positions[i])
+        
+        # Calculate the yaw change
+        yaw1 = quaternion_to_yaw(quaternions[i-1])
+        yaw2 = quaternion_to_yaw(quaternions[i])
+        delta_yaw = yaw2 - yaw1
+        
+        if distance > movement_threshold:
+            actions.append(1)
+        elif delta_yaw > 0:
+            actions.append(2)
+        elif delta_yaw < 0:
+            actions.append(3)
+
+    # last action is stop
+    actions.append(0)
+    assert len(actions) == len(positions) == len(quaternions)
+
+    return actions
+
 def process_subfolders(base_dir, qa_mapping, scene_mapping):
     """Process each subfolder to generate episodes."""
     episodes_data = {"episodes": []}
     episode_id = 0
-    floor_crossed_episode_data = {}
 
     for subfolder in sorted(os.listdir(base_dir)):
         subfolder_path = os.path.join(base_dir, subfolder)
@@ -85,30 +121,25 @@ def process_subfolders(base_dir, qa_mapping, scene_mapping):
             if not pkl_files:
                 continue
             
-            first_data = load_pickle_data(os.path.join(subfolder_path, pkl_files[0]))
-            last_data = load_pickle_data(os.path.join(subfolder_path, pkl_files[-1]))
+            all_data = [load_pickle_data(os.path.join(subfolder_path, f)) for f in pkl_files]
+            first_data, last_data = all_data[0], all_data[-1]
 
-            floor_crossed, delta_h = check_crossed_floor(first_data["agent_state"].position, last_data["agent_state"].position)
+            pos_list = [data["agent_state"].position for data in all_data]
+            rot_list = [quaternion_to_list(data["agent_state"].rotation) for data in all_data]
+            act_list = estimate_actions(pos_list, rot_list)
+
+            shortest_path = [{"position": pos.tolist(),"rotation": rot, "action": act} for pos, rot, act in zip(pos_list, rot_list, act_list)]
             
             episode_history_key = f"hm3d-v0/{subfolder}"
             scene_id = subfolder.split("-")[-1]
-
-            if floor_crossed:
-                print(f"{scene_id} | {floor_crossed}")
-                ep_name = scene_id.split('/')[-1].split('.')[0]
-                floor_crossed_episode_data[ep_name] = []
                       
             if episode_history_key in qa_mapping and scene_id in scene_mapping:
                 scene_name = scene_mapping[scene_id]
 
                 for qa in qa_mapping[episode_history_key]:
-                    episode = create_episode(episode_id, scene_name, first_data, last_data, qa)
+                    episode = create_episode(episode_id, scene_name, first_data, last_data, shortest_path, qa)
                     episodes_data["episodes"].append(episode)
                     episode_id += 1
-                    if floor_crossed:
-                        floor_crossed_episode_data[ep_name].append((episode['question']['question_text'], episode['question']['answer_text']))
-                        with open('/home/ziliottf/repos/navprog/habitat-lab/habitat/datasets/open_eqa/utils/floor_crossed_episodes.json', 'w') as json_file:
-                            json.dump(floor_crossed_episode_data, json_file, indent=4)
 
     return episodes_data
 
@@ -127,7 +158,7 @@ def main():
     qa_mapping = load_qa_data(qa_json_path)
     scene_mapping = get_scene_name_mapping(scene_dir)
     episodes_data = process_subfolders(base_dir, qa_mapping, scene_mapping)
-    # save_episodes_data(output_json_path, episodes_data)
+    save_episodes_data(output_json_path, episodes_data)
     print(f"JSON file created at {output_json_path}")
 
 if __name__ == "__main__":

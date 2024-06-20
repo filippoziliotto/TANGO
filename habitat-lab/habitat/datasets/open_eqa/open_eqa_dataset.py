@@ -76,16 +76,7 @@ class OpenEQADatasetV1(Dataset):
                 episode.goals[g_index] = NavigationGoal(**goal)
 
             if episode.shortest_paths is not None:
-                for path in episode.shortest_paths:
+                for path in [episode.shortest_paths]: # List of lists needed for shortest_paths
                     for p_index, point in enumerate(path):
                         path[p_index] = ShortestPathPoint(**point)        
             self.episodes[ep_index] = episode
-
-
-# def main():
-#     open_eqa = OpenEQADatasetV1()
-#     open_eqa.from_json('val', 'data/datasets/open_eqa/val/val.json.gz')
-
-
-# if __name__ == "__main__":
-#     main()

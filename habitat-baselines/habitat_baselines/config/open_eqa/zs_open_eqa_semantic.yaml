@@ -46,7 +46,7 @@ habitat:
         distance_to: POINT
 
   environment:
-    max_episode_steps: 500
+    max_episode_steps: 3
   simulator:
     turn_angle: 20
     agents:
@@ -104,8 +104,9 @@ habitat_baselines:
     quantization: '8'
   vqa:
     use_vqa: True
-    type: 'blip'
-    size: 'large'
+    type: 'blip2'
+    size: '2.7b'
+    quantization: 16
     vqa_strategy: 'simple-vqa'
   # Segmenter settings
   segmenter:

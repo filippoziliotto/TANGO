@@ -99,7 +99,7 @@ def get_detector_model(type, size, store_detections, device):
 
     return model.to(device), processor
 
-def get_vqa_model(type, size, device):
+def get_vqa_model(type, size, quantization, device):
     """
     Function to get the correct model and processor
     for the VQA model called in models.py
@@ -119,7 +119,15 @@ def get_vqa_model(type, size, device):
         elif size in ['6.7b']:
             model_name = "Salesforce/blip2-opt-6.7b"
         processor = Blip2Processor.from_pretrained(model_name)
-        model = Blip2ForConditionalGeneration.from_pretrained(model_name, load_in_8bit=True, device_map={"": 0}, torch_dtype=torch.float16)
+
+        if quantization in [32]:
+            model = Blip2ForConditionalGeneration.from_pretrained(model_name, device_map={"": 0}, torch_dtype=torch.float32)
+        elif quantization in [16]:
+            model = Blip2ForConditionalGeneration.from_pretrained(model_name, device_map={"": 0}, torch_dtype=torch.float16)
+        elif quantization in [8]:
+            model = Blip2ForConditionalGeneration.from_pretrained(model_name, load_in_8bit=True, device_map={"": 0}, torch_dtype=torch.float16)
+        else:
+            raise ValueError("Invalid quantization setting!")
 
     elif type in ['git']:
         if size in ['base']:

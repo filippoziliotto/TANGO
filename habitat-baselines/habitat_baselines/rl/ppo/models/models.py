@@ -150,9 +150,9 @@ class ObjectDetector:
         return detection['boxes']
 
 class VQA:
-    def __init__(self, type, size, vqa_strategy):
+    def __init__(self, type, size, quantization, vqa_strategy):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.vqa_model, self.processor = get_vqa_model(type, size, self.device)
+        self.vqa_model, self.processor = get_vqa_model(type, size, quantization, self.device)
         self.type = type
         self.vqa_strategy = vqa_strategy
         self.vqa_model.eval()

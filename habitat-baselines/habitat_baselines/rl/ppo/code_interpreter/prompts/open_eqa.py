@@ -39,12 +39,12 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
 while True:
     explore_scene()
     room = classify_room()
-    if room == '{room_label}':
+    if room == "{room_label}":
         explore_scene()
-        object = detect_objects('{object}')
+        object = detect_objects("{object}")
         if object:
             navigate_to(object)
-            answer = answer_question('{question}')
+            answer = answer_question("{question}")
             stop_navigation()"""
         
     elif room is None and object is not None:
@@ -90,6 +90,11 @@ class PromptEQA:
     def get_prompt(self):
         return generate_open_eqa_prompt(self.prompt_utils)
     
+
+"""
+Metrics for Open-EQA task
+Maybe this should go into Habitat-main metrics
+"""
 def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps=0):
     """
     Used only in Open-EQA to save the results in a txt file.

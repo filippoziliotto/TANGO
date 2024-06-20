@@ -93,6 +93,9 @@ def generate_eqa_question(question, answer, strategy='simple-vqa'):
             color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
             question = f"Consider the following color choices: {color_choices}. Question: {question} Answer only with the color:"
 
+    else:
+        question = f"Question: {question} Answer:"
+
     return question
 
 class PromptEQA:

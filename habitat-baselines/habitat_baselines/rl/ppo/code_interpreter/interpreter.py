@@ -241,6 +241,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.vqa = VQA(
                 type=self.habitat_env.vqa.type,
                 size=self.habitat_env.vqa.size,
+                quantization=self.habitat_env.vqa.quantization,
                 vqa_strategy=self.habitat_env.vqa.vqa_strategy
             )
             print('VQA-model loaded')

@@ -332,6 +332,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Go downstairs primitive, needed
         cause pointgoal model is not able to go downstairs
         """
+        # TODO: add minimum number of steps to go downstairs
+        # this will decrease efficiency but provide more accurate results
         sim = self.habitat_env.get_habitat_sim()
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation
@@ -342,6 +344,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Go upstairs primitive, needed
         cause pointgoal model is not able to go upstairs
         """
+        # TODO: add minimum number of steps to go downstairs
+        # this will decrease efficiency but provide more accurate results
         sim = self.habitat_env.get_habitat_sim()
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation

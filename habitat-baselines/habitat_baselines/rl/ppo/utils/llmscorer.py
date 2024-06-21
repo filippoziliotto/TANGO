@@ -3,6 +3,7 @@ import argparse
 import warnings
 import re
 import numpy as np
+from tqdm import tqdm
 from habitat_baselines.rl.ppo.utils.utils import get_llm_model
 warnings.filterwarnings("ignore")
 
@@ -87,7 +88,7 @@ class LLMScorer:
         assert isinstance(questions, list) and isinstance(gt_answers, list) and isinstance(model_answers, list)
 
         scores = []
-        for i in range(len(questions)):
+        for i in tqdm(range(len(questions))):
             score_ = self.score_single(questions[i], gt_answers[i], model_answers[i])
             score_ = score_.strip()
             scores.append(score_)
@@ -97,8 +98,13 @@ class LLMScorer:
         processed_scores = []
         for item in scores:
             processed_scores.extend(extract_valid_integers(item))
-        
+
         scores = processed_scores
+        if len(scores) > len(questions):
+            diff = len(scores) - len(questions)
+        for i in range(diff):
+            scores.remove(1)
+
         results = {}
         results['correctness'] = calculate_correctness(scores)
         results['efficiency'] = calculate_efficiency(scores, num_steps, gt_steps)

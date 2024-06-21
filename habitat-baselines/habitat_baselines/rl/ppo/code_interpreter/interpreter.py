@@ -155,6 +155,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'classify_room': self.classify_room,
             'go_downstairs': self.go_downstairs,
             'go_upstairs': self.go_upstairs,
+            'do_nothing': self.do_nothing,
         }
 
 
@@ -201,6 +202,9 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def go_upstairs(self):
+        pass
+
+    def do_nothing(self):
         pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -332,12 +336,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Go downstairs primitive, needed
         cause pointgoal model is not able to go downstairs
         """
-        # TODO: add minimum number of steps to go downstairs
-        # this will decrease efficiency but provide more accurate results
         sim = self.habitat_env.get_habitat_sim()
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation
         sim.set_agent_state(final_pos, current_rotation)
+
+        self.do_nothing()
 
     def go_upstairs(self):
         """
@@ -350,7 +354,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation
         sim.set_agent_state(final_pos, current_rotation)
-        
+
+        self.do_nothing()
+
+    def do_nothing(self, steps=10):
+        """
+        Do nothing for a certain number of steps
+        """
+        for i in range(steps):
+            self.habitat_env.execute_action(action='turn_left')
+            self.habitat_env.update_episode_stats()
+
     """
     Computer Vision modules
     """

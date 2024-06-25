@@ -357,10 +357,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         self.do_nothing()
 
-    def do_nothing(self, steps=10):
+    def do_nothing(self, steps=20):
         """
         Do nothing for a certain number of steps
         """
+        # Needed for Open-EQA
+        assert steps < self.habitat_env.config.habitat.environment.max_episode_steps
+
         for i in range(steps):
             self.habitat_env.execute_action(action='turn_left')
             self.habitat_env.update_episode_stats()

@@ -107,5 +107,10 @@ data
 /images/
 /logs/
 /slurm/
-TODO.md
 pytorch_model.bin
+
+# Ignoring md files
+TODO.md
+TROUBLESHOOTING.md
+DATASETS.md
+DETAILS.md

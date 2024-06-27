@@ -44,9 +44,10 @@ while not episode_is_over():
 while not episode_is_over():
     explore_scene()
     room = classify_room('bedroom')
-    look_around()
-    answer(image, 'Does the bedroom have a lot of furniture?')
-    episode_is_over = True
+    if room:
+        look_around()
+        answer(image, 'Does the bedroom have a lot of furniture?')
+        episode_is_over = True
 ```
 
 ## Functional reasoning

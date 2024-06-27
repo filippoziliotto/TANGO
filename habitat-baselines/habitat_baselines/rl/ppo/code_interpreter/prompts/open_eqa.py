@@ -32,7 +32,7 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
             try: floor = episode["floor"]
             except: floor = None
             break
-    
+   
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):
         room_label = roomcls_labels[room]
@@ -55,7 +55,7 @@ while True:
     object = detect_objects('{object}')
     if object:
         navigate_to(object)
-        answer = answer_question('{question}')
+        answer = answer_question("{question}")
         stop_navigation()"""
 
     elif room is not None and object is None:
@@ -65,7 +65,7 @@ while True:
     explore_scene()
     room = classify_room()
     if room == '{room_label}':
-        answer = answer_question('{question}')
+        answer = answer_question("{question}")
         stop_navigation()"""    
 
     elif look_around:
@@ -73,7 +73,7 @@ while True:
 while True:
     explore_scene()
     look_around()
-    answer = answer_question('{question}')
+    answer = answer_question("{question}")
     stop_navigation()"""
 
     if floor is not None:
@@ -110,7 +110,7 @@ def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     # If epsisode start then clean existent txt
-    if is_first:
+    if is_first or not os.path.exists(file_path):
         with open(file_path, "w") as f:
             f.write("")
 

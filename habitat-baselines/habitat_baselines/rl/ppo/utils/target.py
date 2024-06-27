@@ -93,13 +93,29 @@ class Target:
         """
         current_step = self.habitat_env.get_current_step()
         update_step = 100
-        if current_step % update_step == 0:
-            polar_coords = self.habitat_env.sample_distant_points(
-                strategy='unreachable'
-            )
-            self.cartesian_coords = self.from_polar_to_cartesian(polar_coords)
-        else:
-            polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
+
+        if self.habitat_env.sampling_strategy in ["unreachable"]:
+            if current_step % update_step == 0:
+                polar_coords = self.update_target()
+            else:
+                polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
+
+        elif self.habitat_env.sampling_strategy in ["navigable"]:
+            if current_step == 0:
+                polar_coords = self.update_target()
+            else:
+                polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
+                if self.target_reached():
+                    polar_coords = self.update_target()
+
+        return polar_coords
+
+    def update_target(self):
+        """
+        Function that updates the target
+        """
+        polar_coords = self.habitat_env.sample_distant_points()
+        self.cartesian_coords = self.from_polar_to_cartesian(polar_coords)
         return polar_coords
         
     def get_target_coords(self, bboxes=None,):
@@ -130,12 +146,13 @@ class Target:
         Function that checks if the target is reached
         ideally this could be written in a better way (probaly TODO)
         """
-        assert self.exploration is False, ValueError
         distance = self.polar_coords[0][0]
-        if distance <= self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius:
-            return True
-        else:
-            return False
+
+        if self.exploration:
+            return distance <= 0.5
+        
+        return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
+
         
     def get_camera_focal_lenght(self, camera_width, camera_hfov):
         """

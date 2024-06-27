@@ -138,6 +138,8 @@ def images_to_video(
         quality=quality,
         **kwargs,
     )
+    # skip first element
+    images = images[1:]
     logger.info(f"Video created: {os.path.join(output_dir, video_name)}")
     if not verbose:
         images_iter: List[np.ndarray] = images
@@ -367,7 +369,8 @@ def overlay_frame(frame, info, additional=None):
         if isinstance(v, str):
             lines.append(f"{k}: {v}")
         else:
-            lines.append(f"{k}: {v:.2f}")
+            pass
+            # lines.append(f"{k}: {v:.2f}")
     if additional is not None:
         lines.extend(additional)
 

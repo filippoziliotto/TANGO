@@ -17,7 +17,7 @@ defaults:
     - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
-    # - top_down_map
+    - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - openeqa_question_sensor
@@ -30,7 +30,7 @@ defaults:
   - _self_
 
 habitat:
-
+  seed: 12345
   dataset:
     type: OPENEQA-v1
     split: val
@@ -46,7 +46,7 @@ habitat:
         distance_to: POINT
 
   environment:
-    max_episode_steps: 30
+    max_episode_steps: 500
   simulator:
     turn_angle: 20
     agents:
@@ -78,12 +78,13 @@ habitat_baselines:
     run_name: zs_eqa_prova
   save_obs:
     save_to_disk: True 
+  sampling_strategy: "navigable"
   # Object Detector settings
   object_detector:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.4
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
@@ -92,7 +93,6 @@ habitat_baselines:
     additional_size: "resnet101"
     additional_thresh: 0.95
     additional_nms_thresh: 0.5
-
   # Feature Matcher settings
   feature_matcher:
     use_matcher: False
@@ -120,7 +120,7 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.5
+  object_distance_threshold: 1.
   
   test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
@@ -136,14 +136,14 @@ habitat_baselines:
   force_torch_single_threaded: True
   evaluate: True
   load_resume_state_config: False
-  verbose: False
+  verbose: True
   eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
 
   eval:
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
-    # video_option: [ "disk" ]
+    video_option: [ "disk" ]
 
   rl:
     policy:

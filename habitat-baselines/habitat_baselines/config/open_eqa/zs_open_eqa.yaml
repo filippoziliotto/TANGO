@@ -14,7 +14,7 @@ defaults:
     # - episode_info
     - answer_accuracy
     # - answer_similarity
-    # - minimum_number_of_actions
+    - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
     # - top_down_map
@@ -130,7 +130,7 @@ habitat_baselines:
   force_torch_single_threaded: True
   evaluate: True
   load_resume_state_config: False
-  verbose: False
+  verbose: True
   eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
 
   eval:

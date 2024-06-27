@@ -566,6 +566,8 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     wb: WBConfig = WBConfig()
     task_name: str = "objectnav"
     save_obs: SaveObservations = SaveObservations()
+    # samplig point strategy
+    sampling_strategy: str = "unreachable"
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
     object_distance_threshold: float = 0.5
     feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()

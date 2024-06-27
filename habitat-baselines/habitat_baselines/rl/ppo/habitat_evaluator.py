@@ -56,6 +56,7 @@ class HabitatEvaluator(Evaluator):
 
         # Task
         self.task_name = self.config.habitat_baselines.task_name
+        self.sampling_strategy = self.config.habitat_baselines.sampling_strategy
         print('Task:', self.task_name)
         # Detection
         self.save_obs = self.config.habitat_baselines.save_obs.save_to_disk
@@ -605,37 +606,40 @@ class HabitatEvaluator(Evaluator):
         """
         return self.current_step
 
-    def sample_distant_points(self, strategy='navigable'):
+    def sample_distant_points(self):
         """
-        sample distant unreachable points and try to navigate to them
-        we try different method to achieve this
-        possibility to extend to new and better sampling strategies
+        Sample distant unreachable points and try to navigate to them.
+        We try different methods to achieve this.
+        Possibility to extend to new and better sampling strategies.
         """
+        def is_valid_goal(distance):
+            return distance >= min_distance
+        
+        def adjust_goal_point(goal_point):
+            return [p1 + p2 for p1, p2 in zip(goal_point, further_point)]
+
+        # Initial setup
         hab_simulator = self.get_habitat_sim()
-        min_distance = 15.
-        max_tries = 1000
+        min_distance, max_tries = 15.0, 1000
         current_pos = self.get_current_position()
-        agent_pos = current_pos.position
-        agent_ang = current_pos.rotation
+        agent_pos, agent_ang = current_pos.position, current_pos.rotation
         further_point = [min_distance, 0, min_distance]
 
+        # Raise error early for invalid strategy
+        assert self.sampling_strategy in ['unreachable', 'navigable'], f"Invalid sampling strategy: {self.sampling_strategy}"
+
+        # Try to find a valid goal point
         for _ in range(max_tries):
             goal_point = hab_simulator.sample_navigable_point()
             distance = hab_simulator.geodesic_distance(agent_pos, goal_point)
-
-            if strategy in ['unreachable']:
-                if distance >= min_distance:
-                    goal_point = [p1 + p2 for p1, p2 in zip(goal_point, further_point)]
-                    break
-
-            elif strategy in ['navigable']:
-                if distance >= min_distance:
-                    break
             
-            else:
-                raise ValueError(f"Invalid sampling strategy")
-            
-        return from_xyz_to_polar(agent_pos, agent_ang, goal_point)
+            if is_valid_goal(distance):
+                if self.sampling_strategy == 'unreachable':
+                    goal_point = adjust_goal_point(goal_point)
+                return from_xyz_to_polar(agent_pos, agent_ang, goal_point)
+        
+        # If no valid point is found
+        raise RuntimeError("Failed to sample a distant point after max tries")
             
     def max_steps_reached(self):
         """

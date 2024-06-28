@@ -93,6 +93,7 @@ data
 
 # habitat_baselines outputs
 /videos
+/video_dir/
 /train_dir
 /tb
 
@@ -105,8 +106,6 @@ data
 /logs/
 /slurm/
 /images/
-/logs/
-/slurm/
 pytorch_model.bin
 
 # Ignoring md files

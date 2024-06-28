@@ -94,19 +94,12 @@ class Target:
         current_step = self.habitat_env.get_current_step()
         update_step = 100
 
-        if self.habitat_env.sampling_strategy in ["unreachable"]:
-            if current_step % update_step == 0:
+        if current_step % update_step == 0:
+            polar_coords = self.update_target()
+        else:
+            polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
+            if self.target_reached():
                 polar_coords = self.update_target()
-            else:
-                polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
-
-        elif self.habitat_env.sampling_strategy in ["navigable"]:
-            if current_step == 0:
-                polar_coords = self.update_target()
-            else:
-                polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
-                if self.target_reached():
-                    polar_coords = self.update_target()
 
         return polar_coords
 
@@ -135,8 +128,7 @@ class Target:
     def update_polar_coords(self):
         """
         Function that updates the polar coordinates of the target
-        after each step during navigate_to primitive
-        also save image to disk (only for debugging purposes)
+        after each step, the method is simply for code elegance
         """
         self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
         return self.polar_coords
@@ -149,11 +141,10 @@ class Target:
         distance = self.polar_coords[0][0]
 
         if self.exploration:
-            return distance <= 0.5
+            return distance <= 1.5
         
         return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
-
-        
+       
     def get_camera_focal_lenght(self, camera_width, camera_hfov):
         """
         Function that returns the focal length of the camera

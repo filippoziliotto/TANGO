@@ -380,11 +380,18 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
         # This is useful for EQA, to speed things up. Can be done without this part.
-        if (self.habitat_env.object_detector.use_additional_detector) and (target_name in list(eqa_objects.keys())):
-            target_name = eqa_objects[target_name]
-            bbox = self.object_detector_closed.detect(obs, target_name)
-        else:
-            bbox = self.object_detector.detect(obs, target_name)
+        if self.habitat_env.task_name in ['eqa']:
+            if (self.habitat_env.object_detector.use_additional_detector) and (target_name in list(eqa_objects.keys())):
+                target_name = eqa_objects[target_name]
+                bbox = self.object_detector_closed.detect(obs, target_name)
+            else:
+                bbox = self.object_detector.detect(obs, target_name)
+
+        elif self.habitat_env.task_name in ['objectnav', 'open_eqa']:
+            if self.habitat_env.object_detector.use_additional_detector:
+                bbox = self.object_detector_closed.detect(obs, target_name)
+            else:
+                bbox = self.object_detector.detect(obs, target_name)
 
         if self.habitat_env.object_detector.store_detections:
             self.habitat_env.target_name = target_name

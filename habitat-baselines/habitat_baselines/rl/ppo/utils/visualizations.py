@@ -29,3 +29,10 @@ def save_images_to_disk(img, path='images/', boxes=None, label=None, instance=Fa
             draw.text((box[0], box[1] - 5), label, fill='white')
     img1.save(path+'detection.jpg')
     return img1
+
+def covered_map_percentage(fog_of_war):
+    """
+    Function to calculate the percentage of the map 
+    covered by the agent
+    """
+    return (fog_of_war.sum() / fog_of_war.size) * 100

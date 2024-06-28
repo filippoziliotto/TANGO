@@ -84,14 +84,14 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.3
+    thresh: 0.6
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
     use_additional_detector: True
     additional_type: "detr"
-    additional_size: "resnet101"
-    additional_thresh: 0.95
+    additional_size: "resnet50"
+    additional_thresh: 0.995
     additional_nms_thresh: 0.5
   # Feature Matcher settings
   feature_matcher:
@@ -136,7 +136,7 @@ habitat_baselines:
   force_torch_single_threaded: True
   evaluate: True
   load_resume_state_config: False
-  verbose: True
+  verbose: False
   eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
 
   eval:

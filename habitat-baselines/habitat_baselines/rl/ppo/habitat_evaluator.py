@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import tqdm
 import wandb
+import math
 
 from habitat import logger
 from habitat.tasks.rearrange.rearrange_sensors import GfxReplayMeasure
@@ -631,9 +632,9 @@ class HabitatEvaluator(Evaluator):
         # Try to find a valid goal point
         for _ in range(max_tries):
             goal_point = hab_simulator.sample_navigable_point()
-            distance = hab_simulator.geodesic_distance(agent_pos, goal_point)
-            
-            if is_valid_goal(distance):
+            distance = hab_simulator.geodesic_distance(agent_pos, goal_point)            
+
+            if is_valid_goal(distance) and not math.isinf(distance):
                 if self.sampling_strategy == 'unreachable':
                     goal_point = adjust_goal_point(goal_point)
                 return from_xyz_to_polar(agent_pos, agent_ang, goal_point)

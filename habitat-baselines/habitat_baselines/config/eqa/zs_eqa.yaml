@@ -29,7 +29,7 @@ defaults:
   - _self_
 
 habitat:
-
+  seed: 2024
   dataset:
     type: MP3DEQA-v1
     split: train
@@ -73,10 +73,11 @@ habitat_baselines:
     run_name: zs_eqa_prova
   save_obs:
     save_to_disk: True 
+  sampling_strategy: "navigable"
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit2"
+    type: "owl-vit"
     size: "base"
     thresh: 0.3
     nms_thresh: 0.5
@@ -84,8 +85,8 @@ habitat_baselines:
     # Additional object detector settings
     use_additional_detector: True 
     additional_type: "detr"
-    additional_size: "resnet101"
-    additional_thresh: 0.95
+    additional_size: "resnet50"
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
@@ -101,8 +102,8 @@ habitat_baselines:
     use_vqa: True
     type: 'blip2'
     size: '2.7b'
-    quantization: 8
-    vqa_strategy: 'simple-vqa'
+    quantization: 16
+    vqa_strategy: 'multiple-choice-vqa'
   # Segmenter settings
   segmenter:
     use_segmenter: False
@@ -115,9 +116,9 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.8
+  object_distance_threshold: 1.5
   
-  test_episode_count: -1
+  test_episode_count: 500
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

@@ -150,14 +150,14 @@ class AnswerSimilarity(Measure):
 
     def __init__(self, dataset, *args: Any, **kwargs: Any):
         self._dataset = dataset
-        self.nlp = spacy.load('en_core_web_md') 
+        self.nlp = spacy.load('en_core_web_lg') 
         super().__init__(**kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
         return "answer_similarity"
 
     def reset_metric(self, episode, *args: Any, **kwargs: Any):
-        self._metric = 0
+        self._metric = 0.
 
     def update_metric(
         self, action=None, episode=None, *args: Any, **kwargs: Any

@@ -11,39 +11,38 @@ defaults:
   - /habitat/task/measurements:
     - num_steps
     - distance_to_goal
-    # - episode_info
+    - episode_info
     - answer_accuracy
-    # - answer_similarity
+    - answer_similarity
     - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
-    - top_down_map
+    # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - openeqa_question_sensor
+    - question_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
-  # - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
-  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbds_agent
+  - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.resize_shortest_edge: resize_shortest_edge_base
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.center_cropper: center_cropper_base
   - _self_
 
 habitat:
-  seed: 12345
+  seed: 2024
   dataset:
-    type: OPENEQA-v1
-    split: val
-    data_path: data/datasets/open_eqa/{split}/{split}.json.gz
+    type: MP3DEQA-v1
+    split: train
+    data_path: data/datasets/eqa/mp3d/v1/{split}/{split}.json.gz
     scenes_dir: "data/scene_datasets/"
 
   task:
-    type: OPENEQA-v0
+    type: EQA-v0
     reward_measure: answer_accuracy
     success_measure: answer_accuracy
     measurements:
       distance_to_goal:
-        distance_to: POINT
+        distance_to: EQA_POINTS
 
   environment:
     max_episode_steps: 500
@@ -58,41 +57,38 @@ habitat:
           depth_sensor:
             width: 256
             height: 256
-          semantic_sensor:
-            width: 256
-            height: 256
-            hfov: 90
     habitat_sim_v0:
       gpu_device_id: 0
 
 habitat_baselines:
   torch_gpu_id: 0
-  task_name: open_eqa
+  task_name: eqa
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/eqa/
-  # writer_type: wb # to deactivate just comment this
+  writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_prova
+    run_name: zs_eqa_navigable
   save_obs:
     save_to_disk: True 
   sampling_strategy: "navigable"
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit2"
-    size: "base"
+    type: "owl-vit"
+    size: "large"
     thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
-    use_additional_detector: True
+    use_additional_detector: True 
     additional_type: "detr"
-    additional_size: "resnet50"
-    additional_thresh: 0.95
+    additional_size: "resnet101"
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
+
   # Feature Matcher settings
   feature_matcher:
     use_matcher: False
@@ -104,9 +100,9 @@ habitat_baselines:
     quantization: '8'
   vqa:
     use_vqa: True
-    type: 'blip'
-    size: 'large'
-    quantization: 16
+    type: 'blip2'
+    size: '2.7b'
+    quantization: 32
     vqa_strategy: 'simple-vqa'
   # Segmenter settings
   segmenter:
@@ -120,7 +116,7 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.
+  object_distance_threshold: 1.3
   
   test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
@@ -143,7 +139,7 @@ habitat_baselines:
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
-    video_option: [ "disk" ]
+    # video_option: [ "disk" ]
 
   rl:
     policy:

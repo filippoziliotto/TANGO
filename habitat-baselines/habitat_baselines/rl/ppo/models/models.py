@@ -181,6 +181,9 @@ class VQA:
             question = generate_eqa_question(question, gt_answer, self.vqa_strategy)
 
         model_answer = self.predict(question, img)
+
+        if self.vqa_strategy in ["chat-based-vqa"]:
+            model_answer = model_answer.split(".")[0]
         self.original_answer = model_answer
         
         # Special case for EQA task

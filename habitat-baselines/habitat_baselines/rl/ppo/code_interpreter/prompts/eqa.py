@@ -71,14 +71,14 @@ def chat_based_prompt(question, answer):
     if answer in rooms_eqa:
         room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
         context = [
-        ("which are the possible room choices?", f"{room_choices}"),
-        ("pick only one room from the list.", "ok")
+        ("which are the possible room choices?", f"{room_choices}."),
+        ("respond with one word", "ok.")
         ]
-    elif answer in colors_eqa:
+    if answer in colors_eqa:
         color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
         context = [
-        ("which are the possible color choices?", f"{color_choices}"),
-        ("pick only one color from the list.", "ok")
+        ("which are the possible color choices?", f"{color_choices}."),
+        ("respond with one word", "ok.")
         ]
     prompt = " ".join([template.format(context[i][0], context[i][1]) for i in range(len(context))]) + " Question: " + question + " Answer:"
     return prompt
@@ -87,32 +87,20 @@ def generate_eqa_question(question, answer, strategy='simple-vqa'):
     assert(strategy in ['simple-vqa', 'one-word-vqa', 'multiple-choice-vqa', 'chat-based-vqa'])
 
     if answer in rooms_eqa:
-        # 1st option
         if strategy in ['simple-vqa']:
             question = f"Question: {question} Answer:"
-        # 2nd option
-        elif strategy in ['one-word-vqa']:
-            question = f"Question: {question} Answer only with the room name:"
-        # 3rd option
         elif strategy in ['multiple-choice-vqa']:
             room_choices = ", ".join([f"{room}" for i, room in enumerate(rooms_eqa)])
-            question = f"Consider the following room choices: {room_choices}. Question: {question} Answer only with the room name:"
-        # 4th option
+            question = f"Consider the following room choices: {room_choices}. Question: {question} Answer:"
         elif strategy in ['chat-based-vqa']:
             question = chat_based_prompt(question, answer)
 
     elif answer in colors_eqa:
-        # 1st option
         if strategy in ['simple-vqa']:
             question = f"Question: {question} Answer:"
-        # 2nd option
-        elif strategy in ['one-word-vqa']:
-            question = f"Question: {question} Answer only with the color:"
-        # 3rd option
         elif strategy in ['multiple-choice-vqa']:
             color_choices = ", ".join([f"{color}" for i, color in enumerate(colors_eqa)])
-            question = f"Consider the following color choices: {color_choices}. Question: {question} Answer only with the color:"
-        # 4th option
+            question = f"Consider the following color choices: {color_choices}. Question: {question} Answer:"
         elif strategy in ['chat-based-vqa']:
             question = chat_based_prompt(question, answer)
 

@@ -642,7 +642,6 @@ class HabitatEvaluator(Evaluator):
             elif self.sampling_strategy == 'navigable':
                 distance = hab_simulator.geodesic_distance(agent_pos, goal_point)            
                 if is_valid_goal(distance) and not math.isinf(distance):
-                    print(distance)
                     return from_xyz_to_polar(agent_pos, agent_ang, goal_point)
             
         # If no navigable point is found, return the last navigable point

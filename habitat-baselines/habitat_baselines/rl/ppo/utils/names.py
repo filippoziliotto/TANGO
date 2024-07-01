@@ -8,6 +8,7 @@ refined_names = {
 }
 
 class_names_coco = {
+    # ObjectNav
     "tv": "tv",
     "toilet": "toilet seat",
     "potted_plant": "plant",
@@ -15,6 +16,7 @@ class_names_coco = {
     "bed": "bed",
     "chair": "chair",
     "couch": "sofa",
+    # EQA
     'microwave': 'microwave',
     'refrigerator': 'refrigerator',
     'oven': 'oven',
@@ -22,6 +24,7 @@ class_names_coco = {
     'sink': 'sink',
     'refrigerator': 'fridge',
     'door': 'door',
+    'plant': 'plant',
 }
 
 desired_classes_ids = {

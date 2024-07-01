@@ -156,6 +156,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'go_downstairs': self.go_downstairs,
             'go_upstairs': self.go_upstairs,
             'do_nothing': self.do_nothing,
+            'select': self.select,
         }
 
 
@@ -205,6 +206,9 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         pass
 
     def do_nothing(self):
+        pass
+
+    def select(self):
         pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -427,14 +431,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             return True
         else:
             return False
-        
-    def answer_question(self, question):
+
+    def answer_question(self, question, image=None):
         """
         VQA module for answering questions
         The actual class is defined in models.py
         """
-        img = self.habitat_env.get_current_observation(type='rgb')
-        # img = self.look_around(40)['stacked']
+        img = image if image is not None else self.habitat_env.get_current_observation(type='rgb')
 
         if self.habitat_env.task_name in ['eqa']:
             gt_answer = self.habitat_env.eqa_vars['gt_answer']
@@ -515,6 +518,24 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         room = self.room_classifier.classify(obs)
         return room
     
+    def select(self, target):
+        """
+        Select the target object from the scene
+        """
+        img  = self.habitat_env.get_current_observation(type='rgb')
+        bbox = self.detect_objects(target)
+
+        if bbox:
+            crop_image_mask = bbox[0][0]
+            crop_image = img[crop_image_mask[1]:crop_image_mask[3], crop_image_mask[0]:crop_image_mask[2]]
+
+            # For debugging purposes
+            self.save_observation(crop_image, 'select')
+            return crop_image
+        else: return None
+
+        
+
     """
     Python subroutines or logical modules
     """

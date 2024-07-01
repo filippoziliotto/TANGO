@@ -24,7 +24,8 @@ while True:
         object = detect_objects('{object}')
         if object:
             navigate_to(object)
-            answer = answer_question('{question}')
+            target = select('{object}')
+            answer = answer_question('{question}', target)
             stop_navigation()"""
     else:
         prompt = f"""
@@ -33,7 +34,8 @@ while True:
     object = detect_objects('{object}')
     if object:
         navigate_to(object)
-        answer = answer_question('{question}')
+        target = select('{object}')
+        answer = answer_question('{question}', target)
         stop_navigation()"""
 
     return prompt

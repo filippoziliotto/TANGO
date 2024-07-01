@@ -17,7 +17,7 @@ defaults:
     - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
-    # - top_down_map
+    - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - question_sensor
@@ -99,11 +99,14 @@ habitat_baselines:
     size: 'large'
     quantization: '8'
   vqa:
+    # use_vqa: True
+    # type: 'blip2'
+    # size: '2.7b'
+    # quantization: 16
     use_vqa: True
-    type: 'blip2'
-    size: '2.7b'
-    quantization: 16
-    vqa_strategy: 'multiple-choice-vqa'
+    type: 'git'
+    size: 'large'
+    vqa_strategy: 'simple-vqa'
   # Segmenter settings
   segmenter:
     use_segmenter: False
@@ -133,13 +136,13 @@ habitat_baselines:
   evaluate: True
   load_resume_state_config: False
   verbose: False
-  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy"]
+  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy", "answer_similarity"]
 
   eval:
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
-    # video_option: [ "disk" ]
+    video_option: [ "disk" ]
 
   rl:
     policy:

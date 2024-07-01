@@ -327,6 +327,8 @@ class HabitatEvaluator(Evaluator):
                 }
 
                 # Support for EQA task if episode_infos in keys
+                if self.task_name in ['eqa']:
+                    self.disp_info = {key: value for key, value in self.disp_info.items() if "episode_info" not in key}
                 tmp_episode_info = {key: value for key, value in self.infos[i].items() if "episode_info" not in key}
 
                 self.episode_stats.update(extract_scalars_from_info(tmp_episode_info))
@@ -640,6 +642,7 @@ class HabitatEvaluator(Evaluator):
             elif self.sampling_strategy == 'navigable':
                 distance = hab_simulator.geodesic_distance(agent_pos, goal_point)            
                 if is_valid_goal(distance) and not math.isinf(distance):
+                    print(distance)
                     return from_xyz_to_polar(agent_pos, agent_ang, goal_point)
             
         # If no navigable point is found, return the last navigable point

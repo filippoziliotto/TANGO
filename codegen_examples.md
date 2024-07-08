@@ -9,10 +9,10 @@ while not episode_is_over():
     object = detect_object('TV')
     if object:
         navigate_to(object)
-        look_around()
         answer('What is the white object on the wall above the TV?')
         episode_is_over = True
 ```
+
 ## Attribute recognition
 **Question**: What material is the floor? \
 **Program**:
@@ -62,6 +62,7 @@ while not episode_is_over():
         answer('is the bed comfortable?')
         episode_is_over = True
 ```
+
 ## Object Localization
 **Question**: Where is the blue trash can?  \
 **Program**:

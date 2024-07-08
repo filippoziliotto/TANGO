@@ -45,7 +45,7 @@ habitat:
         distance_to: EQA_POINTS
 
   environment:
-    max_episode_steps: 1000
+    max_episode_steps: 500
   simulator:
     # turn_angle: 20
     agents:
@@ -70,7 +70,7 @@ habitat_baselines:
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_navigable_office
+    run_name: zs_eqa_nav_select
   save_obs:
     save_to_disk: False
   sampling_strategy: "navigable"
@@ -121,7 +121,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.3
   
-  test_episode_count: 1000
+  test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

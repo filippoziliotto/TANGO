@@ -70,10 +70,10 @@ habitat_baselines:
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_navigable
+    run_name: zs_eqa_select
   save_obs:
-    save_to_disk: True 
-  sampling_strategy: "navigable"
+    save_to_disk: False
+  sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
     use_detector: True
@@ -100,9 +100,9 @@ habitat_baselines:
     quantization: '8'
   vqa:
     use_vqa: True
-    type: 'blip2'
-    size: '2.7b'
-    quantization: 32
+    type: 'blip'
+    size: 'large'
+    # quantization: 32
     vqa_strategy: 'simple-vqa'
   # Segmenter settings
   segmenter:

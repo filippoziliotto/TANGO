@@ -76,6 +76,8 @@ class HabitatEvaluator(Evaluator):
         self.LLM = self.config.habitat_baselines.LLM
         # Room classifier
         self.room_classifier = self.config.habitat_baselines.room_classifier
+        # CLIP value mapper
+        self.value_mapper = self.config.habitat_baselines.value_mapper
 
     def init_env(self):
         """
@@ -714,6 +716,14 @@ class HabitatEvaluator(Evaluator):
         }
         return views
 
+    def update_exploration_policy(self, update_step=10):
+        # TODO: add that if in this 50 steps i found the target i don't 
+        # want to update, stick with the current pseudo-code
+        # TODO: add update_step to config yaml
+        if self.current_step % update_step == 0:
+            return True
+        return False
+
     def evaluate_agent(
         self,
         **kwargs,
@@ -731,14 +741,16 @@ class HabitatEvaluator(Evaluator):
         while self.episode_iterator():
             self.current_episodes_info = self.envs.current_episodes()
 
-            # Generate the PseudoCode
-            self.pseudo_code = code_generator.generate()
-            
-            # Reset init variables
-            self.code_interpreter.parse(self.pseudo_code)
+            if self.update_exploration_policy():
 
-            # Run the code
-            self.code_interpreter.run()
+                # Generate the PseudoCode
+                self.pseudo_code = code_generator.generate()
+                
+                # Reset init variables
+                self.code_interpreter.parse(self.pseudo_code)
+
+                # Run the code
+                self.code_interpreter.run()
 
         self.display_results()
 

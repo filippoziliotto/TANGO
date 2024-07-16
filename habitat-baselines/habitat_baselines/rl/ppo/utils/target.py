@@ -118,7 +118,10 @@ class Target:
         """
 
         if self.exploration:
-            self.polar_coords = self.get_exploration_target()
+            if not self.set_exploration_target:
+                self.polar_coords = self.get_exploration_target()
+            else:
+                pass
         else:
             self.polar_coords = self.from_bbox_to_polar(bboxes)
             self.cartesian_coords = self.from_polar_to_cartesian(self.polar_coords)
@@ -145,6 +148,17 @@ class Target:
         
         return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
        
+    def set_target_coords(self, coords, type="polar"):
+        self.set_exploration_target = True
+        if type in "polar":
+            assert len(coords) == 2
+            self.polar_coords = torch.Tensor([[coords[0], coords[1]]]).to(self.habitat_env.device)
+        
+        elif type in ["cartesian"]:
+            assert len(coords) == 3
+            self.polar_coords = self.from_cartesian_to_polar(coords)
+
+
     def get_camera_focal_lenght(self, camera_width, camera_hfov):
         """
         Function that returns the focal length of the camera

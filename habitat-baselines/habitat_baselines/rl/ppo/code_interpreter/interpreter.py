@@ -1,9 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from habitat_baselines.rl.ppo.utils.target import Target
 from habitat_baselines.rl.ppo.utils.helper import LLMHelper
 from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, VQA, FeatureMatcher,
-    ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel
+    ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel,
+    ValueMapper
 )
 from habitat_baselines.rl.ppo.utils.names import eqa_objects
 
@@ -156,6 +158,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'go_downstairs': self.go_downstairs,
             'go_upstairs': self.go_upstairs,
             'do_nothing': self.do_nothing,
+            'map_scene': self.map_scene,
             'select': self.select,
         }
 
@@ -277,6 +280,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.LLM_model = LLMmodel(type, quantization, self.helper)
             print('LLM model loaded')
     
+        if self.habitat_env.value_mapper.use_value_mapper:
+            self.value_mapper = ValueMapper(
+                habitat_env=self.habitat_env,
+                size=self.habitat_env.value_mapper.size)
+            print('Value mapper loaded')
+
     """
     Habitat environment modules to define actions
     """
@@ -412,6 +421,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.save_observation(obs, 'detection', bbox)
 
         self.update_variable('objects', bbox)
+
+        self.map_scene(target_name)
         return bbox
 
     def feature_match(self):
@@ -533,7 +544,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.save_observation(crop_image, 'select')
             return crop_image
         else: return None
-
         
 
     """
@@ -559,6 +569,21 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         self.update_variable('n_objects', len(boxes))
         return len(boxes)
+
+    def map_scene(self, target_name):
+        """
+        Map the scene and create topdown view
+        from depth image and  use CLIP values
+        """
+        image = self.habitat_env.get_current_observation(type='rgb')
+        map = self.habitat_env.disp_info['top_down_map']
+
+        fow, target_map_coords = self.value_mapper.map_value(image, target_name, map)
+
+        if target_map_coords is not None:  
+            self.target.set_target_coords(target_map_coords, type='cartesian')
+
+        self.save_observation(fow, 'map')
 
     def save_observation(self, obs, name, bbox=None):
         """

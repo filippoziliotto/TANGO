@@ -30,7 +30,7 @@ defaults:
   - _self_
 
 habitat:
-  seed: 12345
+  seed: 2025
   dataset:
     type: OPENEQA-v1
     split: val
@@ -84,7 +84,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.3
+    thresh: 0.9
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
@@ -113,6 +113,9 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
+  value_mapper:
+    use_value_mapper: True
+    size: "large"
   LLM:
     use_LLM: False
     type: "phi3"
@@ -143,7 +146,7 @@ habitat_baselines:
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
-    video_option: [ "disk" ]
+    # video_option: [ "disk" ]
 
   rl:
     policy:

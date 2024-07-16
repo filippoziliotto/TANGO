@@ -17,7 +17,7 @@ defaults:
     - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
-    # - top_down_map
+    - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - question_sensor
@@ -66,7 +66,7 @@ habitat_baselines:
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/eqa/
-  writer_type: wb # to deactivate just comment this
+  # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg

@@ -14,7 +14,8 @@ from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           DetrImageProcessor, DetrForObjectDetection, BlipForQuestionAnswering,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
-                          BlipProcessor, ViTForImageClassification, ViTImageProcessor
+                          BlipProcessor, ViTForImageClassification, ViTImageProcessor,
+                          CLIPProcessor, CLIPModel
                           )
 
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
@@ -252,6 +253,16 @@ def get_roomcls_model(path, device):
 
     processor = ViTImageProcessor.from_pretrained(path)
     model = ViTForImageClassification.from_pretrained(path)
+    model.eval()
+    return model.to(device), processor
+
+def get_value_mapper(device, size):
+    if size in ['base']:
+        model_name = "openai/clip-vit-base-patch32"
+    elif size in ['large']:
+        model_name = "openai/clip-vit-large-patch14"
+    processor = CLIPProcessor.from_pretrained(model_name)
+    model = CLIPModel.from_pretrained(model_name)
     model.eval()
     return model.to(device), processor
 

@@ -3,6 +3,10 @@ import torch
 import torchvision
 import numpy as np
 from PIL import Image
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
+import cv2
 
 from torchvision.transforms import ToTensor
 from torchvision.transforms.functional import rgb_to_grayscale
@@ -13,11 +17,13 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_vqa_model, get_matcher_model, 
     get_captioner_model, get_segmentation_model,
     get_roomcls_model, get_llm_model,
+    get_value_mapper
 )
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
+from habitat.utils.visualizations.maps import from_grid
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -363,3 +369,113 @@ class LLMmodel:
         output = self.pipeline(messages, **self.generation_args)
         return output[0]['generated_text']
 
+class ValueMapper:
+    def __init__(self, habitat_env, size):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.model, self.processor = get_value_mapper(self.device, size)
+        self.habitat_env = habitat_env
+        self.show_target_on_map = True
+
+    # Function to compute cosine similarity
+    def calculate_cosine_similarity(self, image, text):
+        # Preprocess image and text
+        inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
+
+        # Get the image and text embeddings
+        outputs = self.model(**inputs)
+        image_embeddings = outputs.image_embeds
+        text_embeddings = outputs.text_embeds
+
+        # Compute cosine similarity
+        cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())
+        return cosine_sim[0][0]
+
+    def reset_mapper(self, map):
+        self.update_mask_map = np.zeros(map['map'].shape)
+        self.exploration_target = None
+
+    def update_mapper(self, map, value):
+        current_view  = map["current_view_mask"].astype(float)
+        current_view = np.where(current_view != 0., value, 0.)
+        
+        # Indexes non-zero elements of current-view
+        # Subsitute with image-text score value
+        x,y = np.where(current_view != 0.)
+        self.update_mask_map[x,y] += current_view[x,y] / 2
+
+        # Smooth and normalize values
+        self.smoothed_map = self.smooth_values(self.update_mask_map)
+
+    def smooth_values(self, map):
+        # Smooth the values
+        map = cv2.GaussianBlur(map, (5,5), 0)
+        # Normalize from 0 to 1
+        map = (map - np.min(map)) / (np.max(map) - np.min(map))
+        return map
+
+    def map_value(self, image, text, map):
+
+        # Reset values at each episode
+        if self.habitat_env.get_current_step() == 1:
+            self.reset_mapper(map)
+
+        # Calculate score value and update mask
+        value = self.calculate_cosine_similarity(image, text)
+        self.update_mapper(map, value)
+
+        # Convert highest score regions to 3D points
+        if self.habitat_env.get_current_step() % 100 == 0:
+            sim = self.habitat_env.get_habitat_sim()
+            self.exploration_target = self.get_highest_score_point(self.smoothed_map, sim)
+
+        return self.smoothed_map, self.exploration_target
+
+    def get_highest_score_region(self, score_mask):
+        # take max value region
+        max_ = np.max(score_mask)
+        x,y = np.where(score_mask == max_)
+        return x,y
+    
+    def get_highest_score_point(self, score_mask, sim):
+        x, y = self.get_highest_score_region(score_mask)
+        idx = np.random.choice(len(x))
+        x0,y0 = x[idx], y[idx]
+
+        return self.map_to_xy(score_mask, (x0,y0), sim)
+
+    def map_to_xy(self, map, grid_pos, sim):
+        x, z = from_grid(
+            grid_pos[0],
+            grid_pos[1],
+            (map.shape[0], map.shape[1]),
+            sim,
+        )
+        height = sim.get_agent_state().position[1]
+        # unique elements map
+        return np.array([x, height, z])
+
+
+        """
+        Cluster non-zero regions of a 2D numpy array based on their values.
+        
+        Parameters:
+        array (numpy.ndarray): 2D array with float values where zero represents the background.
+        n_clusters (int): Number of clusters to form.
+        
+        Returns:
+        clustered_array (numpy.ndarray): 2D array with the same shape as input, where each non-zero
+                                        value is replaced by its cluster label.
+        """
+        # Mask for non-zero regions
+        mask = array > 0
+        non_zero_values = array[mask].reshape(-1, 1)
+        
+        # Apply k-means clustering
+        kmeans = KMeans(n_clusters=n_clusters, random_state=0)
+        clusters = kmeans.fit_predict(non_zero_values)
+        
+        # Create the clustered array
+        clustered_array = np.zeros_like(array)
+        clustered_array[mask] = clusters + 1  # +1 to differentiate from background (0)
+        
+        return clustered_array

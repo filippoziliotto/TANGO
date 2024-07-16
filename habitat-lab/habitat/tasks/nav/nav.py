@@ -881,6 +881,7 @@ class TopDownMap(Measure):
             "fog_of_war_mask": self._fog_of_war_mask,
             "agent_map_coord": map_positions,
             "agent_angle": map_angles,
+            "current_view_mask": self._current_view_mask,
         }
 
     @staticmethod
@@ -924,7 +925,7 @@ class TopDownMap(Measure):
 
     def update_fog_of_war_mask(self, agent_position, angle):
         if self._config.fog_of_war.draw:
-            self._fog_of_war_mask = fog_of_war.reveal_fog_of_war(
+            self._fog_of_war_mask, self._current_view_mask = fog_of_war.reveal_fog_of_war(
                 self._top_down_map,
                 self._fog_of_war_mask,
                 agent_position,

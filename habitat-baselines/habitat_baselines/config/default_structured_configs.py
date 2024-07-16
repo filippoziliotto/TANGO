@@ -520,6 +520,14 @@ class RoomClassifierConfig(HabitatBaselinesBaseConfig):
     model_path: str = 'habitat-baselines/habitat_baselines/rl/ppo/models/roomcls_utils/'
 
 @dataclass
+class ValueMapperConfig(HabitatBaselinesBaseConfig):
+    """
+    Room classifier model config settings
+    """
+    use_value_mapper: bool = False
+    size: str = "base"
+
+@dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     # task config can be a list of configs like "A.yaml,B.yaml"
     # If habitat_baselines.evaluate is true, the run will be in evaluation mode
@@ -576,6 +584,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     segmenter: SegmenterConfig = SegmenterConfig()
     LLM: LLMConfig = LLMConfig()
     room_classifier: RoomClassifierConfig = RoomClassifierConfig()
+    value_mapper: ValueMapperConfig = ValueMapperConfig()
     # When resuming training or evaluating, will use the original
     # training config if load_resume_state_config is True
     load_resume_state_config: bool = True

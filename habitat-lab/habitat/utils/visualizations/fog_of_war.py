@@ -79,7 +79,7 @@ def bresenham_supercover_line(pt1, pt2):
 
 
 @numba.jit(nopython=True)
-def draw_fog_of_war_line(top_down_map, fog_of_war_mask, pt1, pt2):
+def draw_fog_of_war_line(top_down_map, fog_of_war_mask, pt1, pt2, current_view_mask):
     r"""Draws a line on the fog_of_war_mask mask between pt1 and pt2"""
 
     for pt in bresenham_supercover_line(pt1, pt2):
@@ -95,6 +95,9 @@ def draw_fog_of_war_line(top_down_map, fog_of_war_mask, pt1, pt2):
             break
 
         fog_of_war_mask[x, y] = 1
+        current_view_mask[x, y] = 1
+        
+
 
 
 @numba.jit(nopython=True)
@@ -105,6 +108,7 @@ def _draw_loop(
     current_angle,
     max_line_len,
     angles,
+    current_view_mask
 ):
     for angle in angles:
         draw_fog_of_war_line(
@@ -116,6 +120,7 @@ def _draw_loop(
             * np.array(
                 [np.cos(current_angle + angle), np.sin(current_angle + angle)]
             ),
+            current_view_mask
         )
 
 
@@ -151,6 +156,7 @@ def reveal_fog_of_war(
     )
 
     fog_of_war_mask = current_fog_of_war_mask.copy()
+    current_view_mask = np.zeros_like(fog_of_war_mask)
     _draw_loop(
         top_down_map,
         fog_of_war_mask,
@@ -158,6 +164,7 @@ def reveal_fog_of_war(
         current_angle,
         max_line_len,
         angles,
+        current_view_mask
     )
 
-    return fog_of_war_mask
+    return fog_of_war_mask, current_view_mask

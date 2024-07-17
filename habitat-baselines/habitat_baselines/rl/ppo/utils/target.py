@@ -4,17 +4,16 @@ from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
 
-class Target:
-    def __init__(self, habitat_env):
-        """
-        Class that define what a target is
-        and the relative properties if in exploration or navigation phase
-        """
-        self.habitat_env = habitat_env
+class TargetCoordinates:
+    """
+    Class that defines the target coordinates
+    This is NOT a target class, but a class that defines the coordinates
+    """
+    def __init__(self):
         self.polar_coords = [None, None]
         self.cartesian_coords = [None, None, None]
-        self.exploration = True
-    
+        self.get_camera_params()
+
     def from_bbox_to_polar(self, norm_depth, bbox):
         """
         Function that returns the polar coordinates of the target
@@ -26,7 +25,7 @@ class Target:
             return [None, None]
         
         # calculate the distance of the object
-        self.get_camera_params()
+        
         depth = self.min_depth + (norm_depth * (self.max_depth - self.min_depth))
 
         # Calculate centroid of bounding box
@@ -67,14 +66,13 @@ class Target:
         
         return torch.tensor(cartesian_coords, dtype=torch.float32)
 
-    def from_cartesian_to_polar(self, cartesian_coords):
+    def from_cartesian_to_polar(self, cartesian_coords, agent_state):
         """
         Function that returns the polar coordinates of the target
         given the cartesian coordinates
         """
-        agent_pos = self.habitat_env.get_current_position()
-        agent_ang = agent_pos.rotation
-        agent_pos = agent_pos.position
+        agent_ang = agent_state.rotation
+        agent_pos = agent_state.position
 
         return from_xyz_to_polar(agent_pos, agent_ang, cartesian_coords)
 
@@ -87,77 +85,33 @@ class Target:
         cartesian_coords = self.from_polar_to_cartesian(polar_coords)
         return cartesian_coords
 
-    def get_exploration_target(self):
+    def set_coords(self, 
+                   coords=None,
+                   from_type="polar",
+                   agent_state=None,
+                   bboxes = None,
+                   depth_img = None):
         """
-        If exploration mode, update target each 100 steps
+        Set the coords of the target
+        during exploration
         """
-        current_step = self.habitat_env.get_current_step()
-        update_step = 100
-
-        if current_step % update_step == 0:
-            polar_coords = self.update_target()
-        else:
-            polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
-            if self.target_reached():
-                polar_coords = self.update_target()
-
-        return polar_coords
-
-    def update_target(self):
-        """
-        Function that updates the target
-        """
-        polar_coords = self.habitat_env.sample_distant_points()
-        self.cartesian_coords = self.from_polar_to_cartesian(polar_coords)
-        return polar_coords
-        
-    def get_target_coords(self, bboxes=None,):
-        """
-        Function that returns the polar coordinates of the target
-        depending if in exploration phase or not
-        """
-
-        if self.exploration:
-            if not self.set_exploration_target:
-                self.polar_coords = self.get_exploration_target()
-            else:
-                pass
-        else:
-            self.polar_coords = self.from_bbox_to_polar(bboxes)
+        if from_type in "polar":
+            assert coords is not None, "Coordinates cannot be None"
+            self.polar_coords = coords
             self.cartesian_coords = self.from_polar_to_cartesian(self.polar_coords)
-
-        return self.polar_coords
-
-    def update_polar_coords(self):
-        """
-        Function that updates the polar coordinates of the target
-        after each step, the method is simply for code elegance
-        """
-        self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords)
-        return self.polar_coords
-
-    def target_reached(self):
-        """
-        Function that checks if the target is reached
-        ideally this could be written in a better way (probaly TODO)
-        """
-        distance = self.polar_coords[0][0]
-
-        if self.exploration:
-            return distance <= 1.5
         
-        return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
-       
-    def set_target_coords(self, coords, type="polar"):
-        self.set_exploration_target = True
-        if type in "polar":
-            assert len(coords) == 2
-            self.polar_coords = torch.Tensor([[coords[0], coords[1]]]).to(self.habitat_env.device)
-        
-        elif type in ["cartesian"]:
-            assert len(coords) == 3
-            self.polar_coords = self.from_cartesian_to_polar(coords)
+        elif from_type in ["cartesian"]:
+            assert coords is not None, "Coordinates cannot be None"
+            assert agent_state is not None, "Agent state cannot be None"
+            self.cartesian_coords = coords
+            self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords, agent_state)
 
+        elif from_type in ["bbox"]:
+            assert agent_state is not None, "Agent state cannot be None"
+            assert depth_img is not None, "Depth image cannot be None"
+            assert bboxes is not None, "Bounding boxes cannot be None"
+            self.cartesian_coords = self.from_bbox_to_cartesian(depth_img, bboxes)
+            self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords, agent_state)
 
     def get_camera_focal_lenght(self, camera_width, camera_hfov):
         """
@@ -170,12 +124,136 @@ class Target:
         """
         Function that returns the camera parameters
         """
-        # TODO: Fix this retrieval
-        # self.camera_width = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.width
-        # self.camera_height = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.height
-        # self.camera_hfov = self.habitat_env.config.habitat.simulator.agents.main_agent.sim_sensor.rgb_sensor.hfov
         self.camera_width = 256
         self.camera_height = 256
         self.camera_hfov = 90
         self.max_depth = 10.
         self.min_depth = 0.
+
+class Target:
+    def __init__(self, habitat_env):
+        """
+        Class that define what a target is and the relative
+        properties if in exploration or navigation phase
+        """
+        self.habitat_env = habitat_env
+        self.coordinates = TargetCoordinates()
+        self.exploration = True
+
+        self.polar_coords = [None, None]
+        self.cartesian_coords = [None, None, None]
+        self.update_step = 500
+
+    def set_target(self, 
+                   coords=None,
+                   from_type="polar",
+                   agent_state=None,
+                   bboxes = None,
+                   depth_img = None):
+        """
+        Function that sets the target coordinates
+        during exploration
+        """
+
+        self.coordinates.set_coords(
+            coords=None,
+            from_type="polar",
+            agent_state=None,
+            bboxes = None,
+            depth_img = None
+        )
+        self.cartesian_coords = self.coordinates.cartesian_coords
+        self.polar_coords = self.coordinates.polar_coords
+
+    def generate_target(self):
+        """
+        Function that geneate the fake target for exploration
+        it generates both polar and cartesian coords
+        """
+        polar_coords = self.habitat_env.sample_distant_points()
+        self.set_target(
+                coords = polar_coords, 
+                from_type="polar"
+        )
+
+    def get_target_coords(self):
+        """
+        If exploration mode, update target each 100 steps
+        """
+        current_step = self.habitat_env.get_current_step()
+
+        if current_step % self.update_step == 0:
+            self.generate_target()
+        else:
+            self.update_target_coords()
+
+        # Useful ony for navigable points policy
+        if self.is_target_reached():
+            self.generate_target()
+
+    def update_target_coords(self):
+        """
+        Function that updates the target, this works
+        only using cartesian coords as target as default
+        """
+        current_agent_state = self.habitat_env.get_current_position()
+        self.set_target(
+            coords = self.cartesian_coords,
+            from_type = "cartesian", 
+            current_agent_state = current_agent_state)
+
+    def set_target_coords_from_bbox(self, depth_image, bboxes):
+        """
+        Function that returns the polar coordinates of the target
+        from bbox
+        """
+        current_agent_state = self.habitat_env.get_current_position()
+
+        self.set_target(
+            from_type="bboxes",
+            agent_state=current_agent_state,
+            bboxes = bboxes,
+            depth_img = depth_image)
+
+        return self.polar_coords
+
+    def set_target_coords_from_cartesian(self, coords):
+        """
+        Function that returns the polar coordinates of the target
+        from bbox
+        """
+        current_agent_state = self.habitat_env.get_current_position()
+
+        self.set_target(
+            coords=coords,
+            from_type="cartesian",
+            agent_state=current_agent_state,
+        )
+
+        return self.polar_coords
+
+        if self.exploration:
+            self.polar_coords = self.get_exploration_target()
+        
+        elif not self.exploration:
+            self.set_target(
+                from_type="bboxes",
+                agent_state=None,
+                bboxes = None,
+                depth_img = None):
+
+        return self.polar_coords
+
+    def is_target_reached(self):
+        """
+        Function that checks if the target is reached
+        ideally this could be written in a better way (probaly TODO)
+        """
+        distance = self.polar_coords[0][0]
+
+        if self.exploration:
+            return distance <= 1.5
+        
+        return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
+       
+

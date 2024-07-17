@@ -401,7 +401,8 @@ class ValueMapper:
         # Indexes non-zero elements of current-view
         # Subsitute with image-text score value
         x,y = np.where(current_view != 0.)
-        self.update_mask_map[x,y] += current_view[x,y] / 2
+        self.update_mask_map[x,y] += current_view[x,y]
+        self.update_mask_map[x,y] /= 2
 
         # Smooth and normalize values
         self.smoothed_map = self.smooth_values(self.update_mask_map)
@@ -424,9 +425,9 @@ class ValueMapper:
         self.update_mapper(map, value)
 
         # Convert highest score regions to 3D points
-        if self.habitat_env.get_current_step() % 100 == 0:
-            sim = self.habitat_env.get_habitat_sim()
-            self.exploration_target = self.get_highest_score_point(self.smoothed_map, sim)
+        # if self.habitat_env.get_current_step() % 100 == 0:
+        sim = self.habitat_env.get_habitat_sim()
+        self.exploration_target = self.get_highest_score_point(self.smoothed_map, sim)
 
         return self.smoothed_map, self.exploration_target
 

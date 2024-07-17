@@ -295,9 +295,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
         self.target.exploration = True
-        self.coords = self.target.get_target_coords()
+        self.target.get_target_coords()
 
-        self.habitat_env.execute_action(coords=self.coords)
+        self.habitat_env.execute_action(coords=self.target.polar_coords)
         self.habitat_env.update_episode_stats()
 
         # For debugging purposes
@@ -317,19 +317,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
         self.target.exploration = False
-        self.coords = self.target.polar_coords
         
         while (not self.target.target_reached()) and (not self.habitat_env.max_steps_reached()):
-            self.habitat_env.execute_action(coords=self.coords)
+            self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
-            # update polar coordinates given the new agent step
-            self.coords = self.target.update_polar_coords()
+            # Update polar coordinates given the new agent step
+            self.target.update_target_coords()
             self.update_variable('object', bbox)
 
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
-            # self.habitat_env.debugger.save_obs(self.habitat_env.get_current_observation(type='semantic'), 'semantic', gt_semantic=True)
 
     def stop_navigation(self):
         """
@@ -414,14 +412,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     self.habitat_env.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.habitat_env.memory_dict[label]['bbox'])
         
         if bbox:
-            self.target.polar_coords = self.target.from_bbox_to_polar(depth_obs, bbox[0][0])    
-            self.target.cartesian_coords = self.target.from_polar_to_cartesian(self.target.polar_coords)
+            self.target.set_target_coords_from_bbox(depth_obs, bbox[0][0])
 
             # For debugging purposes
             self.save_observation(obs, 'detection', bbox)
-
+        
         self.update_variable('objects', bbox)
-
         self.map_scene(target_name)
         return bbox
 
@@ -580,10 +576,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         fow, target_map_coords = self.value_mapper.map_value(image, target_name, map)
 
-        if target_map_coords is not None:  
-            self.target.set_target_coords(target_map_coords, type='cartesian')
+        if target_map_coords is not None and not self.variables['objects']:  
+            self.target.cartesian_coords = target_map_coords
 
-        self.save_observation(fow, 'map')
+        # self.save_observation(fow, 'map')
+        # save fow image as map.png with jetmap
+        # TODO: check if the target is acutally near the heatmap scores
+        plt.imsave('images/map.png', fow, cmap='jet')
 
     def save_observation(self, obs, name, bbox=None):
         """

@@ -78,20 +78,20 @@ habitat_baselines:
     run_name: zs_eqa_prova
   save_obs:
     save_to_disk: True 
-  sampling_strategy: "navigable"
+  sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.9
+    thresh: 0.2
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
     use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet50"
-    additional_thresh: 0.95
+    additional_thresh: 0.8
     additional_nms_thresh: 0.5
   # Feature Matcher settings
   feature_matcher:

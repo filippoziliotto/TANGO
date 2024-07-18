@@ -9,8 +9,8 @@ from habitat.sims.habitat_simulator.habitat_simulator import HabitatSim
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 
-from frontier_exploration.base_explorer import BaseExplorer
-from frontier_exploration.objnav_explorer import GreedyObjNavExplorer, ObjNavExplorer
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.base_explorer import BaseExplorer
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.objnav_explorer import GreedyObjNavExplorer, ObjNavExplorer
 
 
 @registry.register_sensor

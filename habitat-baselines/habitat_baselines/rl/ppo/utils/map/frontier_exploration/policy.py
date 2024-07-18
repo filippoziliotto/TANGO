@@ -11,8 +11,8 @@ except:
     POLICY_ACTION_DATA = False
 
 
-from frontier_exploration.base_explorer import BaseExplorer
-from frontier_exploration.objnav_explorer import GreedyObjNavExplorer, ObjNavExplorer
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.base_explorer import BaseExplorer
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.objnav_explorer import GreedyObjNavExplorer, ObjNavExplorer
 
 
 @baseline_registry.register_policy

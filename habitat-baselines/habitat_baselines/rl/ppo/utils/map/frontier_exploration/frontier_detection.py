@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 from numba import njit
 
-from frontier_exploration.utils.bresenham_line import bresenhamline
-from frontier_exploration.utils.frontier_utils import closest_line_segment
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.bresenham_line import bresenhamline
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.frontier_utils import closest_line_segment
 
 VISUALIZE = os.environ.get("MAP_VISUALIZE", "False").lower() == "true"
 DEBUG = os.environ.get("MAP_DEBUG", "False").lower() == "true"

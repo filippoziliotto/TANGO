@@ -11,12 +11,12 @@ from habitat_sim import AgentState
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 
-from frontier_exploration.base_explorer import (
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.base_explorer import (
     ActionIDs,
     BaseExplorer,
     BaseExplorerSensorConfig,
 )
-from frontier_exploration.utils.general_utils import wrap_heading
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.general_utils import wrap_heading
 
 
 class State:

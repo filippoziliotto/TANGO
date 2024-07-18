@@ -380,6 +380,7 @@ class ValueMapper:
         self.habitat_env = habitat_env
         self.show_target_on_map = True
 
+        self._get_cameras_parameters(self.habitat_env.config)
         self.obstacle_map = ObstacleMap(
             agent_radius=0.18,
             min_height=0.4,
@@ -410,22 +411,19 @@ class ValueMapper:
         current_view  = map["current_view_mask"].astype(float)
         current_view = np.where(current_view != 0., value, 0.)
 
-        x, y = self.habitat_env.batch["gps"][0].cpu().numpy()
-        camera_yaw = self.habitat_env.batch["compass"][0].cpu().item()
-        camera_position = np.array([x, -y, 1.41])
-
-        depth_img = self.habitat_env.get_current_observation(type='depth')[:,:,0]
         self.obstacle_map.update_map(
-            depth = depth_img,
-            tf_camera_to_episodic=xyz_yaw_to_tf_matrix(camera_position, camera_yaw),
-            min_depth=0.,
-            max_depth=10.,
-            fx=128,
-            fy=128,
-            topdown_fov = np.deg2rad(90),
+            depth = self._get_current_depth(),
+            tf_camera_to_episodic=self.get_tf_camera_to_episodic(self.habitat_env),
+            min_depth=self._min_depth,
+            max_depth=self._max_depth,
+            fx=self._fx,
+            fy=self._fy,
+            topdown_fov = self._topdown_view_angle,
         )
+        # TODO: add trajectory visualizer
+        map_ = self.obstacle_map.visualize()
+        plt.imsave("images/map.png", map_)
 
-        
         # Indexes non-zero elements of current-view
         # Subsitute with image-text score value
         x,y = np.where(current_view != 0.)
@@ -483,28 +481,25 @@ class ValueMapper:
         # unique elements map
         return np.array([x, height, z])
 
+    def _get_cameras_parameters(self, config):
+            # Get camera parameters
+        self._min_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.min_depth
+        self._max_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.max_depth
+        self._fov = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.hfov
+        self._camera_height = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.position[1]
+        self._image_height = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.height
+        self._image_width = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.width
+        self._agent_radius = config.habitat.simulator.agents.main_agent.radius
+        self._agent_height = config.habitat.simulator.agents.main_agent.height
+        self._fx = self._image_width / (2 * np.tan(np.deg2rad(self._fov) / 2))
+        self._fy = self._image_height / (2 * np.tan(np.deg2rad(self._fov) / 2))
+        self._topdown_view_angle = np.deg2rad(self._fov)
+     
+    def _get_current_depth(self):
+        return self.habitat_env.get_current_observation(type='depth')[:,:,0]
 
-        """
-        Cluster non-zero regions of a 2D numpy array based on their values.
-        
-        Parameters:
-        array (numpy.ndarray): 2D array with float values where zero represents the background.
-        n_clusters (int): Number of clusters to form.
-        
-        Returns:
-        clustered_array (numpy.ndarray): 2D array with the same shape as input, where each non-zero
-                                        value is replaced by its cluster label.
-        """
-        # Mask for non-zero regions
-        mask = array > 0
-        non_zero_values = array[mask].reshape(-1, 1)
-        
-        # Apply k-means clustering
-        kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-        clusters = kmeans.fit_predict(non_zero_values)
-        
-        # Create the clustered array
-        clustered_array = np.zeros_like(array)
-        clustered_array[mask] = clusters + 1  # +1 to differentiate from background (0)
-        
-        return clustered_array
+    def get_tf_camera_to_episodic(self, habitat):
+        x, y = self.habitat_env.get_current_observation(type='gps')
+        camera_yaw = self.habitat_env.get_current_observation(type='compass')
+        camera_position = np.array([x, -y, self._camera_height])
+        return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)

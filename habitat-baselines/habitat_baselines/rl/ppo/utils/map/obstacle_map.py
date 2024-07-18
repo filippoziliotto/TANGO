@@ -99,10 +99,6 @@ class ObstacleMap(BaseMap):
             pixel_points = self._xy_to_px(xy_points)
             self._map[pixel_points[:, 1], pixel_points[:, 0]] = 1
 
-            # save self._map to images/map.png
-            # convert self._map from mask to int
-            self._map = self._map.astype(np.uint8)
-
             # Update the navigable area, which is an inverse of the obstacle map after a
             # dilation operation to accommodate the robot's radius.
             self._navigable_map = 1 - cv2.dilate(
@@ -149,7 +145,6 @@ class ObstacleMap(BaseMap):
             self.explored_area = new_area.astype(bool)
 
         # Compute frontier locations
-        # This is commented for now
         self._frontiers_px = self._get_frontiers()
         if len(self._frontiers_px) == 0:
             self.frontiers = np.array([])

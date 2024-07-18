@@ -2,7 +2,7 @@ import habitat_sim
 import numpy as np
 from numba import njit
 
-from frontier_exploration.utils.general_utils import wrap_heading
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.general_utils import wrap_heading
 
 
 @njit

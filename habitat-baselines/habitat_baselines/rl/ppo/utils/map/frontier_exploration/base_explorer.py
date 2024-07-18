@@ -13,9 +13,9 @@ from habitat.utils.visualizations import maps
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 
-from frontier_exploration.frontier_detection import detect_frontier_waypoints
-from frontier_exploration.utils.fog_of_war import reveal_fog_of_war
-from frontier_exploration.utils.path_utils import (
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.frontier_detection import detect_frontier_waypoints
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.fog_of_war import reveal_fog_of_war
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.path_utils import (
     a_star_search,
     completion_time_heuristic,
     euclidean_heuristic,

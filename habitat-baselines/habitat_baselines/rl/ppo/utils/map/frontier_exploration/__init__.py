@@ -1,14 +1,14 @@
 """The following imports are necessary for updating the registry"""
 try:
-    import frontier_exploration.base_explorer
-    import frontier_exploration.frontier_detection
-    import frontier_exploration.frontier_sensor
-    import frontier_exploration.measurements
-    import frontier_exploration.objnav_explorer
-    import frontier_exploration.policy
-    import frontier_exploration.trainer
-    import frontier_exploration.utils.inflection_sensor
-    import frontier_exploration.utils.multistory_episode_finder
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.base_explorer
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.frontier_detection
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.frontier_sensor
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.measurements
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.objnav_explorer
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.policy
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.trainer
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.inflection_sensor
+    import habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.multistory_episode_finder
 except ModuleNotFoundError as e:
     # If the error was due to the habitat package not being installed, then pass, but
     # print a warning. Do not pass if it was due to another package being missing.

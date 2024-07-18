@@ -13,10 +13,10 @@ from habitat.tasks.nav.nav import HeadingSensor
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 
-from frontier_exploration.base_explorer import BaseExplorer
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.base_explorer import BaseExplorer
 
 # from frontier_exploration.utils.path_utils import path_dist_cost
-from frontier_exploration.utils.path_utils import path_time_cost
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.path_utils import path_time_cost
 
 
 @registry.register_sensor

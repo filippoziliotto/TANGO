@@ -595,7 +595,6 @@ class HabitatEvaluator(Evaluator):
         """
         Get the current observation from the environment
         """
-        assert type in ['rgb', 'depth', 'semantic','instance_imagegoal']
         if type in ['rgb']:
             return self.batch['rgb'].squeeze(0).detach().cpu().numpy()
         elif type in ['depth']:
@@ -604,6 +603,12 @@ class HabitatEvaluator(Evaluator):
             return self.batch['semantic'].squeeze(0).detach().cpu().numpy()
         elif type in ['instance_imagegoal']:
             return self.batch['instance_imagegoal'].squeeze(0).detach().cpu().numpy()
+        elif type in ['gps']:
+            return self.batch['gps'].squeeze(0).detach().cpu().numpy()
+        elif type in ['compass']:
+            return self.batch['compass'].squeeze(0).detach().cpu().item()
+        else:
+            raise ValueError(f"Invalid observation type: {type}")
 
     def get_current_step(self):
         """

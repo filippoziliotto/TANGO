@@ -4,12 +4,11 @@ from typing import Any, Union
 
 import cv2
 import numpy as np
-from frontier_exploration.frontier_detection import detect_frontier_waypoints
-from frontier_exploration.utils.fog_of_war import reveal_fog_of_war
+# from frontier_exploration.frontier_detection import detect_frontier_waypoints
+# from frontier_exploration.utils.fog_of_war import reveal_fog_of_war
 
-from vlfm.mapping.base_map import BaseMap
-from vlfm.utils.geometry_utils import extract_yaw, get_point_cloud, transform_points
-from vlfm.utils.img_utils import fill_small_holes
+from .base_map import BaseMap
+from .geometry_utils import extract_yaw, get_point_cloud, transform_points, fill_small_holes
 
 
 class ObstacleMap(BaseMap):
@@ -100,6 +99,10 @@ class ObstacleMap(BaseMap):
             pixel_points = self._xy_to_px(xy_points)
             self._map[pixel_points[:, 1], pixel_points[:, 0]] = 1
 
+            # save self._map to images/map.png
+            # convert self._map from mask to int
+            self._map = self._map.astype(np.uint8)
+
             # Update the navigable area, which is an inverse of the obstacle map after a
             # dilation operation to accommodate the robot's radius.
             self._navigable_map = 1 - cv2.dilate(
@@ -108,6 +111,7 @@ class ObstacleMap(BaseMap):
                 iterations=1,
             ).astype(bool)
 
+        explore = False
         if not explore:
             return
 
@@ -146,6 +150,7 @@ class ObstacleMap(BaseMap):
             self.explored_area = new_area.astype(bool)
 
         # Compute frontier locations
+        # This is commented for now
         self._frontiers_px = self._get_frontiers()
         if len(self._frontiers_px) == 0:
             self.frontiers = np.array([])

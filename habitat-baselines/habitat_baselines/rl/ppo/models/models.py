@@ -23,7 +23,11 @@ from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
+
+# Map generator imports
 from habitat.utils.visualizations.maps import from_grid
+from habitat_baselines.rl.ppo.utils.map.obstacle_map import ObstacleMap
+from habitat_baselines.rl.ppo.utils.map.geometry_utils import xyz_yaw_to_tf_matrix
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -376,6 +380,13 @@ class ValueMapper:
         self.habitat_env = habitat_env
         self.show_target_on_map = True
 
+        self.obstacle_map = ObstacleMap(
+            agent_radius=0.18,
+            min_height=0.4,
+            max_height=1.6,
+            area_thresh=1.5
+        )
+
     # Function to compute cosine similarity
     def calculate_cosine_similarity(self, image, text):
         # Preprocess image and text
@@ -395,8 +406,25 @@ class ValueMapper:
         self.exploration_target = None
 
     def update_mapper(self, map, value):
+        
         current_view  = map["current_view_mask"].astype(float)
         current_view = np.where(current_view != 0., value, 0.)
+
+        x, y = self.habitat_env.batch["gps"][0].cpu().numpy()
+        camera_yaw = self.habitat_env.batch["compass"][0].cpu().item()
+        camera_position = np.array([x, -y, 1.41])
+
+        depth_img = self.habitat_env.get_current_observation(type='depth')[:,:,0]
+        self.obstacle_map.update_map(
+            depth = depth_img,
+            tf_camera_to_episodic=xyz_yaw_to_tf_matrix(camera_position, camera_yaw),
+            min_depth=0.,
+            max_depth=10.,
+            fx=128,
+            fy=128,
+            topdown_fov = np.deg2rad(90),
+        )
+
         
         # Indexes non-zero elements of current-view
         # Subsitute with image-text score value
@@ -425,7 +453,7 @@ class ValueMapper:
         self.update_mapper(map, value)
 
         # Convert highest score regions to 3D points
-        if self.habitat_env.get_current_step() % 100 == 0:
+        if self.habitat_env.get_current_step() % 500 == 0:
             sim = self.habitat_env.get_habitat_sim()
             self.exploration_target = self.get_highest_score_point(self.smoothed_map, sim)
 

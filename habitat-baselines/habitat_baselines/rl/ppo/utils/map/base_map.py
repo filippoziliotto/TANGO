@@ -4,7 +4,7 @@ from typing import Any, List
 
 import numpy as np
 
-from vlfm.mapping.traj_visualizer import TrajectoryVisualizer
+from .traj_visualizer import TrajectoryVisualizer
 
 
 class BaseMap:

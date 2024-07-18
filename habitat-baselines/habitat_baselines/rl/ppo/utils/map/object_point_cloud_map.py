@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import open3d as o3d
 
-from vlfm.utils.geometry_utils import (
+from .geometry_utils import (
     extract_yaw,
     get_point_cloud,
     transform_points,

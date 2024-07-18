@@ -584,7 +584,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # self.save_observation(fow, 'map')
         # save fow image as map.png with jetmap
         # TODO: check if the target is acutally near the heatmap scores
-        plt.imsave('images/map.png', fow, cmap='jet')
+        # plt.imsave('images/map.png', fow, cmap='jet')
 
     def save_observation(self, obs, name, bbox=None):
         """

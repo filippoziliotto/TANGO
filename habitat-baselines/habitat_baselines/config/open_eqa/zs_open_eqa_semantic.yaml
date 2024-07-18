@@ -21,6 +21,8 @@ defaults:
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - openeqa_question_sensor
+    - compass_sensor
+    - gps_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   # - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
@@ -83,7 +85,7 @@ habitat_baselines:
   object_detector:
     use_detector: True
     type: "owl-vit2"
-    size: "large"
+    size: "base"
     thresh: 0.2
     nms_thresh: 0.5
     store_detections: False

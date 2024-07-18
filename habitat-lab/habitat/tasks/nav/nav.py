@@ -62,7 +62,6 @@ cv2 = try_cv2_import()
 
 MAP_THICKNESS_SCALAR: int = 128
 
-
 @attr.s(auto_attribs=True, kw_only=True)
 class NavigationGoal:
     r"""Base class for a goal specification hierarchy."""
@@ -936,6 +935,7 @@ class TopDownMap(Measure):
                     self._map_resolution, sim=self._sim
                 ),
             )
+
 
 
 @registry.register_measure

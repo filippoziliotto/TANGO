@@ -12,9 +12,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import cv2
 import numpy as np
 
-from vlfm.mapping.base_map import BaseMap
-from vlfm.utils.geometry_utils import extract_yaw, get_rotation_matrix
-from vlfm.utils.img_utils import (
+from .base_map import BaseMap
+from .geometry_utils import extract_yaw, get_rotation_matrix
+from .geometry_utils import (
     monochannel_to_inferno_rgb,
     pixel_value_within_radius,
     place_img_in_img,

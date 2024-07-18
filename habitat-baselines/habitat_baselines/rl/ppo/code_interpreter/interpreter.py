@@ -311,6 +311,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     question=self.habitat_env.eqa_vars['question'])
             self.stop_navigation()
 
+        self.target.update_target_coords()
+
     def navigate_to(self, bbox):
         """
         Target fixed (approaching the target)
@@ -577,7 +579,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         fow, target_map_coords = self.value_mapper.map_value(image, target_name, map)
 
         if target_map_coords is not None and not self.variables['objects']:  
-            self.target.cartesian_coords = target_map_coords
+            self.target.set_target_coords_from_cartesian(target_map_coords)
 
         # self.save_observation(fow, 'map')
         # save fow image as map.png with jetmap

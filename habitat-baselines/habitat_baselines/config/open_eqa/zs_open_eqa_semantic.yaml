@@ -83,7 +83,7 @@ habitat_baselines:
   object_detector:
     use_detector: True
     type: "owl-vit2"
-    size: "base"
+    size: "large"
     thresh: 0.2
     nms_thresh: 0.5
     store_detections: False

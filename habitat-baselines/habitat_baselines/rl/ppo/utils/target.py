@@ -52,14 +52,14 @@ class TargetCoordinates:
 
         return torch.Tensor([[distance, theta]]).to(self.habitat_env.device)
     
-    def from_polar_to_cartesian(self, polar_coords):
+    def from_polar_to_cartesian(self, polar_coords, agent_state):
         """
         Function that returns the cartesian coordinates of the target
         given the polar coordinates
         """
-        agent_pos = self.habitat_env.get_current_position()
-        agent_ang = agent_pos.rotation
-        agent_pos = agent_pos.position
+
+        agent_ang = agent_state.rotation
+        agent_pos = agent_state.position
 
         rho, phi = polar_coords[0][0].cpu().numpy(), polar_coords[0][1].cpu().numpy()
         cartesian_coords = from_polar_to_xyz(agent_pos, agent_ang, rho, phi)
@@ -76,13 +76,13 @@ class TargetCoordinates:
 
         return from_xyz_to_polar(agent_pos, agent_ang, cartesian_coords)
 
-    def from_bbox_to_cartesian(self, depth, bbox):
+    def from_bbox_to_cartesian(self, depth, bbox, agent_state):
         """
         Function that returns the cartesian coordinates of the target
         given a bounding box
         """
         polar_coords = self.from_bbox_to_polar(depth, bbox)
-        cartesian_coords = self.from_polar_to_cartesian(polar_coords)
+        cartesian_coords = self.from_polar_to_cartesian(polar_coords, agent_state)
         return cartesian_coords
 
     def set_coords(self, 
@@ -97,8 +97,9 @@ class TargetCoordinates:
         """
         if from_type in "polar":
             assert coords is not None, "Coordinates cannot be None"
+            assert agent_state is not None, "Agent state cannot be None"
             self.polar_coords = coords
-            self.cartesian_coords = self.from_polar_to_cartesian(self.polar_coords)
+            self.cartesian_coords = self.from_polar_to_cartesian(self.polar_coords, agent_state)
         
         elif from_type in ["cartesian"]:
             assert coords is not None, "Coordinates cannot be None"
@@ -110,7 +111,7 @@ class TargetCoordinates:
             assert agent_state is not None, "Agent state cannot be None"
             assert depth_img is not None, "Depth image cannot be None"
             assert bboxes is not None, "Bounding boxes cannot be None"
-            self.cartesian_coords = self.from_bbox_to_cartesian(depth_img, bboxes)
+            self.cartesian_coords = self.from_bbox_to_cartesian(depth_img, bboxes, agent_state)
             self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords, agent_state)
 
     def get_camera_focal_lenght(self, camera_width, camera_hfov):
@@ -129,6 +130,7 @@ class TargetCoordinates:
         self.camera_hfov = 90
         self.max_depth = 10.
         self.min_depth = 0.
+        self.fl = self.get_camera_focal_lenght(self.camera_width, self.camera_hfov)
 
 class Target:
     def __init__(self, habitat_env):
@@ -154,64 +156,24 @@ class Target:
         Function that sets the target coordinates
         during exploration
         """
-
         self.coordinates.set_coords(
-            coords=None,
-            from_type="polar",
-            agent_state=None,
-            bboxes = None,
-            depth_img = None
+            coords=coords,
+            from_type=from_type,
+            agent_state=agent_state,
+            bboxes = bboxes,
+            depth_img = depth_img
         )
         self.cartesian_coords = self.coordinates.cartesian_coords
         self.polar_coords = self.coordinates.polar_coords
-
-    def generate_target(self):
-        """
-        Function that geneate the fake target for exploration
-        it generates both polar and cartesian coords
-        """
-        polar_coords = self.habitat_env.sample_distant_points()
-        self.set_target(
-                coords = polar_coords, 
-                from_type="polar"
-        )
-
-    def get_target_coords(self):
-        """
-        If exploration mode, update target each 100 steps
-        """
-        current_step = self.habitat_env.get_current_step()
-
-        if current_step % self.update_step == 0:
-            self.generate_target()
-        else:
-            self.update_target_coords()
-
-        # Useful ony for navigable points policy
-        if self.is_target_reached():
-            self.generate_target()
-
-    def update_target_coords(self):
-        """
-        Function that updates the target, this works
-        only using cartesian coords as target as default
-        """
-        current_agent_state = self.habitat_env.get_current_position()
-        self.set_target(
-            coords = self.cartesian_coords,
-            from_type = "cartesian", 
-            current_agent_state = current_agent_state)
 
     def set_target_coords_from_bbox(self, depth_image, bboxes):
         """
         Function that returns the polar coordinates of the target
         from bbox
         """
-        current_agent_state = self.habitat_env.get_current_position()
-
         self.set_target(
-            from_type="bboxes",
-            agent_state=current_agent_state,
+            from_type="bbox",
+            agent_state=self.get_agent_state(),
             bboxes = bboxes,
             depth_img = depth_image)
 
@@ -222,28 +184,64 @@ class Target:
         Function that returns the polar coordinates of the target
         from bbox
         """
-        current_agent_state = self.habitat_env.get_current_position()
-
         self.set_target(
             coords=coords,
             from_type="cartesian",
-            agent_state=current_agent_state,
+            agent_state=self.get_agent_state(),
         )
 
         return self.polar_coords
 
-        if self.exploration:
-            self.polar_coords = self.get_exploration_target()
-        
-        elif not self.exploration:
-            self.set_target(
-                from_type="bboxes",
-                agent_state=None,
-                bboxes = None,
-                depth_img = None):
+    def set_target_coords_from_polar(self, coords):
+        """
+        Function that returns the polar coordinates of the target
+        from polar, just a placeholder
+        """
+        self.set_target(
+            coords=coords,
+            from_type="polar",
+            agent_state=self.get_agent_state(),
+        )
 
         return self.polar_coords
 
+    def generate_target(self):
+        """
+        Function that geneate the fake target for exploration
+        it generates both polar and cartesian coords
+        """
+        polar_coords = self.habitat_env.sample_distant_points()
+        self.set_target_coords_from_polar(coords = polar_coords)
+
+    def get_target_coords(self):
+        """
+        If exploration mode, update target each 100 steps
+        """
+        assert self.exploration is True, "Exploration mode cannot be False"
+
+        current_step = self.habitat_env.get_current_step()
+        if current_step % self.update_step == 0:
+            self.generate_target()
+
+        # Useful ony for navigable points policy
+        if self.is_target_reached():
+            self.generate_target()
+
+    def update_target_coords(self, from_type="cartesian"):
+        """
+        Function that updates the target, this works
+        only using cartesian coords as target as default
+        """
+
+        if from_type in ["cartesian"]:
+            self.set_target_coords_from_cartesian(
+                coords = self.cartesian_coords
+            )
+
+        # TODO: implement bbox update
+        elif from_type in ["bbox"]:
+            pass
+        
     def is_target_reached(self):
         """
         Function that checks if the target is reached
@@ -256,4 +254,8 @@ class Target:
         
         return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
        
-
+    def get_agent_state(self):
+        """
+        Function that returns the agent state
+        """
+        return self.habitat_env.get_current_position()

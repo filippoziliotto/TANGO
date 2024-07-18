@@ -4,8 +4,8 @@ from typing import Any, Union
 
 import cv2
 import numpy as np
-# from frontier_exploration.frontier_detection import detect_frontier_waypoints
-# from frontier_exploration.utils.fog_of_war import reveal_fog_of_war
+from .frontier_exploration.frontier_detection import detect_frontier_waypoints
+from .frontier_exploration.utils.fog_of_war import reveal_fog_of_war
 
 from .base_map import BaseMap
 from .geometry_utils import extract_yaw, get_point_cloud, transform_points, fill_small_holes
@@ -111,7 +111,6 @@ class ObstacleMap(BaseMap):
                 iterations=1,
             ).astype(bool)
 
-        explore = False
         if not explore:
             return
 

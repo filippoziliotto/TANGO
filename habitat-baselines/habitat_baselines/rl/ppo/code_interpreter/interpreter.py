@@ -576,10 +576,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         image = self.habitat_env.get_current_observation(type='rgb')
         map = self.habitat_env.disp_info['top_down_map']
 
-        fow, target_map_coords = self.value_mapper.map_value(image, target_name, map)
+        self.value_mapper.compute_map_value(image, target_name)
 
-        if target_map_coords is not None and not self.variables['objects']:  
-            self.target.set_target_coords_from_cartesian(target_map_coords)
+        # if target_map_coords is not None and not self.variables['objects']:  
+        #     self.target.set_target_coords_from_cartesian(target_map_coords)
 
         # self.save_observation(fow, 'map')
         # save fow image as map.png with jetmap

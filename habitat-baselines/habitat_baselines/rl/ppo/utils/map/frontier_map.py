@@ -1,10 +1,14 @@
 # Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved.
 
 from typing import List, Tuple
-
+import torch
 import numpy as np
 
-from vlfm.vlm.blip2itm import BLIP2ITMClient
+# Habitat imports
+from habitat_baselines.rl.ppo.utils.utils import (
+    get_value_mapper
+)
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 class Frontier:
@@ -16,8 +20,9 @@ class Frontier:
 class FrontierMap:
     frontiers: List[Frontier] = []
 
-    def __init__(self, encoding_type: str = "cosine"):
-        self.encoder: BLIP2ITMClient = BLIP2ITMClient()
+    def __init__(self, size, encoding_type: str = "cosine"):
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.encoder, self.processor = get_value_mapper(self.device, size)
 
     def reset(self) -> None:
         self.frontiers = []
@@ -61,7 +66,16 @@ class FrontierMap:
         Returns:
 
         """
-        return self.encoder.cosine(image, text)
+        inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
+
+        # Get the image and text embeddings
+        outputs = self.encoder(**inputs)
+        image_embeddings = outputs.image_embeds
+        text_embeddings = outputs.text_embeds
+
+        # Compute cosine similarity
+        cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())
+        return cosine_sim[0][0]
 
     def sort_waypoints(self) -> Tuple[np.ndarray, List[float]]:
         """

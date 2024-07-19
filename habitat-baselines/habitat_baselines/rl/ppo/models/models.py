@@ -1,9 +1,7 @@
 # Torch imports
 import torch
-import torchvision
 import numpy as np
 from PIL import Image
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 import cv2
@@ -27,6 +25,7 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
 # Map generator imports
 from habitat.utils.visualizations.maps import from_grid
 from habitat_baselines.rl.ppo.utils.map.obstacle_map import ObstacleMap
+from habitat_baselines.rl.ppo.utils.map.frontier_map import FrontierMap
 from habitat_baselines.rl.ppo.utils.map.geometry_utils import xyz_yaw_to_tf_matrix
 
 class ObjectDetector:
@@ -375,43 +374,23 @@ class LLMmodel:
 
 class ValueMapper:
     def __init__(self, habitat_env, size):
-        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model, self.processor = get_value_mapper(self.device, size)
         self.habitat_env = habitat_env
-        self.show_target_on_map = True
-
         self._get_cameras_parameters(self.habitat_env.config)
+        self.visualize = True
+
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
             min_height=0.4,
             max_height=1.6,
             area_thresh=1.5
         )
-        self.visualize = True
-
-
-    # Function to compute cosine similarity
-    def calculate_cosine_similarity(self, image, text):
-        # Preprocess image and text
-        inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
-
-        # Get the image and text embeddings
-        outputs = self.model(**inputs)
-        image_embeddings = outputs.image_embeds
-        text_embeddings = outputs.text_embeds
-
-        # Compute cosine similarity
-        cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())
-        return cosine_sim[0][0]
-
-    def reset_mapper(self, map):
-        self.update_mask_map = np.zeros(map['map'].shape)
-        self.exploration_target = None
-
-    def update_mapper(self, map, value):
+        self.frontier_map = FrontierMap(size, encoding_type="cosine")
         
-        current_view  = map["current_view_mask"].astype(float)
-        current_view = np.where(current_view != 0., value, 0.)
+    def reset_map(self):
+        self.frontier_map.reset()
+        self.obstacle_map.reset()
+
+    def update_map(self, curr_image, text):
 
         self.obstacle_map.update_map(
             depth = self._get_current_depth(),
@@ -422,56 +401,24 @@ class ValueMapper:
             fy=self._fy,
             topdown_fov = self._topdown_view_angle,
         )
+
+        self.frontier_map.update(
+            frontier_locations = self.obstacle_map._get_frontiers(),
+            curr_image = curr_image,
+            text = text
+        )
         
         if self.visualize:
             map_ = self.obstacle_map.visualize()
             plt.imsave("images/map.png", map_)
 
-        # Indexes non-zero elements of current-view
-        # Subsitute with image-text score value
-        x,y = np.where(current_view != 0.)
-        self.update_mask_map[x,y] += current_view[x,y]
-        self.update_mask_map[x,y] /= 2
-
-        # Smooth and normalize values
-        self.smoothed_map = self.smooth_values(self.update_mask_map)
-
-    def smooth_values(self, map):
-        # Smooth the values
-        map = cv2.GaussianBlur(map, (5,5), 0)
-        # Normalize from 0 to 1
-        map = (map - np.min(map)) / (np.max(map) - np.min(map))
-        return map
-
-    def map_value(self, image, text, map):
+    def compute_map_value(self, image, text):
 
         # Reset values at each episode
         if self.habitat_env.get_current_step() == 1:
-            self.reset_mapper(map)
+            self.reset_map()
 
-        # Calculate score value and update mask
-        value = self.calculate_cosine_similarity(image, text)
-        self.update_mapper(map, value)
-
-        # Convert highest score regions to 3D points
-        if self.habitat_env.get_current_step() % 500 == 0:
-            sim = self.habitat_env.get_habitat_sim()
-            self.exploration_target = self.get_highest_score_point(self.smoothed_map, sim)
-
-        return self.smoothed_map, self.exploration_target
-
-    def get_highest_score_region(self, score_mask):
-        # take max value region
-        max_ = np.max(score_mask)
-        x,y = np.where(score_mask == max_)
-        return x,y
-    
-    def get_highest_score_point(self, score_mask, sim):
-        x, y = self.get_highest_score_region(score_mask)
-        idx = np.random.choice(len(x))
-        x0,y0 = x[idx], y[idx]
-
-        return self.map_to_xy(score_mask, (x0,y0), sim)
+        self.update_map(image, text)
 
     def map_to_xy(self, map, grid_pos, sim):
         x, z = from_grid(

@@ -382,11 +382,13 @@ class ValueMapper:
 
         self._get_cameras_parameters(self.habitat_env.config)
         self.obstacle_map = ObstacleMap(
-            agent_radius=0.18,
+            agent_radius=self._agent_radius,
             min_height=0.4,
             max_height=1.6,
             area_thresh=1.5
         )
+        self.visualize = True
+
 
     # Function to compute cosine similarity
     def calculate_cosine_similarity(self, image, text):
@@ -420,9 +422,10 @@ class ValueMapper:
             fy=self._fy,
             topdown_fov = self._topdown_view_angle,
         )
-        # TODO: add trajectory visualizer
-        map_ = self.obstacle_map.visualize()
-        plt.imsave("images/map.png", map_)
+        
+        if self.visualize:
+            map_ = self.obstacle_map.visualize()
+            plt.imsave("images/map.png", map_)
 
         # Indexes non-zero elements of current-view
         # Subsitute with image-text score value

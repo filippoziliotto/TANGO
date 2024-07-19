@@ -42,7 +42,7 @@ class ObstacleMap(BaseMap):
         kernel_size = self.pixels_per_meter * agent_radius * 2
         # round kernel_size to nearest odd number
         kernel_size = int(kernel_size) + (int(kernel_size) % 2 == 0)
-        self._navigable_kernel = np.ones((kernel_size, kernel_size), np.uint8)
+        self._navigable_kernel = np.ones((kernel_size, kernel_size), np.uint8)        
 
     def reset(self) -> None:
         super().reset()
@@ -150,6 +150,10 @@ class ObstacleMap(BaseMap):
             self.frontiers = np.array([])
         else:
             self.frontiers = self._px_to_xy(self._frontiers_px)
+
+        # Update the trajectory visualization
+        self._camera_positions.append(agent_xy_location)
+        self._last_camera_yaw = extract_yaw(tf_camera_to_episodic)
 
     def _get_frontiers(self) -> np.ndarray:
         """Returns the frontiers of the map."""

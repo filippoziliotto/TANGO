@@ -23,6 +23,7 @@ defaults:
     - openeqa_question_sensor
     - compass_sensor
     - gps_sensor
+    - heading_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   # - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
@@ -86,7 +87,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.2
+    thresh: 0.1
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings

@@ -171,6 +171,10 @@ class HabitatEvaluator(Evaluator):
         self.space_lengths = {}
         self.batch['pointgoal_with_gps_compass'] = coords.to(self.device)
 
+        # Needed for frontier exploration policy. Is it really???
+        if "heading" in list(self.batch.keys()):
+            self.batch.pop("heading")
+
         with inference_mode():
             self.action_data = self.agent.actor_critic.act(
                 self.batch,
@@ -607,6 +611,8 @@ class HabitatEvaluator(Evaluator):
             return self.batch['gps'].squeeze(0).detach().cpu().numpy()
         elif type in ['compass']:
             return self.batch['compass'].squeeze(0).detach().cpu().item()
+        elif type in ['heading']:
+            return self.batch['heading'].squeeze(0).detach().cpu().item()
         else:
             raise ValueError(f"Invalid observation type: {type}")
 

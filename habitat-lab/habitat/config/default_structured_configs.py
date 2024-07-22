@@ -729,6 +729,10 @@ class InstructionSensorConfig(LabSensorConfig):
     type: str = "InstructionSensor"
     instruction_sensor_uuid: str = "instruction"
 
+@dataclass
+class FrontierSensorConfig(LabSensorConfig):
+    type: str = "FrontierSensor"
+
 
 # -----------------------------------------------------------------------------
 # Measurements
@@ -773,6 +777,8 @@ class SoftSPLMeasurementConfig(MeasurementConfig):
     SoftSPL = max(0, 1 - distance_to_goal / optimal_distance_to_goal) * optimal_distance_to_goal / distance_traveled_so_far
     """
     type: str = "SoftSPL"
+
+
 
 
 @dataclass
@@ -1840,7 +1846,6 @@ class PyrobotDepthSensorConfig(PyrobotVisualSensorConfig):
     normalize_depth: bool = True
     center_crop: bool = False
 
-
 @dataclass
 class PyrobotBumpSensorConfig(PyrobotSensor):
     type: str = "PyRobotBumpSensor"
@@ -2333,6 +2338,18 @@ cs.store(
     group="habitat/task/lab_sensors",
     name="openeqa_question_sensor",
     node=OpenEQAQuestionSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.frontier_sensor",
+    group="habitat/task/lab_sensors",
+    name="frontier_sensor",
+    node=FrontierSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.heading_sensor",
+    group="habitat/task/lab_sensors",
+    name="heading_sensor",
+    node=HeadingSensorConfig,
 )
 cs.store(
     package="habitat.task.lab_sensors.object_sensor",

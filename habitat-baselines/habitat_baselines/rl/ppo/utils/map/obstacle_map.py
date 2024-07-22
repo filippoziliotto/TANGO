@@ -171,7 +171,7 @@ class ObstacleMap(BaseMap):
         )
         return frontiers
 
-    def visualize(self) -> np.ndarray:
+    def visualize(self, best_frontier=None) -> np.ndarray:
         """Visualizes the map."""
         vis_img = np.ones((*self._map.shape[:2], 3), dtype=np.uint8) * 255
         # Draw explored area in light green
@@ -182,7 +182,11 @@ class ObstacleMap(BaseMap):
         vis_img[self._map == 1] = (0, 0, 0)
         # Draw frontiers in blue (200, 0, 0)
         for frontier in self._frontiers_px:
-            cv2.circle(vis_img, tuple([int(i) for i in frontier]), 5, (200, 0, 0), 2)
+            if best_frontier is not None and np.array_equal(frontier, best_frontier):
+                # Best frontier is drawn in blue
+                cv2.circle(vis_img, tuple([int(i) for i in frontier]), 5, (0, 0, 200), 2)
+            else:
+                cv2.circle(vis_img, tuple([int(i) for i in frontier]), 5, (200, 0, 0), 2)
 
         vis_img = cv2.flip(vis_img, 0)
 

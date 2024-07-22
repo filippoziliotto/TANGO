@@ -23,8 +23,10 @@ from .geometry_utils import (
 
 DEBUG = False
 SAVE_VISUALIZATIONS = False
-RECORDING = os.environ.get("RECORD_VALUE_MAP", "0") == "1"
-PLAYING = os.environ.get("PLAY_VALUE_MAP", "0") == "1"
+RECORDING = False
+PLAYING = False
+# RECORDING = os.environ.get("RECORD_VALUE_MAP", "0") == "1"
+# PLAYING = os.environ.get("PLAY_VALUE_MAP", "0") == "1"
 RECORDING_DIR = "value_map_recordings"
 JSON_PATH = osp.join(RECORDING_DIR, "data.json")
 KWARGS_JSON = osp.join(RECORDING_DIR, "kwargs.json")
@@ -161,7 +163,8 @@ class ValueMap(BaseMap):
         radius_px = int(radius * self.pixels_per_meter)
 
         def get_value(point: np.ndarray) -> Union[float, Tuple[float, ...]]:
-            x, y = point
+            point_ = self._px_to_xy(point.reshape(1,2))
+            x, y = point_[0]
             px = int(-x * self.pixels_per_meter) + self._episode_pixel_origin[0]
             py = int(-y * self.pixels_per_meter) + self._episode_pixel_origin[1]
             point_px = (self._value_map.shape[0] - px, py)

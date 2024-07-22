@@ -2,6 +2,8 @@
 import torch
 import numpy as np
 from PIL import Image
+from typing import Tuple, List
+
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 import cv2
@@ -26,7 +28,10 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
 from habitat.utils.visualizations.maps import from_grid
 from habitat_baselines.rl.ppo.utils.map.obstacle_map import ObstacleMap
 from habitat_baselines.rl.ppo.utils.map.frontier_map import FrontierMap
-from habitat_baselines.rl.ppo.utils.map.geometry_utils import xyz_yaw_to_tf_matrix
+from habitat_baselines.rl.ppo.utils.map.value_map import ValueMap
+from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.acyclic_enforcer import AcyclicEnforcer
+from habitat_baselines.rl.ppo.utils.map.geometry_utils import xyz_yaw_to_tf_matrix, closest_point_within_threshold, rho_theta
+
 
 class ObjectDetector:
     def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
@@ -373,18 +378,44 @@ class LLMmodel:
         return output[0]['generated_text']
 
 class ValueMapper:
+
+    _last_value: float = float("-inf")
+    _last_frontier: np.ndarray = np.zeros(2)
+    _previous_frontier: np.ndarray = np.zeros(2)
+
     def __init__(self, habitat_env, size):
         self.habitat_env = habitat_env
         self._get_cameras_parameters(self.habitat_env.config)
         self.visualize = True
+        self._prompt = "Seems like there is [] ahead. | There is a lot of area to explore ahead."
+        self.use_double_value_map = True
+
+        self._acyclic_enforcer = AcyclicEnforcer()
 
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
             min_height=0.4,
-            max_height=1.6,
+            max_height=1.8,
             area_thresh=1.5
         )
-        self.frontier_map = FrontierMap(size, encoding_type="cosine")
+        self.frontier_map = FrontierMap(
+            size=size, 
+            encoding_type="cosine"
+        )
+        self.value_map = ValueMap(
+            value_channels=1,
+            use_max_confidence=True,
+            fusion_type="default",
+            obstacle_map=self.obstacle_map
+        )
+
+    def preprocess_text(self, text):
+        obj = self._prompt.replace("[]", text)
+
+        if self.use_double_value_map:
+            return (obj, self._prompt.split("|")[1])
+        
+        return self._prompt.replace("[]", text)
         
     def reset_map(self):
         self.frontier_map.reset()
@@ -392,9 +423,11 @@ class ValueMapper:
 
     def update_map(self, curr_image, text):
 
+        prompt = self.preprocess_text(text)
+
         self.obstacle_map.update_map(
             depth = self._get_current_depth(),
-            tf_camera_to_episodic=self.get_tf_camera_to_episodic(self.habitat_env),
+            tf_camera_to_episodic=self._get_tf_camera_to_episodic(self.habitat_env),
             min_depth=self._min_depth,
             max_depth=self._max_depth,
             fx=self._fx,
@@ -405,12 +438,154 @@ class ValueMapper:
         self.frontier_map.update(
             frontier_locations = self.obstacle_map._get_frontiers(),
             curr_image = curr_image,
-            text = text
+            text = prompt
         )
-        
+
+        self.curr_values = self.frontier_map._encode(
+            curr_image,
+            prompt
+        )
+
+        self.value_map.update_map(
+            values = np.array([self.curr_values]),
+            depth = self._get_current_depth(),
+            tf_camera_to_episodic = self._get_tf_camera_to_episodic(self.habitat_env),
+            min_depth = self._min_depth,
+            max_depth = self._max_depth,
+            fov = self._fov
+        )
+        self.value_map.update_agent_traj(
+            self.value_map._xy_to_px(self.habitat_env.get_current_observation(type="gps").reshape(1,2))[0],
+            self.habitat_env.get_current_observation(type="compass"),
+        )
+
+        self.best_frontier_polar = self._get_best_frontier(
+            self.obstacle_map._get_frontiers()
+        )
+
         if self.visualize:
-            map_ = self.obstacle_map.visualize()
+            map_ = self.obstacle_map.visualize(self._last_frontier)
             plt.imsave("images/map.png", map_)
+
+            map_ = self.value_map.visualize(
+                obstacle_map=self.obstacle_map,
+            )
+            plt.imsave("images/value_map.png", map_)
+
+    def _get_best_frontier(
+        self,
+        frontiers: np.ndarray,
+    ) -> Tuple[np.ndarray, float]:
+        """Returns the best frontier and its value based on self._value_map.
+
+        Args:
+            observations (Union[Dict[str, Tensor], "TensorDict"]): The observations from
+                the environment.
+            frontiers (np.ndarray): The frontiers to choose from, array of 2D points.
+
+        Returns:
+            Tuple[np.ndarray, float]: The best frontier and its value.
+        """
+        # The points and values will be sorted in descending order
+        sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers)
+        robot_xy = self.habitat_env.get_current_observation(type="gps")
+        best_frontier_idx = None
+        top_two_values = tuple(sorted_values[:2])
+
+        # If there is a last point pursued, then we consider sticking to pursuing it
+        # if it is still in the list of frontiers and its current value is not much
+        # worse than self._last_value.
+        if not np.array_equal(self._last_frontier, np.zeros(2)):
+            curr_index = None
+
+            for idx, p in enumerate(sorted_pts):
+                if np.array_equal(p, self._last_frontier):
+                    # Last point is still in the list of frontiers
+                    curr_index = idx
+                    break
+
+            if curr_index is None:
+                closest_index = closest_point_within_threshold(sorted_pts, self._last_frontier, threshold=0.5)
+                if closest_index != -1:
+                    # There is a point close to the last point pursued
+                    curr_index = closest_index
+
+            if curr_index is not None:
+                curr_value = sorted_values[curr_index]
+                if curr_value + 0.01 > self._last_value:
+                    # The last point pursued is still in the list of frontiers and its
+                    # value is not much worse than self._last_value
+                    # print("Sticking to last point.")
+                    best_frontier_idx = curr_index
+
+        # If there is no last point pursued, then just take the best point, given that
+        # it is not cyclic.
+        if best_frontier_idx is None:
+            for idx, frontier in enumerate(sorted_pts):
+                cyclic = self._acyclic_enforcer.check_cyclic(robot_xy, frontier, top_two_values)
+                if cyclic:
+                    continue
+                best_frontier_idx = idx
+                break
+
+        if best_frontier_idx is None:
+            # print("All frontiers are cyclic. Just choosing the closest one.")
+            best_frontier_idx = max(
+                range(len(frontiers)),
+                key=lambda i: np.linalg.norm(frontiers[i] - robot_xy),
+            )
+
+        best_frontier = sorted_pts[best_frontier_idx]
+        best_value = sorted_values[best_frontier_idx]
+        self._acyclic_enforcer.add_state_action(robot_xy, best_frontier, top_two_values)
+        self._last_value = best_value
+        self._last_frontier = best_frontier
+
+        # We update the target only if the best frontier has changed
+        self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, best_frontier)
+
+        return self.best_frontier_polar
+
+    def _sort_frontiers_by_value(
+        self, frontiers: np.ndarray,
+        itm_policy: str = "v3",
+    ) -> Tuple[np.ndarray, List[float]]:
+        
+        if itm_policy == "v1":
+            return self.frontier_map.sort_waypoints()
+        if itm_policy == "v3":
+            return self.value_map.sort_waypoints(frontiers, 0.5, reduce_fn=self._reduce_values)
+
+    def _reduce_values(self, values: List[Tuple[float, float]]) -> List[float]:
+        """
+        Reduce the values to a single value per frontier
+
+        Args:
+            values: A list of tuples of the form (target_value, exploration_value). If
+                the highest target_value of all the value tuples is below the threshold,
+                then we return the second element (exploration_value) of each tuple.
+                Otherwise, we return the first element (target_value) of each tuple.
+
+        Returns:
+            A list of values, one per frontier.
+        """
+        target_values = [v[0] for v in values]
+        max_target_value = max(target_values)
+
+        if max_target_value < self._exploration_thresh:
+            explore_values = [v[1] for v in values]
+            return explore_values
+        else:
+            return [v[0] for v in values]
+
+    def _get_polar_from_frontier(self, robot_xy, frontier):
+        # TODO: make this MUCH MORE ELEGANT
+        heading = self.habitat_env.get_current_observation(type="compass")
+        frontier_xy = self.value_map._px_to_xy(frontier.reshape(1, 2))[0]
+        # This next line should be correct
+        robot_xy = np.array([robot_xy[0], -robot_xy[1]])
+        rho, theta = rho_theta(robot_xy, heading, frontier_xy)
+        return torch.tensor([[rho, theta]], device="cuda", dtype=torch.float32)
 
     def compute_map_value(self, image, text):
 
@@ -419,17 +594,6 @@ class ValueMapper:
             self.reset_map()
 
         self.update_map(image, text)
-
-    def map_to_xy(self, map, grid_pos, sim):
-        x, z = from_grid(
-            grid_pos[0],
-            grid_pos[1],
-            (map.shape[0], map.shape[1]),
-            sim,
-        )
-        height = sim.get_agent_state().position[1]
-        # unique elements map
-        return np.array([x, height, z])
 
     def _get_cameras_parameters(self, config):
             # Get camera parameters
@@ -448,8 +612,25 @@ class ValueMapper:
     def _get_current_depth(self):
         return self.habitat_env.get_current_observation(type='depth')[:,:,0]
 
-    def get_tf_camera_to_episodic(self, habitat):
-        x, y = self.habitat_env.get_current_observation(type='gps')
-        camera_yaw = self.habitat_env.get_current_observation(type='compass')
+    def _get_tf_camera_to_episodic(self, habitat_env):
+        x, y = habitat_env.get_current_observation(type='gps')
+        camera_yaw = habitat_env.get_current_observation(type='compass')
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
+
+        # TODO: maybe improve the code elegance of this
+        if hasattr(self, '_previous_best_frontier'):
+            if np.array_equal(self._previous_best_frontier, best_frontier):
+                # If the best frontier is the same as the previous one, do not update
+                self.best_frontier_polar = None
+                return True
+            else:
+                # Update the previous best frontier
+                self._previous_best_frontier = best_frontier
+                self._previous_best_value = best_value
+                return False
+        else:
+            # Initialize the previous best frontier
+            self._previous_best_frontier = best_frontier
+            self._previous_best_value = best_value
+            return False

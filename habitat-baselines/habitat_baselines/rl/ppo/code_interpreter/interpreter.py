@@ -418,9 +418,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes
             self.save_observation(obs, 'detection', bbox)
-        
+        else:
+            self.map_scene(target_name)
+            
         self.update_variable('objects', bbox)
-        self.map_scene(target_name)
+
         return bbox
 
     def feature_match(self):
@@ -574,10 +576,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         from depth image and  use CLIP values
         """
         image = self.habitat_env.get_current_observation(type='rgb')
-        map = self.habitat_env.disp_info['top_down_map']
 
         self.value_mapper.compute_map_value(image, target_name)
 
+        new_frontier = self.value_mapper.best_frontier_polar
+        if new_frontier is not None:
+            self.target.set_target_coords_from_polar(new_frontier)
+            
         # if target_map_coords is not None and not self.variables['objects']:  
         #     self.target.set_target_coords_from_cartesian(target_map_coords)
 

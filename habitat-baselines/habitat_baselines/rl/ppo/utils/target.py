@@ -104,8 +104,10 @@ class TargetCoordinates:
         elif from_type in ["cartesian"]:
             assert coords is not None, "Coordinates cannot be None"
             assert agent_state is not None, "Agent state cannot be None"
+            
             self.cartesian_coords = coords
             self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords, agent_state)
+            print("saved target coords",self.polar_coords)
 
         elif from_type in ["bbox"]:
             assert agent_state is not None, "Agent state cannot be None"
@@ -145,6 +147,7 @@ class Target:
         self.polar_coords = [None, None]
         self.cartesian_coords = [None, None, None]
         self.update_step = 500
+        self._min_distance = 0.01
 
     def set_target(self, 
                    coords=None,
@@ -250,7 +253,7 @@ class Target:
         distance = self.polar_coords[0][0]
 
         if self.exploration:
-            return distance <= 1.5
+            return distance <= self._min_distance
         
         return distance <= (self.habitat_env.object_distance_threshold + self.habitat_env.agent_radius)
        

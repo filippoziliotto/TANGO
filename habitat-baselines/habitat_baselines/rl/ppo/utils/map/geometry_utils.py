@@ -25,6 +25,7 @@ def rho_theta(curr_pos: np.ndarray, curr_heading: float, curr_goal: np.ndarray) 
             (rho, theta).
     """
     rotation_matrix = get_rotation_matrix(-curr_heading, ndims=2)
+
     local_goal = curr_goal - curr_pos
     local_goal = rotation_matrix @ local_goal
 

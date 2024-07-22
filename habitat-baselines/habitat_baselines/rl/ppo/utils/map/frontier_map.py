@@ -56,6 +56,7 @@ class FrontierMap:
                     cosine = self._encode(curr_image, text)
                 self.frontiers.append(Frontier(location, cosine))
 
+
     def _encode(self, image: np.ndarray, text: str) -> float:
         """
         Encodes the given image using the encoding type specified in the constructor.

@@ -107,7 +107,6 @@ class TargetCoordinates:
             
             self.cartesian_coords = coords
             self.polar_coords = self.from_cartesian_to_polar(self.cartesian_coords, agent_state)
-            print("saved target coords",self.polar_coords)
 
         elif from_type in ["bbox"]:
             assert agent_state is not None, "Agent state cannot be None"

@@ -17,7 +17,7 @@ defaults:
     - minimum_number_of_actions
     - stop_before_episode_end
     - smallest_distance_to_target
-    - top_down_map
+    # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - openeqa_question_sensor
@@ -65,6 +65,8 @@ habitat:
             width: 256
             height: 256
             hfov: 90
+        radius: 0.18
+        height: 0.88
     habitat_sim_v0:
       gpu_device_id: 0
 
@@ -118,6 +120,7 @@ habitat_baselines:
     use_room_classifier: True
   value_mapper:
     use_value_mapper: True
+    type: "blip"
     size: "large"
   LLM:
     use_LLM: False

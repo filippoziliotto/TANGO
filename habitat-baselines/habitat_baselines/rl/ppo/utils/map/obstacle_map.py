@@ -171,16 +171,20 @@ class ObstacleMap(BaseMap):
         )
         return frontiers
 
-    def visualize(self, best_frontier=None) -> np.ndarray:
+    def visualize(self, 
+                  best_frontier=None,
+        ) -> np.ndarray:
+        
         """Visualizes the map."""
         vis_img = np.ones((*self._map.shape[:2], 3), dtype=np.uint8) * 255
         # Draw explored area in light green
         vis_img[self.explored_area == 1] = (200, 255, 200)
+
         # Draw unnavigable areas in gray
         vis_img[self._navigable_map == 0] = self.radius_padding_color
         # Draw obstacles in black
         vis_img[self._map == 1] = (0, 0, 0)
-        # Draw frontiers in blue (200, 0, 0)
+        # Draw frontiers in red (200, 0, 0)
         for frontier in self._frontiers_px:
             if best_frontier is not None and np.array_equal(frontier, best_frontier):
                 # Best frontier is drawn in blue

@@ -283,7 +283,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.value_mapper.use_value_mapper:
             self.value_mapper = ValueMapper(
                 habitat_env=self.habitat_env,
-                size=self.habitat_env.value_mapper.size)
+                type = self.habitat_env.value_mapper.type,
+                size = self.habitat_env.value_mapper.size)
             print('Value mapper loaded')
 
     """

@@ -15,7 +15,7 @@ from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
                           BlipProcessor, ViTForImageClassification, ViTImageProcessor,
-                          CLIPProcessor, CLIPModel
+                          CLIPProcessor, CLIPModel, BlipForImageTextRetrieval
                           )
 
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
@@ -256,13 +256,21 @@ def get_roomcls_model(path, device):
     model.eval()
     return model.to(device), processor
 
-def get_value_mapper(device, size):
-    if size in ['base']:
-        model_name = "openai/clip-vit-base-patch32"
-    elif size in ['large']:
-        model_name = "openai/clip-vit-large-patch14"
-    processor = CLIPProcessor.from_pretrained(model_name)
-    model = CLIPModel.from_pretrained(model_name)
+def get_value_mapper(device, type, size):
+    if type in ['clip']:
+        if size in ['base']:
+            model_name = "openai/clip-vit-base-patch32"
+        elif size in ['large']:
+            model_name = "openai/clip-vit-large-patch14"
+        processor = CLIPProcessor.from_pretrained(model_name)
+        model = CLIPModel.from_pretrained(model_name)
+    elif type in ['blip']:
+        if size in ['base']:
+            model_name = "Salesforce/blip-itm-base-flickr"
+        elif size in ['large']:
+            model_name = "Salesforce/blip-itm-large-flickr"
+        processor = BlipProcessor.from_pretrained(model_name)
+        model = BlipForImageTextRetrieval.from_pretrained(model_name)
     model.eval()
     return model.to(device), processor
 

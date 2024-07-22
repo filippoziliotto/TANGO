@@ -383,7 +383,7 @@ class ValueMapper:
     _last_frontier: np.ndarray = np.zeros(2)
     _previous_frontier: np.ndarray = np.zeros(2)
 
-    def __init__(self, habitat_env, size):
+    def __init__(self, habitat_env, type, size):
         self.habitat_env = habitat_env
         self._get_cameras_parameters(self.habitat_env.config)
         self.visualize = True
@@ -391,35 +391,39 @@ class ValueMapper:
         self.use_double_value_map = True
 
         self._acyclic_enforcer = AcyclicEnforcer()
+        self._exploration_thresh = 0.0
 
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
-            min_height=0.4,
-            max_height=1.8,
+            min_height=0.61,
+            max_height=self._max_obstacle_height,
             area_thresh=1.5
         )
         self.frontier_map = FrontierMap(
+            type=type,
             size=size, 
             encoding_type="cosine"
         )
         self.value_map = ValueMap(
             value_channels=1,
-            use_max_confidence=True,
+            use_max_confidence=False,
             fusion_type="default",
             obstacle_map=self.obstacle_map
         )
 
     def preprocess_text(self, text):
-        obj = self._prompt.replace("[]", text)
+        # obj = self._prompt.replace("[]", text)
 
-        if self.use_double_value_map:
-            return (obj, self._prompt.split("|")[1])
+        # if self.use_double_value_map:
+        #     return (obj, self._prompt.split("|")[1])
         
-        return self._prompt.replace("[]", text)
+        # return self._prompt.replace("[]", text)
+        return text
         
     def reset_map(self):
         self.frontier_map.reset()
         self.obstacle_map.reset()
+        self.value_map.reset()
 
     def update_map(self, curr_image, text):
 
@@ -442,8 +446,8 @@ class ValueMapper:
         )
 
         self.curr_values = self.frontier_map._encode(
-            curr_image,
-            prompt
+            image = curr_image,
+            text = prompt
         )
 
         self.value_map.update_map(
@@ -452,25 +456,29 @@ class ValueMapper:
             tf_camera_to_episodic = self._get_tf_camera_to_episodic(self.habitat_env),
             min_depth = self._min_depth,
             max_depth = self._max_depth,
-            fov = self._fov
+            fov = np.deg2rad(self._fov),
         )
         self.value_map.update_agent_traj(
-            self.value_map._xy_to_px(self.habitat_env.get_current_observation(type="gps").reshape(1,2))[0],
-            self.habitat_env.get_current_observation(type="compass"),
+            robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3],
+            robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
         self.best_frontier_polar = self._get_best_frontier(
-            self.obstacle_map._get_frontiers()
+            frontiers=self.obstacle_map._get_frontiers()
         )
 
         if self.visualize:
-            map_ = self.obstacle_map.visualize(self._last_frontier)
-            plt.imsave("images/map.png", map_)
+            map_ = self.obstacle_map.visualize(
+                best_frontier = self._last_frontier
+            )
+            cv2.imwrite("images/map.png", map_)
 
             map_ = self.value_map.visualize(
+                # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
+                best_frontier=self._last_frontier
             )
-            plt.imsave("images/value_map.png", map_)
+            cv2.imwrite("images/value_map.png", map_)
 
     def _get_best_frontier(
         self,
@@ -489,6 +497,8 @@ class ValueMapper:
         # The points and values will be sorted in descending order
         sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers)
         robot_xy = self.habitat_env.get_current_observation(type="gps")
+        heading = self.habitat_env.get_current_observation(type="compass")
+        # robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
         best_frontier_idx = None
         top_two_values = tuple(sorted_values[:2])
 
@@ -542,7 +552,7 @@ class ValueMapper:
         self._last_frontier = best_frontier
 
         # We update the target only if the best frontier has changed
-        self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, best_frontier)
+        self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, heading, best_frontier)
 
         return self.best_frontier_polar
 
@@ -556,33 +566,13 @@ class ValueMapper:
         if itm_policy == "v3":
             return self.value_map.sort_waypoints(frontiers, 0.5, reduce_fn=self._reduce_values)
 
-    def _reduce_values(self, values: List[Tuple[float, float]]) -> List[float]:
-        """
-        Reduce the values to a single value per frontier
-
-        Args:
-            values: A list of tuples of the form (target_value, exploration_value). If
-                the highest target_value of all the value tuples is below the threshold,
-                then we return the second element (exploration_value) of each tuple.
-                Otherwise, we return the first element (target_value) of each tuple.
-
-        Returns:
-            A list of values, one per frontier.
-        """
-        target_values = [v[0] for v in values]
-        max_target_value = max(target_values)
-
-        if max_target_value < self._exploration_thresh:
-            explore_values = [v[1] for v in values]
-            return explore_values
-        else:
-            return [v[0] for v in values]
-
-    def _get_polar_from_frontier(self, robot_xy, frontier):
-        # TODO: make this MUCH MORE ELEGANT
-        heading = self.habitat_env.get_current_observation(type="compass")
+    def _get_polar_from_frontier(
+            self,
+            robot_xy: np.ndarray,
+            heading: float,
+            frontier: List[np.ndarray],
+        ):
         frontier_xy = self.value_map._px_to_xy(frontier.reshape(1, 2))[0]
-        # This next line should be correct
         robot_xy = np.array([robot_xy[0], -robot_xy[1]])
         rho, theta = rho_theta(robot_xy, heading, frontier_xy)
         return torch.tensor([[rho, theta]], device="cuda", dtype=torch.float32)
@@ -608,6 +598,7 @@ class ValueMapper:
         self._fx = self._image_width / (2 * np.tan(np.deg2rad(self._fov) / 2))
         self._fy = self._image_height / (2 * np.tan(np.deg2rad(self._fov) / 2))
         self._topdown_view_angle = np.deg2rad(self._fov)
+        self._max_obstacle_height = self._agent_height
      
     def _get_current_depth(self):
         return self.habitat_env.get_current_observation(type='depth')[:,:,0]
@@ -618,19 +609,24 @@ class ValueMapper:
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
 
-        # TODO: maybe improve the code elegance of this
-        if hasattr(self, '_previous_best_frontier'):
-            if np.array_equal(self._previous_best_frontier, best_frontier):
-                # If the best frontier is the same as the previous one, do not update
-                self.best_frontier_polar = None
-                return True
-            else:
-                # Update the previous best frontier
-                self._previous_best_frontier = best_frontier
-                self._previous_best_value = best_value
-                return False
+    def _reduce_values(self, values: List[Tuple[float, float]]) -> List[float]:
+        """
+        Reduce the values to a single value per frontier
+
+        Args:
+            values: A list of tuples of the form (target_value, exploration_value). If
+                the highest target_value of all the value tuples is below the threshold,
+                then we return the second element (exploration_value) of each tuple.
+                Otherwise, we return the first element (target_value) of each tuple.
+
+        Returns:
+            A list of values, one per frontier.
+        """
+        target_values = [v[0] for v in values]
+        max_target_value = max(target_values)
+
+        if max_target_value < self._exploration_thresh:
+            explore_values = [v[1] for v in values]
+            return explore_values
         else:
-            # Initialize the previous best frontier
-            self._previous_best_frontier = best_frontier
-            self._previous_best_value = best_value
-            return False
+            return [v[0] for v in values]

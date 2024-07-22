@@ -15,7 +15,7 @@ class TrajectoryVisualizer:
     agent_line_thickness: int = 3
     path_color: tuple = (0, 255, 0)
     path_thickness: int = 3
-    scale_factor: float = 1.0
+    scale_factor: float = 0.9
 
     def __init__(self, origin_in_img: np.ndarray, pixels_per_meter: float):
         self._origin_in_img = origin_in_img
@@ -101,7 +101,7 @@ class TrajectoryVisualizer:
     def draw_circle(self, img: np.ndarray, position: np.ndarray, **kwargs: Any) -> np.ndarray:
         """Draws the point as a circle on the image and returns it"""
         px_position = self._metric_to_pixel(position)
-        cv2.circle(img, tuple(px_position[::-1]), **kwargs)
+        img = cv2.circle(img, tuple(px_position[::-1]), **kwargs)
 
         return img
 

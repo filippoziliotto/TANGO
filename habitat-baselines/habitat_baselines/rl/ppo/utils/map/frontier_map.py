@@ -20,9 +20,10 @@ class Frontier:
 class FrontierMap:
     frontiers: List[Frontier] = []
 
-    def __init__(self, size, encoding_type: str = "cosine"):
+    def __init__(self, type, size, encoding_type: str = "cosine"):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.encoder, self.processor = get_value_mapper(self.device, size)
+        self.encoder, self.processor = get_value_mapper(self.device, type, size)
+        self.type = type
 
     def reset(self) -> None:
         self.frontiers = []
@@ -67,16 +68,33 @@ class FrontierMap:
         Returns:
 
         """
-        inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
-
-        # Get the image and text embeddings
-        outputs = self.encoder(**inputs)
-        image_embeddings = outputs.image_embeds
-        text_embeddings = outputs.text_embeds
+        # Process Input
+        if self.type in ['clip']:
+            inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
+        elif self.type in ['blip']:
+            inputs = self.processor(image, text, return_tensors="pt").to(self.device)
 
         # Compute cosine similarity
-        cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())
-        return cosine_sim[0][0]
+        if self.type in ['clip']:
+            # Get the image and text embeddings
+            outputs = self.encoder(**inputs)
+            image_embeddings = outputs.pixel_values
+            text_embeddings = outputs.last_hidden_state
+            # Get the image and text embeddings
+            outputs = self.encoder(**inputs)
+            image_embeddings = outputs.image_embeds
+            text_embeddings = outputs.text_embeds
+
+            # Compute cosine similarity
+            cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())[0][0]
+            return cosine_sim
+        
+        elif self.type in ['blip']:
+            cosine_sim = self.encoder(**inputs, use_itm_head=False)[0].detach().cpu().numpy().item()
+            
+        return cosine_sim
+
+        
 
     def sort_waypoints(self) -> Tuple[np.ndarray, List[float]]:
         """

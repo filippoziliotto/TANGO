@@ -21,7 +21,7 @@ from .geometry_utils import (
     rotate_image,
 )
 
-DEBUG = False
+DEBUG = True
 SAVE_VISUALIZATIONS = False
 RECORDING = False
 PLAYING = False
@@ -42,6 +42,12 @@ class ValueMap(BaseMap):
     _min_confidence: float = 0.25
     _decision_threshold: float = 0.35
     _map: np.ndarray
+
+    # Frontiers markers
+    _circle_marker_radius: int = 5
+    _circle_marker_thickness: int = 2
+    _frontier_color: Tuple[int, int, int] = (0, 0, 255)
+    _selected__frontier_color: Tuple[int, int, int] = (0, 255, 255)
 
     def __init__(
         self,
@@ -194,7 +200,19 @@ class ValueMap(BaseMap):
         markers: Optional[List[Tuple[np.ndarray, Dict[str, Any]]]] = None,
         reduce_fn: Callable = lambda i: np.max(i, axis=-1),
         obstacle_map: Optional["ObstacleMap"] = None,  # type: ignore # noqa: F821
+        best_frontier: Optional[np.ndarray] = None,
     ) -> np.ndarray:
+
+        if markers is None:
+            markers = []
+            for frontier in obstacle_map._get_frontiers():
+                marker_kwargs = {
+                    "radius": self._circle_marker_radius,
+                    "thickness": self._circle_marker_thickness,
+                    "color": self._frontier_color,
+                }
+                markers.append((frontier[:2], marker_kwargs))
+
         """Return an image representation of the map"""
         # Must negate the y values to get the correct orientation
         reduced_map = reduce_fn(self._value_map).copy()
@@ -215,9 +233,12 @@ class ValueMap(BaseMap):
                 self._last_camera_yaw,
             )
 
-            if markers is not None:
-                for pos, marker_kwargs in markers:
-                    map_img = self._traj_vis.draw_circle(map_img, pos, **marker_kwargs)
+        if markers is not None:
+            for pos, marker_kwargs in markers:
+                if best_frontier is not None and np.array_equal(pos, best_frontier):
+                    marker_kwargs["color"] = self._selected__frontier_color
+                pos = self._px_to_xy(pos.reshape(1,2))[0]
+                map_img = self._traj_vis.draw_circle(map_img, pos, **marker_kwargs)
 
         return map_img
 
@@ -269,8 +290,8 @@ class ValueMap(BaseMap):
                 vis[point[1], point[0]] = (0, 255, 0)
             if SAVE_VISUALIZATIONS:
                 # Create visualizations directory if it doesn't exist
-                if not os.path.exists("visualizations"):
-                    os.makedirs("visualizations")
+                if not os.path.exists("images/debug"):
+                    os.makedirs("images/debug")
                 # Expand the depth_row back into a full image
                 depth_row_full = np.repeat(depth_row.reshape(1, -1), depth.shape[0], axis=0)
                 # Stack the depth images with the visible mask
@@ -281,10 +302,10 @@ class ValueMap(BaseMap):
                 vis_resized = cv2.resize(vis, (new_width, depth_rgb.shape[0]))
                 vis = np.hstack((depth_rgb, depth_row_full, vis_resized))
                 time_id = int(time.time() * 1000)
-                cv2.imwrite(f"visualizations/{time_id}.png", vis)
-            else:
-                cv2.imshow("obstacle mask", vis)
-                cv2.waitKey(0)
+                cv2.imwrite(f"images/debug/{time_id}.png", vis)
+            # else:
+            #     cv2.imshow("obstacle mask", vis)
+            #     cv2.waitKey(0)
 
         return visible_mask
 

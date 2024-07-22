@@ -525,6 +525,7 @@ class ValueMapperConfig(HabitatBaselinesBaseConfig):
     Room classifier model config settings
     """
     use_value_mapper: bool = False
+    type: str = "blip"
     size: str = "base"
 
 @dataclass

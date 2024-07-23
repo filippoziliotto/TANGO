@@ -193,6 +193,9 @@ def closest_point_within_threshold(points_array: np.ndarray, target_point: np.nd
     Returns:
         int: The index of the closest point within the threshold distance.
     """
+    if points_array.size == 0:
+        return -1
+
     distances = np.sqrt((points_array[:, 0] - target_point[0]) ** 2 + (points_array[:, 1] - target_point[1]) ** 2)
     within_threshold = distances <= threshold
 

@@ -350,8 +350,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
 
+        # Reset deteciton dict
         if self.habitat_env.object_detector.store_detections:   
             self.object_detector.reset_detection_dict()
+
+        # Reset value mapper
+        if self.habitat_env.value_mapper.use_value_mapper:
+            self.value_mapper.reset_map()
     
     def turn_around(self):
         """
@@ -439,6 +444,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes
             self.save_observation(obs, 'detection', bbox)
+            pass
 
         else:
             self.map_scene(target_name)
@@ -549,10 +555,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
  
         # This should be better than the 180° view
         # Returns None if not the correct room
-        room, confidence = self.room_classifier.classify(obs)
+        room_cls, confidence = self.room_classifier.classify(obs)
 
-        if (room == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
-            pass
+        if (room_cls == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
+            room = room_cls
         else:
             room = None
 
@@ -609,11 +615,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         https://github.com/bdaiinstitute/vlfm/tree/main
         """
         image = self.habitat_env.get_current_observation(type='rgb')
-        self.value_mapper.compute_map_value(image, target_name)
+        self.value_mapper.update_map(image, target_name)
 
-        new_frontier = self.value_mapper.best_frontier_polar
-        if new_frontier is not None:
-            self.target.set_target_coords_from_polar(new_frontier)
+        best_frontier = self.value_mapper.best_frontier_polar
+        self.target.set_target_coords_from_polar(best_frontier)
 
     def save_observation(self, obs, name, bbox=None):
         """

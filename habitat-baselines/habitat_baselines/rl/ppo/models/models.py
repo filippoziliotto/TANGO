@@ -89,6 +89,7 @@ class ObjectDetector:
         if len(boxes)==0:
             return [], [], []
 
+        print(self.model.model.config.id2label)
         for label in labels:
             if label in list(desired_classes_ids.keys()):
                 if class_names_coco[desired_classes_ids[label]] in obj_name:
@@ -398,11 +399,12 @@ class ValueMapper:
 
         self._acyclic_enforcer = AcyclicEnforcer()
         self._exploration_thresh = 0.0
+        self.frontiers_at_step = []
 
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
-            min_height=0.61,
-            max_height=self._max_obstacle_height,
+            min_height=0.3,
+            max_height=self._max_obstacle_height + 0.5,
             area_thresh=1.5
         )
         self.frontier_map = FrontierMap(
@@ -427,9 +429,15 @@ class ValueMapper:
         return text
         
     def reset_map(self):
+
+        if self.visualize:
+            self.save_map_video(self.video_frames, "videos/frontier_example.mp4")
+
         self.frontier_map.reset()
         self.obstacle_map.reset()
         self.value_map.reset()
+        self.frontiers_at_step = []
+        self.video_frames = []
 
     def update_map(self, curr_image, text):
 
@@ -474,17 +482,19 @@ class ValueMapper:
         )
 
         if self.visualize:
-            map_ = self.obstacle_map.visualize(
+            obs_map = self.obstacle_map.visualize(
                 best_frontier = self._last_frontier
             )
-            cv2.imwrite("images/map.png", map_)
+            cv2.imwrite("images/map.png", obs_map)
 
-            map_ = self.value_map.visualize(
+            val_map = self.value_map.visualize(
                 # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
                 best_frontier=self._last_frontier
             )
-            cv2.imwrite("images/value_map.png", map_)
+            cv2.imwrite("images/value_map.png", val_map)
+
+            self.video_frames.append(np.hstack((obs_map, val_map, curr_image)))
 
     def _get_best_frontier(
         self,
@@ -507,6 +517,10 @@ class ValueMapper:
         # robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
         best_frontier_idx = None
         top_two_values = tuple(sorted_values[:2])
+
+        # If no frontier is found, sample random point
+        if self.no_frontiers_found(frontiers, robot_xy, heading):
+            return self.best_frontier_polar
 
         # If there is a last point pursued, then we consider sticking to pursuing it
         # if it is still in the list of frontiers and its current value is not much
@@ -563,6 +577,17 @@ class ValueMapper:
 
         return self.best_frontier_polar
 
+    def no_frontiers_found(self, frontiers: np.ndarray, robot_xy: np.ndarray, heading: float):
+        # If no frontier is found, sample a random
+        # point and navigate to it, untile next frontier is updated
+        self.frontiers_at_step.append(frontiers)
+        if self.frontiers_at_step[-1].size == 0:
+            self._last_value = 0.05
+            self._last_frontier = np.array(list(np.random.randint(0, self.obstacle_map.size, 2)))
+            self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, heading, self._last_frontier)
+            return True
+        return False
+            
     def _sort_frontiers_by_value(
         self, frontiers: np.ndarray,
         itm_policy: str = "v3",
@@ -583,14 +608,6 @@ class ValueMapper:
         robot_xy = np.array([robot_xy[0], -robot_xy[1]])
         rho, theta = rho_theta(robot_xy, heading, frontier_xy)
         return torch.tensor([[rho, theta]], device="cuda", dtype=torch.float32)
-
-    def compute_map_value(self, image, text):
-
-        # Reset values at each episode
-        if self.habitat_env.get_current_step() == 1:
-            self.reset_map()
-
-        self.update_map(image, text)
 
     def _get_cameras_parameters(self, config):
             # Get camera parameters
@@ -638,6 +655,14 @@ class ValueMapper:
         else:
             return [v[0] for v in values]
 
-    def save_map_video(self):
-        # TODO:
-        pass
+    def save_map_video(self, stacked_frames: List[np.ndarray], save_path: str):
+        """
+        Save the video of the map exploration
+        """
+        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), 1, (stacked_frames[0].shape[1], stacked_frames[0].shape[0]))
+        for frame in stacked_frames:
+            out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+        out.release()
+        print(f"Video saved at {save_path}")
+        
+        

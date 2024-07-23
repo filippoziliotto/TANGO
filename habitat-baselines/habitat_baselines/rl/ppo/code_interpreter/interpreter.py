@@ -355,7 +355,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.object_detector.reset_detection_dict()
 
         # Reset value mapper
-        if self.habitat_env.value_mapper.use_value_mapper:
+        if self.habitat_env.value_mapper.use_value_mapper and self.value_mapper.visualize:
             self.value_mapper.reset_map()
     
     def turn_around(self):

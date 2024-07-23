@@ -23,6 +23,7 @@ from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
+from habitat.utils.visualizations.utils import images_to_video
 
 # Map generator imports
 from habitat.utils.visualizations.maps import from_grid
@@ -389,6 +390,7 @@ class ValueMapper:
     _last_value: float = float("-inf")
     _last_frontier: np.ndarray = np.zeros(2)
     _previous_frontier: np.ndarray = np.zeros(2)
+    video_frames = []
 
     def __init__(self, habitat_env, type, size):
         self.habitat_env = habitat_env
@@ -400,7 +402,7 @@ class ValueMapper:
         self._acyclic_enforcer = AcyclicEnforcer()
         self._exploration_thresh = 0.0
         self.frontiers_at_step = []
-
+       
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
             min_height=0.3,
@@ -431,7 +433,7 @@ class ValueMapper:
     def reset_map(self):
 
         if self.visualize:
-            self.save_map_video(self.video_frames, "videos/frontier_example.mp4")
+            self.save_map_video(self.video_frames, "video_dir/open_eqa", "open_eqa_example.mp4")
 
         self.frontier_map.reset()
         self.obstacle_map.reset()
@@ -494,7 +496,7 @@ class ValueMapper:
             )
             cv2.imwrite("images/value_map.png", val_map)
 
-            self.video_frames.append(np.hstack((obs_map, val_map, curr_image)))
+            self.video_frames.append((obs_map, val_map))
 
     def _get_best_frontier(
         self,
@@ -581,6 +583,7 @@ class ValueMapper:
         # If no frontier is found, sample a random
         # point and navigate to it, untile next frontier is updated
         self.frontiers_at_step.append(frontiers)
+        # TODO: make this in map_scene function in interpreter.py
         if self.frontiers_at_step[-1].size == 0:
             self._last_value = 0.05
             self._last_frontier = np.array(list(np.random.randint(0, self.obstacle_map.size, 2)))
@@ -655,14 +658,33 @@ class ValueMapper:
         else:
             return [v[0] for v in values]
 
-    def save_map_video(self, stacked_frames: List[np.ndarray], save_path: str):
+    def save_map_video(self, stacked_frames: List[np.ndarray], output_dir, output_name, crop=True):
         """
         Save the video of the map exploration
-        """
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), 1, (stacked_frames[0].shape[1], stacked_frames[0].shape[0]))
-        for frame in stacked_frames:
-            out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-        out.release()
-        print(f"Video saved at {save_path}")
+        """ 
+
+        # Take the last obstacle map
+        if crop:
+            image_array = stacked_frames[-1][0]
+            # Find non-white areas
+            # Assuming the non-white parts are those where any of the channels is not 255
+            non_white = np.any(image_array != 255, axis=-1)
+            
+            # Find the bounding box of non-white areas
+            coords = np.argwhere(non_white)
+            y0, x0 = coords.min(axis=0) + 1
+            y1, x1 = coords.max(axis=0) + 80 # slices are exclusive at the top
+
+            # Crop all the images on the list
+            stacked_frames = [(obs_frame[y0:y1, x0:x1],val_frame[y0:y1, x0:x1]) for (obs_frame, val_frame) in stacked_frames]
+            
+        stacked_frames = [(np.concatenate((obs_frame, val_frame), axis=1)) for (obs_frame, val_frame) in stacked_frames]
+
+        images_to_video(
+            images = stacked_frames,
+            output_dir = output_dir,
+            video_name = output_name,
+            verbose = True,
+        )
         
         

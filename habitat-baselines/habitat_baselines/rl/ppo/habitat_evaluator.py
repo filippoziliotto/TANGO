@@ -180,7 +180,7 @@ class HabitatEvaluator(Evaluator):
                 self.batch,
                 self.test_recurrent_hidden_states,
                 self.prev_actions,
-                self.not_done_masks,
+                self.not_done_masks.to("cuda:0"),
                 deterministic=False,
                 **self.space_lengths,
             )
@@ -253,11 +253,13 @@ class HabitatEvaluator(Evaluator):
         # Note that `policy_infos` represents the information about the
         # action BEFORE `observations` (the action used to transition to
         # `observations`).
-        self.policy_infos = self.agent.actor_critic.get_extra(
-            self.action_data, self.infos, self.dones
-        )
-        for i in range(len(self.policy_infos)):
-            self.infos[i].update(self.policy_infos[i])
+
+        if not isinstance(self.action_to_take, str):
+            self.policy_infos = self.agent.actor_critic.get_extra(
+                self.action_data, self.infos, self.dones
+            )
+            for i in range(len(self.policy_infos)):
+                self.infos[i].update(self.policy_infos[i])
 
         self.observations = self.envs.post_step(self.observations)
         self.batch = batch_obs(  # type: ignore
@@ -276,6 +278,8 @@ class HabitatEvaluator(Evaluator):
             self.rewards_l, dtype=torch.float, device="cpu"
         ).unsqueeze(1)
         self.current_episode_reward += self.rewards
+
+        self.current_step += 1
 
     def update_episode_stats(self, display=True):
         """
@@ -323,7 +327,6 @@ class HabitatEvaluator(Evaluator):
                     frame = overlay_frame(frame, self.disp_info)
                     self.rgb_frames[i].append(frame)
             
-            self.current_step += 1
 
             # episode ended
             if not self.not_done_masks[i].any().item() or (self.action_to_take in ['stop']):
@@ -727,14 +730,6 @@ class HabitatEvaluator(Evaluator):
         }
         return views
 
-    def update_exploration_policy(self, update_step=10):
-        # TODO: add that if in this 50 steps i found the target i don't 
-        # want to update, stick with the current pseudo-code
-        # TODO: add update_step to config yaml
-        if self.current_step % update_step == 0:
-            return True
-        return False
-
     def evaluate_agent(
         self,
         **kwargs,
@@ -752,16 +747,14 @@ class HabitatEvaluator(Evaluator):
         while self.episode_iterator():
             self.current_episodes_info = self.envs.current_episodes()
 
-            if self.update_exploration_policy():
-
-                # Generate the PseudoCode
-                self.pseudo_code = code_generator.generate()
+            # Generate the PseudoCode
+            self.pseudo_code = code_generator.generate()
                 
-                # Reset init variables
-                self.code_interpreter.parse(self.pseudo_code)
+            # Reset init variables
+            self.code_interpreter.parse(self.pseudo_code)
 
-                # Run the code
-                self.code_interpreter.run()
+            # Run the code
+            self.code_interpreter.run()
 
         self.display_results()
 

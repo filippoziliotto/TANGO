@@ -320,10 +320,11 @@ class SegmenterModel:
         return self.predict(img)
 
 class RoomClassifier:
-    def __init__(self, path):
+    def __init__(self, path, cls_threshold=0.3):
         self.path = path
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.model, self.processor = get_roomcls_model(self.path, self.device)
+        self.cls_threshold = cls_threshold
 
     def preprocess(self, img):
         img = torch.tensor(img)
@@ -334,15 +335,20 @@ class RoomClassifier:
         inputs = self.preprocess(img)
         with torch.no_grad():
             outputs = self.model(inputs['pixel_values'])
-        outputs = outputs['logits'].softmax(1).argmax(-1).item()
-        room = self.postprocess(outputs)
-        return room
+        probabilities = outputs['logits'].softmax(1)
+        max_prob, predicted_class = probabilities.max(1)
+        confidence = max_prob.item()
+        predicted_class = predicted_class.item()
+        return predicted_class, confidence
     
     def postprocess(self, output):
         return compact_labels[self.model.config.id2label[output]]
 
     def classify(self, img):
-        return self.predict(img)
+        predicted_class, confidence = self.predict(img)
+        room = self.postprocess(predicted_class)
+        return room, confidence
+
     
 class LLMmodel:
     def __init__(self, type, quantization, helper):
@@ -515,6 +521,7 @@ class ValueMapper:
                     break
 
             if curr_index is None:
+                # Avoid depth camera issues during evaluation
                 closest_index = closest_point_within_threshold(sorted_pts, self._last_frontier, threshold=0.5)
                 if closest_index != -1:
                     # There is a point close to the last point pursued
@@ -630,3 +637,7 @@ class ValueMapper:
             return explore_values
         else:
             return [v[0] for v in values]
+
+    def save_map_video(self):
+        # TODO:
+        pass

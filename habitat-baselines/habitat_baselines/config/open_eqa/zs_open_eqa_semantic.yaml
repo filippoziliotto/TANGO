@@ -33,7 +33,7 @@ defaults:
   - _self_
 
 habitat:
-  seed: 2025
+  seed: 100
   dataset:
     type: OPENEQA-v1
     split: val
@@ -49,7 +49,7 @@ habitat:
         distance_to: POINT
 
   environment:
-    max_episode_steps: 500
+    max_episode_steps: 518
   simulator:
     turn_angle: 20
     agents:
@@ -89,7 +89,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.1
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
@@ -118,6 +118,7 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
+    cls_threshold: 0.8
   value_mapper:
     use_value_mapper: True
     type: "blip"

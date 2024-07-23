@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 class ObjectGoalNavEpisode(NavigationEpisode):
     r"""ObjectGoal Navigation Episode
 
-    :param object_category: Category of the obect
+    :param object_category: Category of the object
     """
     object_category: Optional[str] = None
 

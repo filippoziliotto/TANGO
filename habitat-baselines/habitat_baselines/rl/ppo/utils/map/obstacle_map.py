@@ -50,6 +50,7 @@ class ObstacleMap(BaseMap):
         self.explored_area.fill(0)
         self._frontiers_px = np.array([])
         self.frontiers = np.array([])
+        self._traj_vis.reset()
 
     def update_map(
         self,

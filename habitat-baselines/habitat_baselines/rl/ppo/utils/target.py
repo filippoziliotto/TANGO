@@ -50,7 +50,7 @@ class TargetCoordinates:
         distance = torch.tensor(distance, dtype=torch.float32)
         theta = torch.tensor(theta, dtype=torch.float32)
 
-        return torch.Tensor([[distance, theta]]).to(self.habitat_env.device)
+        return torch.Tensor([[distance, theta]])
     
     def from_polar_to_cartesian(self, polar_coords, agent_state):
         """

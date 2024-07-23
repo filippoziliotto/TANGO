@@ -104,6 +104,7 @@ class ValueMap(BaseMap):
     def reset(self) -> None:
         super().reset()
         self._value_map.fill(0)
+        self._traj_vis.reset()
 
     def update_map(
         self,

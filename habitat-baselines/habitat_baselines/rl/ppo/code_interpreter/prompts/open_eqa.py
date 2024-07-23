@@ -39,14 +39,15 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
         prompt = f"""
 while True:
     explore_scene()
-    room = classify_room()
-    if room == "{room_label}":
-        explore_scene()
-        object = detect_objects("{object}")
-        if object:
-            navigate_to(object)
-            answer = answer_question("{question}")
-            stop_navigation()"""
+    room = classify_room("{room_label}")
+    if room:
+        while True:
+            explore_scene()
+            object = detect_objects("{object}")
+            if object:
+                navigate_to(object)
+                answer = answer_question("{question}")
+                stop_navigation()"""
         
     elif room is None and object is not None:
         prompt = f"""
@@ -63,8 +64,8 @@ while True:
         prompt = f"""
 while True:
     explore_scene()
-    room = classify_room()
-    if room == '{room_label}':
+    room = classify_room("{room_label}")
+    if room:
         answer = answer_question("{question}")
         stop_navigation()"""    
 

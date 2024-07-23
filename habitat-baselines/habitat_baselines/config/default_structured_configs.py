@@ -518,6 +518,7 @@ class RoomClassifierConfig(HabitatBaselinesBaseConfig):
     """
     use_room_classifier: bool = False
     model_path: str = 'habitat-baselines/habitat_baselines/rl/ppo/models/roomcls_utils/'
+    cls_threshold: float = 0.3
 
 @dataclass
 class ValueMapperConfig(HabitatBaselinesBaseConfig):

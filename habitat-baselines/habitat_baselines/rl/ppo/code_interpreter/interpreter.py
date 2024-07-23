@@ -270,7 +270,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             print('Segmenter loaded')
     
         if self.habitat_env.room_classifier.use_room_classifier:
-            self.room_classifier = RoomClassifier(self.habitat_env.room_classifier.model_path)
+            self.room_classifier = RoomClassifier(
+                path = self.habitat_env.room_classifier.model_path,
+                cls_threshold = self.habitat_env.room_classifier.cls_threshold,
+            )
+
             print('Room classifier loaded')
     
         if self.habitat_env.LLM.use_LLM:
@@ -295,6 +299,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Exploration primitive (set distant target)
         see target.py for more details
         """
+
+        # Initial 360° turn for frontiers initialization
+        self.turn_around()
+
         self.target.exploration = True
         self.target.get_target_coords()
 
@@ -321,7 +329,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         self.target.exploration = False
         
-        while (not self.target.target_reached()) and (not self.habitat_env.max_steps_reached()):
+        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
@@ -345,6 +353,19 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.object_detector.store_detections:   
             self.object_detector.reset_detection_dict()
     
+    def turn_around(self):
+        """
+        Make a complete turn at the beginning of the episode
+        to initialize the frontiers to have as many as possible
+        """
+        num_turns = 360 // self.habitat_env.config.habitat.simulator.turn_angle
+
+        if self.habitat_env.get_current_step() == 0:
+            for _ in range(num_turns):
+                self.habitat_env.execute_action(action='turn_left')
+                # Using "explore" as ITM to select best frontiers for exploration
+                self.map_scene("explore")
+
     def go_downstairs(self):
         """
         Go downstairs primitive, needed
@@ -362,8 +383,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Go upstairs primitive, needed
         cause pointgoal model is not able to go upstairs
         """
-        # TODO: add minimum number of steps to go downstairs
-        # this will decrease efficiency but provide more accurate results
         sim = self.habitat_env.get_habitat_sim()
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation
@@ -402,7 +421,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 bbox = self.object_detector.detect(obs, target_name)
 
         elif self.habitat_env.task_name in ['objectnav', 'open_eqa']:
-            if self.habitat_env.object_detector.use_additional_detector:
+            # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
+            if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
                 bbox = self.object_detector_closed.detect(obs, target_name)
             else:
                 bbox = self.object_detector.detect(obs, target_name)
@@ -419,6 +439,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes
             self.save_observation(obs, 'detection', bbox)
+
         else:
             self.map_scene(target_name)
             
@@ -518,7 +539,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         return segmentation
 
-    def classify_room(self):
+    def classify_room(self, room_name):
         """
         Classify the room using a room classifier model
         details in models.py and roomcls_utils folder
@@ -527,7 +548,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # obs = self.look_around(80)['stacked']
  
         # This should be better than the 180° view
-        room = self.room_classifier.classify(obs)
+        # Returns None if not the correct room
+        room, confidence = self.room_classifier.classify(obs)
+
+        if (room == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
+            pass
+        else:
+            room = None
+
+        self.update_variable('room', room)
+        self.map_scene(room_name)
+
         return room
     
     def select(self, target):
@@ -573,24 +604,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
     def map_scene(self, target_name):
         """
-        Map the scene and create topdown view
-        from depth image and  use CLIP values
+        Map the scene and create topdown view from depth image
+        and use Image-Text embedding to find the best frontier
+        https://github.com/bdaiinstitute/vlfm/tree/main
         """
         image = self.habitat_env.get_current_observation(type='rgb')
-
         self.value_mapper.compute_map_value(image, target_name)
 
         new_frontier = self.value_mapper.best_frontier_polar
         if new_frontier is not None:
             self.target.set_target_coords_from_polar(new_frontier)
-            
-        # if target_map_coords is not None and not self.variables['objects']:  
-        #     self.target.set_target_coords_from_cartesian(target_map_coords)
-
-        # self.save_observation(fow, 'map')
-        # save fow image as map.png with jetmap
-        # TODO: check if the target is acutally near the heatmap scores
-        # plt.imsave('images/map.png', fow, cmap='jet')
 
     def save_observation(self, obs, name, bbox=None):
         """

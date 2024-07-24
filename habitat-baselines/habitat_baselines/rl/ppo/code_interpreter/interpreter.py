@@ -288,7 +288,15 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.value_mapper = ValueMapper(
                 habitat_env=self.habitat_env,
                 type = self.habitat_env.value_mapper.type,
-                size = self.habitat_env.value_mapper.size)
+                size = self.habitat_env.value_mapper.size,
+                visualize = self.habitat_env.value_mapper.visualize, 
+                save_video = self.habitat_env.value_mapper.save_video, 
+                policy = self.habitat_env.value_mapper.policy,
+                exploration_thresh = self.habitat_env.value_mapper.exploration_threshold,
+                min_obstacle_height = self.habitat_env.value_mapper.min_obstacle_height,
+                max_obstacle_height = self.habitat_env.value_mapper.max_obstacle_height,
+                use_max_confidence = self.habitat_env.value_mapper.use_max_confidence,                
+            )
             print('Value mapper loaded')
 
     """
@@ -618,7 +626,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.value_mapper.update_map(image, target_name)
 
         best_frontier = self.value_mapper.best_frontier_polar
-        self.target.set_target_coords_from_polar(best_frontier)
+
+        # Navigate to the best frontier
+        if best_frontier is not None:
+            self.target.set_target_coords_from_polar(best_frontier)
+        # No forntier found, explore with random policy
+        else:
+            self.target.generate_target()
+    
 
     def save_observation(self, obs, name, bbox=None):
         """

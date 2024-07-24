@@ -528,6 +528,13 @@ class ValueMapperConfig(HabitatBaselinesBaseConfig):
     use_value_mapper: bool = False
     type: str = "blip"
     size: str = "base"
+    visualize: bool = False
+    save_video: bool = False
+    policy: str = "v1"
+    exploration_threshold: float = 0.2
+    min_obstacle_height: float = 0.3
+    max_obstacle_height: float = 0.5
+    use_max_confidence: bool = False
 
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):

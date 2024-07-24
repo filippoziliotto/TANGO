@@ -57,7 +57,6 @@ class FrontierMap:
                     cosine = self._encode(curr_image, text)
                 self.frontiers.append(Frontier(location, cosine))
 
-
     def _encode(self, image: np.ndarray, text: str) -> float:
         """
         Encodes the given image using the encoding type specified in the constructor.
@@ -68,14 +67,30 @@ class FrontierMap:
         Returns:
 
         """
-        # Process Input
-        if self.type in ['clip']:
-            inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
-        elif self.type in ['blip']:
-            inputs = self.processor(image, text, return_tensors="pt").to(self.device)
+        cosine = []
+        if not isinstance(text, List):
+            text = [text]
 
+        for word in text:
+            # Process Input
+            inputs = self.process_input(self.type, word, image)
+
+            # Compute Similarity
+            cosine_sim = self.compute_similarity(self.type, inputs)
+        cosine.append(cosine_sim)
+
+        return cosine[0]
+
+    def process_input(self, type, text, image) -> torch.Tensor:
+        if type in ['clip']:
+            inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
+        elif type in ['blip']:
+            inputs = self.processor(image, text, return_tensors="pt").to(self.device)
+        return inputs
+    
+    def compute_similarity(self, type, inputs):
         # Compute cosine similarity
-        if self.type in ['clip']:
+        if type in ['clip']:
             # Get the image and text embeddings
             outputs = self.encoder(**inputs)
             image_embeddings = outputs.pixel_values
@@ -89,12 +104,10 @@ class FrontierMap:
             cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())[0][0]
             return cosine_sim
         
-        elif self.type in ['blip']:
+        elif type in ['blip']:
             cosine_sim = self.encoder(**inputs, use_itm_head=False)[0].detach().cpu().numpy().item()
             
         return cosine_sim
-
-        
 
     def sort_waypoints(self) -> Tuple[np.ndarray, List[float]]:
         """

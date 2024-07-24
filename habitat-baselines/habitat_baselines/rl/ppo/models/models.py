@@ -90,7 +90,6 @@ class ObjectDetector:
         if len(boxes)==0:
             return [], [], []
 
-        print(self.model.model.config.id2label)
         for label in labels:
             if label in list(desired_classes_ids.keys()):
                 if class_names_coco[desired_classes_ids[label]] in obj_name:
@@ -391,22 +390,37 @@ class ValueMapper:
     _last_frontier: np.ndarray = np.zeros(2)
     _previous_frontier: np.ndarray = np.zeros(2)
     video_frames = []
+    frontiers_at_step = []
 
-    def __init__(self, habitat_env, type, size):
+    def __init__(self, 
+                 habitat_env, 
+                 type: str = "blip", 
+                 size: str = "large", 
+                 visualize: bool = False, 
+                 save_video: bool = False, 
+                 policy: str = "v1",
+                 exploration_thresh: float = 0.0,
+                 min_obstacle_height: float = 0.3,
+                 max_obstacle_height: float = 0.5,
+                 use_max_confidence: bool = False,
+                 ):
+        # Class settings
         self.habitat_env = habitat_env
         self._get_cameras_parameters(self.habitat_env.config)
-        self.visualize = True
-        self._prompt = "Seems like there is [] ahead. | There is a lot of area to explore ahead."
-        self.use_double_value_map = True
+        self.visualize = visualize
+        self.save_video = save_video
+        self.policy = policy
+        value_channels = 1 if policy in ["v1", "v2"] else 2
 
+        # Frontier settings
         self._acyclic_enforcer = AcyclicEnforcer()
-        self._exploration_thresh = 0.0
-        self.frontiers_at_step = []
+        self._exploration_thresh = exploration_thresh
        
+        # Map Initializattion
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
-            min_height=0.3,
-            max_height=self._max_obstacle_height + 0.5,
+            min_height=min_obstacle_height,
+            max_height=self._max_obstacle_height + max_obstacle_height,
             area_thresh=1.5
         )
         self.frontier_map = FrontierMap(
@@ -415,24 +429,16 @@ class ValueMapper:
             encoding_type="cosine"
         )
         self.value_map = ValueMap(
-            value_channels=1,
-            use_max_confidence=False,
+            value_channels=value_channels,
+            use_max_confidence=use_max_confidence,
             fusion_type="default",
             obstacle_map=self.obstacle_map
         )
 
-    def preprocess_text(self, text):
-        # obj = self._prompt.replace("[]", text)
-
-        # if self.use_double_value_map:
-        #     return (obj, self._prompt.split("|")[1])
-        
-        # return self._prompt.replace("[]", text)
-        return text
-        
     def reset_map(self):
 
-        if self.visualize:
+        # At the end of episode save the video
+        if self.visualize and self.save_video:
             self.save_map_video(self.video_frames, "video_dir/open_eqa", "open_eqa_example.mp4")
 
         self.frontier_map.reset()
@@ -441,10 +447,34 @@ class ValueMapper:
         self.frontiers_at_step = []
         self.video_frames = []
 
+    def preprocess_text(self, target):
+        assert target is not None or target != "", "Target should not be empty"
+
+        # Only target name
+        if self.policy == "v1":
+            self._prompt ="[]"
+            prompt = target
+
+        # Seem like the is "target" ahead
+        if self.policy == "v2":
+            self._prompt = "Seems like there is [] ahead.",
+            prompt = self._prompt.replace("[]", target)
+
+        # Seem like there is "target" ahead. | There is a lot of area to explore ahead.
+        if self.policy == "v3":
+            self._prompt = "Seems like there is [] ahead.|There is a lot of area to explore ahead.",
+            assert self._exploration_thresh > 0, "Exploration threshold should be greater than 0"
+            splitted_text = self._prompt.split("|")
+            prompt = [splitted_text[0].replace("[]", target), splitted_text[-1]]
+
+        return prompt
+    
     def update_map(self, curr_image, text):
 
+        # Extract target prompt
         prompt = self.preprocess_text(text)
 
+        # Update maps
         self.obstacle_map.update_map(
             depth = self._get_current_depth(),
             tf_camera_to_episodic=self._get_tf_camera_to_episodic(self.habitat_env),
@@ -454,18 +484,15 @@ class ValueMapper:
             fy=self._fy,
             topdown_fov = self._topdown_view_angle,
         )
-
         self.frontier_map.update(
             frontier_locations = self.obstacle_map._get_frontiers(),
             curr_image = curr_image,
             text = prompt
         )
-
         self.curr_values = self.frontier_map._encode(
             image = curr_image,
             text = prompt
         )
-
         self.value_map.update_map(
             values = np.array([self.curr_values]),
             depth = self._get_current_depth(),
@@ -479,6 +506,7 @@ class ValueMapper:
             robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
+        # Update the best frontier
         self.best_frontier_polar = self._get_best_frontier(
             frontiers=self.obstacle_map._get_frontiers()
         )
@@ -496,7 +524,8 @@ class ValueMapper:
             )
             cv2.imwrite("images/value_map.png", val_map)
 
-            self.video_frames.append((obs_map, val_map))
+            if self.save_video:
+                self.video_frames.append((obs_map, val_map))
 
     def _get_best_frontier(
         self,
@@ -513,7 +542,7 @@ class ValueMapper:
             Tuple[np.ndarray, float]: The best frontier and its value.
         """
         # The points and values will be sorted in descending order
-        sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers)
+        sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers, self.policy)
         robot_xy = self.habitat_env.get_current_observation(type="gps")
         heading = self.habitat_env.get_current_observation(type="compass")
         # robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
@@ -522,7 +551,7 @@ class ValueMapper:
 
         # If no frontier is found, sample random point
         if self.no_frontiers_found(frontiers, robot_xy, heading):
-            return self.best_frontier_polar
+            return None
 
         # If there is a last point pursued, then we consider sticking to pursuing it
         # if it is still in the list of frontiers and its current value is not much
@@ -580,24 +609,21 @@ class ValueMapper:
         return self.best_frontier_polar
 
     def no_frontiers_found(self, frontiers: np.ndarray, robot_xy: np.ndarray, heading: float):
-        # If no frontier is found, sample a random
-        # point and navigate to it, untile next frontier is updated
+        # Check if now new frontier is found
         self.frontiers_at_step.append(frontiers)
-        # TODO: make this in map_scene function in interpreter.py
         if self.frontiers_at_step[-1].size == 0:
-            self._last_value = 0.05
-            self._last_frontier = np.array(list(np.random.randint(0, self.obstacle_map.size, 2)))
-            self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, heading, self._last_frontier)
             return True
         return False
             
     def _sort_frontiers_by_value(
         self, frontiers: np.ndarray,
-        itm_policy: str = "v3",
+        itm_policy: str = "v1",
     ) -> Tuple[np.ndarray, List[float]]:
         
         if itm_policy == "v1":
             return self.frontier_map.sort_waypoints()
+        if itm_policy == "v2":
+            return self._value_map.sort_waypoints(frontiers, 0.5)
         if itm_policy == "v3":
             return self.value_map.sort_waypoints(frontiers, 0.5, reduce_fn=self._reduce_values)
 

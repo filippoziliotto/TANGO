@@ -535,6 +535,9 @@ class ValueMapperConfig(HabitatBaselinesBaseConfig):
     min_obstacle_height: float = 0.3
     max_obstacle_height: float = 0.5
     use_max_confidence: bool = False
+    map_size: int = 1000
+    pixels_per_meter: int = 20
+    save_image_embed: bool = False
 
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):

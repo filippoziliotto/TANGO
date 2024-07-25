@@ -56,6 +56,7 @@ class ValueMap(BaseMap):
         use_max_confidence: bool = True,
         fusion_type: str = "default",
         obstacle_map: Optional["ObstacleMap"] = None,  # type: ignore # noqa: F821
+        pixels_per_meter: Optional[int] = None,
     ) -> None:
         """
         Args:
@@ -72,11 +73,14 @@ class ValueMap(BaseMap):
             size = 2000
         super().__init__(size)
         self._value_map = np.zeros((size, size, value_channels), np.float32)
+        self._embed_map = np.zeros((size, size, 256), np.float32)
         self._value_channels = value_channels
         self._use_max_confidence = use_max_confidence
         self._fusion_type = fusion_type
         self._obstacle_map = obstacle_map
         if self._obstacle_map is not None:
+            if pixels_per_meter is not None:
+                self.pixels_per_meter = pixels_per_meter
             assert self._obstacle_map.pixels_per_meter == self.pixels_per_meter
             assert self._obstacle_map.size == self.size
         if os.environ.get("MAP_FUSION_TYPE", "") != "":
@@ -114,6 +118,7 @@ class ValueMap(BaseMap):
         min_depth: float,
         max_depth: float,
         fov: float,
+        image_embed: Optional[np.ndarray] = None,
     ) -> None:
         """Updates the value map with the given depth image, pose, and value to use.
 
@@ -134,7 +139,7 @@ class ValueMap(BaseMap):
         curr_map = self._localize_new_data(depth, tf_camera_to_episodic, min_depth, max_depth, fov)
 
         # Fuse the new data with the existing data
-        self._fuse_new_data(curr_map, values)
+        self._fuse_new_data(curr_map, values, image_embed)
 
         if RECORDING:
             idx = len(glob.glob(osp.join(RECORDING_DIR, "*.png")))
@@ -379,7 +384,7 @@ class ValueMap(BaseMap):
 
         return adjusted_mask
 
-    def _fuse_new_data(self, new_map: np.ndarray, values: np.ndarray) -> None:
+    def _fuse_new_data(self, new_map: np.ndarray, values: np.ndarray, image_embed: np.ndarray = None) -> None:
         """Fuse the new data with the existing value and confidence maps.
 
         Args:
@@ -395,9 +400,16 @@ class ValueMap(BaseMap):
             # If an obstacle map is provided, we will use it to mask out the
             # new map
             explored_area = self._obstacle_map.explored_area
-            new_map[explored_area == 0] = 0
-            self._map[explored_area == 0] = 0
-            self._value_map[explored_area == 0] *= 0
+            mask = explored_area == 0
+            new_map[mask] = 0
+            self._map[mask] = 0
+            self._value_map[mask] *= 0
+
+            # SIMPLE REPLACE FOR IMAGE EMBEDDING MAP
+            self._embed_map[mask, :] *= 0
+            # new_embed_map = np.zeros_like(self._embed_map)
+            # new_embed_map[new_map > 0, :] = image_embed
+            # self._embed_map[new_map > 0] = new_embed_map[new_map > 0]
 
         if self._fusion_type == "replace":
             # Ablation. The values from the current observation will overwrite any
@@ -422,6 +434,16 @@ class ValueMap(BaseMap):
         # will be silenced into 0s
         new_map_mask = np.logical_and(new_map < self._decision_threshold, new_map < self._map)
         new_map[new_map_mask] = 0
+
+        # Using max confidence for feature map
+        emap = self._map.copy()
+        new_emap = new_map.copy()
+        emap[emap > 0] = 1
+        new_emap[new_emap > 0] = 1
+        new_map_mask = np.logical_and(new_emap < self._decision_threshold, new_emap < emap)
+        new_emap[new_map_mask] = 0
+        higher_new_map_mask = new_emap > emap
+        self._embed_map[higher_new_map_mask] = image_embed
 
         if self._use_max_confidence:
             # For every pixel that has a higher new_map in the new map than the

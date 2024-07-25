@@ -295,7 +295,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 exploration_thresh = self.habitat_env.value_mapper.exploration_threshold,
                 min_obstacle_height = self.habitat_env.value_mapper.min_obstacle_height,
                 max_obstacle_height = self.habitat_env.value_mapper.max_obstacle_height,
-                use_max_confidence = self.habitat_env.value_mapper.use_max_confidence,                
+                use_max_confidence = self.habitat_env.value_mapper.use_max_confidence,  
+                map_size = self.habitat_env.value_mapper.map_size,       
+                pixels_per_meter = self.habitat_env.value_mapper.pixels_per_meter,
+                save_image_embed = self.habitat_env.value_mapper.save_image_embed,       
             )
             print('Value mapper loaded')
 
@@ -363,7 +366,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.object_detector.reset_detection_dict()
 
         # Reset value mapper
-        if self.habitat_env.value_mapper.use_value_mapper and self.value_mapper.visualize:
+        if self.habitat_env.value_mapper.use_value_mapper:
             self.value_mapper.reset_map()
     
     def turn_around(self):

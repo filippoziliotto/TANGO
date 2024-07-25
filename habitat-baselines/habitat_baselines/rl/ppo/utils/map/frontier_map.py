@@ -9,21 +9,31 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_value_mapper
 )
 from sklearn.metrics.pairwise import cosine_similarity
+from torch.nn.functional import normalize
 
+
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 class Frontier:
-    def __init__(self, xyz: np.ndarray, cosine: float):
+    def __init__(self, xyz: np.ndarray, cosine: float, embed: np.ndarray = None):
         self.xyz = xyz
         self.cosine = cosine
+        self.embed = embed
 
 
 class FrontierMap:
     frontiers: List[Frontier] = []
 
-    def __init__(self, type, size, encoding_type: str = "cosine"):
+    def __init__(self, type, size, encoding_type: str = "cosine", save_image_embed: bool = False):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.encoder, self.processor = get_value_mapper(self.device, type, size)
         self.type = type
+        self.encoding_type = encoding_type
+        self.save_image_embed = save_image_embed
+
+        self._text_embed = None
 
     def reset(self) -> None:
         self.frontiers = []
@@ -54,8 +64,8 @@ class FrontierMap:
         for location in frontier_locations:
             if not any(np.array_equal(frontier.xyz, location) for frontier in self.frontiers):
                 if cosine is None:
-                    cosine = self._encode(curr_image, text)
-                self.frontiers.append(Frontier(location, cosine))
+                    cosine, curr_embed = self._encode(curr_image, text)
+                self.frontiers.append(Frontier(location, cosine, curr_embed))
 
     def _encode(self, image: np.ndarray, text: str) -> float:
         """
@@ -68,6 +78,7 @@ class FrontierMap:
 
         """
         cosine = []
+        image_embeds = []
         if not isinstance(text, List):
             text = [text]
 
@@ -76,10 +87,11 @@ class FrontierMap:
             inputs = self.process_input(self.type, word, image)
 
             # Compute Similarity
-            cosine_sim = self.compute_similarity(self.type, inputs)
+            cosine_sim, image_embed = self.compute_similarity(self.type, inputs)
         cosine.append(cosine_sim)
+        image_embeds.append(image_embed)
 
-        return cosine[0]
+        return cosine[0], image_embeds[0]
 
     def process_input(self, type, text, image) -> torch.Tensor:
         if type in ['clip']:
@@ -89,25 +101,30 @@ class FrontierMap:
         return inputs
     
     def compute_similarity(self, type, inputs):
-        # Compute cosine similarity
+        # Compute cosine similarity and return image embeddings
         if type in ['clip']:
-            # Get the image and text embeddings
             outputs = self.encoder(**inputs)
-            image_embeddings = outputs.pixel_values
-            text_embeddings = outputs.last_hidden_state
-            # Get the image and text embeddings
-            outputs = self.encoder(**inputs)
-            image_embeddings = outputs.image_embeds
-            text_embeddings = outputs.text_embeds
+            image_embed = outputs.image_embeds.detach().cpu().numpy()
+            text_embed = outputs.text_embeds.detach().cpu().numpy()
+            self._text_embed = text_embed
 
             # Compute cosine similarity
-            cosine_sim = cosine_similarity(image_embeddings.detach().cpu().numpy(), text_embeddings.detach().cpu().numpy())[0][0]
-            return cosine_sim
-        
+            cosine_sim = cosine_similarity(image_embed, text_embed)[0][0]
+            image_embed = image_embed[0]
+
         elif type in ['blip']:
             cosine_sim = self.encoder(**inputs, use_itm_head=False)[0].detach().cpu().numpy().item()
+
+            if self.save_image_embed:
+                # Extract image embeddings separately
+                image_embed = self.encoder.vision_model(inputs.data["pixel_values"])
+                image_embed = normalize(self.encoder.vision_proj(image_embed.last_hidden_state[:, 0, :]), dim=-1)
+                image_embed = image_embed.squeeze(0).detach().cpu().numpy()  # or appropriate attribute for image embeddings
             
-        return cosine_sim
+        if self.save_image_embed:
+            return cosine_sim, image_embed
+        else:
+            return cosine_sim, None
 
     def sort_waypoints(self) -> Tuple[np.ndarray, List[float]]:
         """

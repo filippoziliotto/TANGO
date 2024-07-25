@@ -403,6 +403,9 @@ class ValueMapper:
                  min_obstacle_height: float = 0.3,
                  max_obstacle_height: float = 0.5,
                  use_max_confidence: bool = False,
+                 map_size: int = 1000,
+                 pixels_per_meter: int = 20,
+                 save_image_embed: bool = False
                  ):
         # Class settings
         self.habitat_env = habitat_env
@@ -415,24 +418,31 @@ class ValueMapper:
         # Frontier settings
         self._acyclic_enforcer = AcyclicEnforcer()
         self._exploration_thresh = exploration_thresh
+        self._map_size = map_size
+        self._pixels_per_meter = pixels_per_meter
        
         # Map Initializattion
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
             min_height=min_obstacle_height,
             max_height=self._max_obstacle_height + max_obstacle_height,
-            area_thresh=1.5
+            area_thresh=1.5,
+            size = self._map_size,
+            pixels_per_meter=self._pixels_per_meter
         )
         self.frontier_map = FrontierMap(
             type=type,
             size=size, 
-            encoding_type="cosine"
+            encoding_type="cosine",
+            save_image_embed=save_image_embed,
         )
         self.value_map = ValueMap(
             value_channels=value_channels,
             use_max_confidence=use_max_confidence,
             fusion_type="default",
-            obstacle_map=self.obstacle_map
+            obstacle_map=self.obstacle_map, 
+            size = self._map_size,
+            pixels_per_meter=self._pixels_per_meter
         )
 
     def reset_map(self):
@@ -489,7 +499,7 @@ class ValueMapper:
             curr_image = curr_image,
             text = prompt
         )
-        self.curr_values = self.frontier_map._encode(
+        self.curr_values, self.curr_embed = self.frontier_map._encode(
             image = curr_image,
             text = prompt
         )
@@ -500,6 +510,7 @@ class ValueMapper:
             min_depth = self._min_depth,
             max_depth = self._max_depth,
             fov = np.deg2rad(self._fov),
+            image_embed=self.curr_embed
         )
         self.value_map.update_agent_traj(
             robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3],
@@ -526,6 +537,45 @@ class ValueMapper:
 
             if self.save_video:
                 self.video_frames.append((obs_map, val_map))
+
+            # from sklearn.metrics.pairwise import cosine_similarity
+            # from habitat_baselines.rl.ppo.utils.map.geometry_utils import monochannel_to_inferno_rgb
+            # from habitat_baselines.rl.ppo.utils.utils import (
+            #     get_value_mapper
+            # )
+            # from torch.nn.functional import normalize
+
+            # encoder, processor = get_value_mapper("cuda:0", "blip", "large")
+            # image = self.habitat_env.get_current_observation(type="rgb")
+
+            # text = "bathroom"
+            # inputs = processor(image, text, return_tensors="pt").to("cuda:0")
+            # text_embeds = encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
+            # text_embeds = normalize(encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
+
+            # # Extract the embedding and feature map
+            # embed_map = self.value_map._embed_map
+
+            # mask = np.any(embed_map, axis=2)
+            # non_zero_embeds = embed_map[mask]
+            # cosine_sims = cosine_similarity(non_zero_embeds, text_embeds.reshape(1, -1))
+            # emap = np.zeros(embed_map.shape[:2])
+
+            # # Fill in the non-zero cosine similarities
+            # emap[mask] = cosine_sims.flatten()
+
+            # # Create the image
+            # zero_mask = emap == 0
+            # emap[zero_mask] = np.max(emap)
+            
+            # emap = monochannel_to_inferno_rgb(emap)
+            # emap[zero_mask] = (255, 255, 255)
+            
+            
+            # emap = cv2.flip(emap, 0)
+            # cv2.imwrite("images/embed_map.png", emap)
+
+            
 
     def _get_best_frontier(
         self,
@@ -713,4 +763,4 @@ class ValueMapper:
             verbose = True,
         )
         
-        
+

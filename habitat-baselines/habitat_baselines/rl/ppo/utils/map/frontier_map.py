@@ -8,8 +8,10 @@ import numpy as np
 from habitat_baselines.rl.ppo.utils.utils import (
     get_value_mapper
 )
+from habitat_baselines.rl.ppo.utils.map.geometry_utils import monochannel_to_inferno_rgb
 from sklearn.metrics.pairwise import cosine_similarity
 from torch.nn.functional import normalize
+import cv2
 
 
 from PIL import Image
@@ -119,7 +121,7 @@ class FrontierMap:
                 # Extract image embeddings separately
                 image_embed = self.encoder.vision_model(inputs.data["pixel_values"])
                 image_embed = normalize(self.encoder.vision_proj(image_embed.last_hidden_state[:, 0, :]), dim=-1)
-                image_embed = image_embed.squeeze(0).detach().cpu().numpy()  # or appropriate attribute for image embeddings
+                image_embed = image_embed.squeeze(0).detach().cpu().numpy()
             
         if self.save_image_embed:
             return cosine_sim, image_embed
@@ -138,3 +140,58 @@ class FrontierMap:
         sorted_frontiers = np.array([waypoints[i] for i in sorted_inds])
 
         return sorted_frontiers, sorted_values
+
+    def compute_map_cosine_similarity(self, 
+                                      feature_map: np.ndarray, 
+                                      text: str, 
+                                      image: np.ndarray, 
+                                      save_to_disk: bool = False) -> np.ndarray:
+        """
+        Computes the cosine similarity given the feature map saved for each pixel
+        in the value map. Returns a 2D numpy array which is a value map
+        """
+        assert isinstance(feature_map, np.ndarray), "Feature map has to be (size, size, feature) numpy array"
+        assert isinstance(text, str), "Text has to be a string"
+        assert isinstance(image, np.ndarray), "Image has to be a numpy array (img_size, img_size, 3)"
+
+        
+        if self.type in ["blip"]:
+            inputs = self.processor(image, text, return_tensors="pt").to("cuda:0")
+            text_embeds = self.encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
+            text_embeds = normalize(self.encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
+        elif self.type in ["clip"]:
+            inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
+            outputs = self.encoder(**inputs)
+            text_embeds = outputs.text_embeds.detach().cpu().numpy()
+
+        assert feature_map.shape[-1] == text_embeds.shape[-1], "Feature map and text embeddings have to have the same dimension"
+        
+        mask_non_zero = np.any(feature_map, axis=2)
+        cosine_sims = cosine_similarity(feature_map[mask_non_zero], text_embeds.reshape(1, -1))
+
+        value_map = np.zeros(feature_map.shape[:2])
+        value_map[mask_non_zero] = cosine_sims.flatten()
+
+        if save_to_disk:
+            from_feature_to_image(cosine_sims, feature_map, mask_non_zero)
+
+        return value_map
+
+
+def from_feature_to_image(cosine_sim: np.ndarray , feature_map: np.ndarray, mask:np.ndarray) -> np.ndarray:
+
+    # Fill in the non-zero cosine similarities
+    embed_map = np.zeros(feature_map.shape[:2])
+    embed_map[mask] = cosine_sim.flatten()
+
+    # Create the image
+    zero_mask = embed_map == 0
+    embed_map[zero_mask] = np.max(embed_map)
+            
+    # Convert to 
+    embed_map = monochannel_to_inferno_rgb(embed_map)
+    embed_map[zero_mask] = (255, 255, 255)
+    embed_map = cv2.flip(embed_map, 0)
+    cv2.imwrite("images/feature_value_map.png", embed_map)
+    return
+    

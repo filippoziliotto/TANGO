@@ -538,44 +538,12 @@ class ValueMapper:
             if self.save_video:
                 self.video_frames.append((obs_map, val_map))
 
-            # from sklearn.metrics.pairwise import cosine_similarity
-            # from habitat_baselines.rl.ppo.utils.map.geometry_utils import monochannel_to_inferno_rgb
-            # from habitat_baselines.rl.ppo.utils.utils import (
-            #     get_value_mapper
-            # )
-            # from torch.nn.functional import normalize
-
-            # encoder, processor = get_value_mapper("cuda:0", "blip", "large")
-            # image = self.habitat_env.get_current_observation(type="rgb")
-
-            # text = "bathroom"
-            # inputs = processor(image, text, return_tensors="pt").to("cuda:0")
-            # text_embeds = encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
-            # text_embeds = normalize(encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
-
-            # # Extract the embedding and feature map
-            # embed_map = self.value_map._embed_map
-
-            # mask = np.any(embed_map, axis=2)
-            # non_zero_embeds = embed_map[mask]
-            # cosine_sims = cosine_similarity(non_zero_embeds, text_embeds.reshape(1, -1))
-            # emap = np.zeros(embed_map.shape[:2])
-
-            # # Fill in the non-zero cosine similarities
-            # emap[mask] = cosine_sims.flatten()
-
-            # # Create the image
-            # zero_mask = emap == 0
-            # emap[zero_mask] = np.max(emap)
-            
-            # emap = monochannel_to_inferno_rgb(emap)
-            # emap[zero_mask] = (255, 255, 255)
-            
-            
-            # emap = cv2.flip(emap, 0)
-            # cv2.imwrite("images/embed_map.png", emap)
-
-            
+            # When now new frontier is found, compute the cosine similarity of features
+            if self.frontiers_at_step[-1].size == 0:
+                feature_map = self.value_map._embed_map
+                text = "bathroom"
+                image = self.habitat_env.get_current_observation(type="rgb")
+                self.frontier_map.compute_map_cosine_similarity(feature_map, text, image, True)
 
     def _get_best_frontier(
         self,

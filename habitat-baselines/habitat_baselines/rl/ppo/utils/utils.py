@@ -15,7 +15,7 @@ from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
                           BlipProcessor, ViTForImageClassification, ViTImageProcessor,
-                          CLIPProcessor, CLIPModel, BlipForImageTextRetrieval
+                          CLIPProcessor, CLIPModel, BlipForImageTextRetrieval, GroundingDinoForObjectDetection
                           )
 
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
@@ -65,7 +65,7 @@ def get_detector_model(type, size, store_detections, device):
     Function to get the correct model and processor 
     for the detector called in models.py
     """
-    if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['base', 'large', 'resnet50','resnet101']):
+    if (type not in ['owl-vit', 'owl-vit2', 'grounding-dino', 'detr']) or (size not in ['tiny', 'base', 'large', 'resnet50','resnet101']):
         raise ValueError("Invalid model settings!")
         
     if (store_detections) and (type not in ['detr']):
@@ -86,10 +86,14 @@ def get_detector_model(type, size, store_detections, device):
         processor = OwlViTProcessor.from_pretrained(model_name)
         model = OwlViTForObjectDetection.from_pretrained(model_name)
     elif type in ['grounding-dino']:
-        assert size == 'base', "Only base size available for grounding_dino model."
+        assert size in ['base', 'tiny'], "Only base size available for grounding_dino model."
         model_name = f"IDEA-Research/grounding-dino-{size}"
-        processor = AutoProcessor.from_pretrained(model_name)
-        model = AutoModelForZeroShotObjectDetection.from_pretrained(model_name)
+        if size in ['base']:
+            processor = AutoProcessor.from_pretrained(model_name)
+            model = AutoModelForZeroShotObjectDetection.from_pretrained(model_name)
+        elif size in ['tiny']:
+            processor = AutoProcessor.from_pretrained(model_name)
+            model = GroundingDinoForObjectDetection.from_pretrained(model_name)
     elif type in ["detr"]:
         if size in ["resnet50"]:
             model_name = "facebook/detr-resnet-50"

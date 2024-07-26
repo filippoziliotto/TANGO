@@ -62,7 +62,7 @@ class ObjectDetector:
         elif self.type in ["owl-vit", "owl-vit2"]:
             text = [[f'a photo of {obj_name}']]
         elif self.type in ["grounding-dino"]:
-            text = f"a photo of {obj_name}"
+            text = f"a {obj_name}."
 
         encoding = self.processor(
                 text=text, 
@@ -81,7 +81,7 @@ class ObjectDetector:
                 outputs,
                 encoding['input_ids'],
                 box_threshold=self.thresh,
-                text_threshold=0.3,
+                # text_threshold=0.3,
                 target_sizes=target_sizes)
         return results
 
@@ -151,8 +151,12 @@ class ObjectDetector:
 
         final_detections = sorted(zip(selected_boxes, selected_scores, [obj_name] * len(selected_boxes)), 
                                 key=lambda x: x[1], reverse=True)
+        
+        detections = [det[0] for det in final_detections]
+        scores = [det[1] for det in final_detections]
+        labels = [det[2] for det in final_detections]
 
-        return {'boxes': final_detections, 'scores': final_detections, 'labels': final_detections}
+        return {'boxes': detections, 'scores': scores, 'labels': labels}
 
     def detect(self, image, target_name):
         """
@@ -162,7 +166,22 @@ class ObjectDetector:
         """
         detection = self.predict(image, target_name)
 
-        return detection['boxes']
+        
+        target_dict = {} 
+        for box, score, label in zip(detection['boxes'], detection['scores'], detection['labels']):
+            if label not in target_dict:
+                target_dict[label] = {
+                    "boxes": [],
+                    "scores": []
+                }
+            target_dict[label]["boxes"].append(box)
+            target_dict[label]["scores"].append(score)
+
+        if len(target_dict) < 1:
+            target_dict = {target_name : {"boxes": [], "scores": []}}
+            
+        # If no detection is found return original detection dict
+        return target_dict
 
 class VQA:
     def __init__(self, type, size, quantization, vqa_strategy):
@@ -442,7 +461,8 @@ class ValueMapper:
             fusion_type="default",
             obstacle_map=self.obstacle_map, 
             size = self._map_size,
-            pixels_per_meter=self._pixels_per_meter
+            pixels_per_meter=self._pixels_per_meter,
+            use_feature_map = save_image_embed
         )
 
     def reset_map(self):
@@ -539,9 +559,9 @@ class ValueMapper:
                 self.video_frames.append((obs_map, val_map))
 
             # When now new frontier is found, compute the cosine similarity of features
-            if self.frontiers_at_step[-1].size == 0:
+            if self.frontiers_at_step[-1].size == 0 and False:
                 feature_map = self.value_map._embed_map
-                text = "bathroom"
+                text = "bedroom"
                 image = self.habitat_env.get_current_observation(type="rgb")
                 self.frontier_map.compute_map_cosine_similarity(feature_map, text, image, True)
 

@@ -133,6 +133,9 @@ class PseudoCodeInterpreter:
     def update_variable(self, name, value):
         self.variables[name] = value
 
+    def get_variable(self, name):
+        return self.variables[name]
+
     def current_indentation(self, line):
         return len(line) - len(line.lstrip())
 class PseudoCodePrimitives(PseudoCodeInterpreter): 
@@ -143,76 +146,30 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
     def __init__(self):
         super().__init__()
         self.primitives = {
+            # Exploration functions
             'explore_scene': self.explore_scene,
             'detect_objects': self.detect_objects,
             'navigate_to': self.navigate_to,
             'feature_match': self.feature_match,
-            'stop_navigation': self.stop_navigation,    
+            'stop_navigation': self.stop_navigation,   
+            # Base Vision module functions 
             'answer_question': self.answer_question,
             'look_around': self.look_around,
             'describe_scene': self.describe_scene,
-            'count_objects': self.count_objects,
-            'map_scene': self.map_scene,
             'segment_scene': self.segment_scene,
             'classify_room': self.classify_room,
+            # Useless functions
             'go_downstairs': self.go_downstairs,
             'go_upstairs': self.go_upstairs,
             'do_nothing': self.do_nothing,
+            # New functions
+            'count': self.count,
             'map_scene': self.map_scene,
             'select': self.select,
+            'eval': self.eval,
+            'is_found': self.is_found,
         }
 
-
-    def detect_objects(self, target):
-        pass
-    
-    def answer_question(self, question):
-        pass
-
-    def feature_match(self, object):
-        pass
-
-    def explore_scene(self):
-        pass
-
-    def navigate_to(self, target):
-        pass
-
-    def stop_navigation(self):
-        pass
-
-    def answer_question(self, question):
-        pass
-
-    def look_around(self):
-        pass
-
-    def describe_scene(self):
-        pass
-
-    def count_objects(self, target):
-        pass
-
-    def segment_scene(self):
-        pass
-
-    def map_scene(self):
-        pass
-
-    def classify_room(self):
-        pass
-
-    def go_downstairs(self):
-        pass
-
-    def go_upstairs(self):
-        pass
-
-    def do_nothing(self):
-        pass
-
-    def select(self):
-        pass
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Primitive functions interactive with habitat
@@ -333,12 +290,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         self.target.update_target_coords()
 
-    def navigate_to(self, bbox):
+    def navigate_to(self, target_object):
         """
         Target fixed (approaching the target)
         see target.py for more details
         """
+        target_object = self.check_variable_type(target_object)
+
+        # Now we are in navigation mode, given a precise target
         self.target.exploration = False
+        depth_obs = self.habitat_env.get_current_observation(type='depth')
+        self.target.set_target_coords_from_bbox(depth_obs, target_object['boxes'][0])
         
         while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
             self.habitat_env.execute_action(coords=self.target.polar_coords)
@@ -346,7 +308,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # Update polar coordinates given the new agent step
             self.target.update_target_coords()
-            self.update_variable('object', bbox)
 
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
@@ -432,16 +393,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.task_name in ['eqa']:
             if (self.habitat_env.object_detector.use_additional_detector) and (target_name in list(eqa_objects.keys())):
                 target_name = eqa_objects[target_name]
-                bbox = self.object_detector_closed.detect(obs, target_name)
+                detection_dict = self.object_detector_closed.detect(obs, target_name)
             else:
-                bbox = self.object_detector.detect(obs, target_name)
+                detection_dict = self.object_detector.detect(obs, target_name)
 
         elif self.habitat_env.task_name in ['objectnav', 'open_eqa']:
             # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
             if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
-                bbox = self.object_detector_closed.detect(obs, target_name)
+                detection_dict = self.object_detector_closed.detect(obs, target_name)
             else:
-                bbox = self.object_detector.detect(obs, target_name)
+                detection_dict = self.object_detector.detect(obs, target_name)
 
         if self.habitat_env.object_detector.store_detections:
             self.habitat_env.target_name = target_name
@@ -450,19 +411,26 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 if 'xyz' not in self.habitat_env.memory_dict[label]:  
                     self.habitat_env.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.habitat_env.memory_dict[label]['bbox'])
         
-        if bbox:
-            self.target.set_target_coords_from_bbox(depth_obs, bbox[0][0])
+        if detection_dict[target_name]['boxes']:
+            # Add 3D position to targets
+            for target in detection_dict:
+                detection_dict[target_name]['xyz'] = []
+                for target_bbox in detection_dict[target]['boxes']:
+                    detection_dict[target]['xyz'].append(self.target.coordinates.from_bbox_to_cartesian(
+                        depth_obs, 
+                        target_bbox, 
+                        self.habitat_env.get_current_position()
+                    ))
 
-            # For debugging purposes
-            self.save_observation(obs, 'detection', bbox)
+            # For debugging purposes, take the first detection
+            self.save_observation(obs, 'detection', detection_dict[target_name]['boxes'])
             pass
 
         else:
+            # If the target is not found, update the semantic exploration
             self.map_scene(target_name)
             
-        self.update_variable('objects', bbox)
-
-        return bbox
+        return  detection_dict[target_name]
 
     def feature_match(self):
         """
@@ -501,6 +469,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             
         else:
             answer = self.vqa.answer(question, img)
+
+        self.update_variable("ans", answer)
 
         return answer
 
@@ -605,20 +575,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         return self.habitat_env.get_stereo_view(degrees)
     
-    def count_objects(self, target):
-        """
-        Count how many objects can you see in the scene
-        given a certain target
-        """
-        try: target = eval(target)
-        except: pass
-
-        views = self.look_around()
-        boxes = self.object_detector.detect(views['stacked'], target)
-
-        self.update_variable('n_objects', len(boxes))
-        return len(boxes)
-
     def map_scene(self, target_name):
         """
         Map the scene and create topdown view from depth image
@@ -637,6 +593,46 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             self.target.generate_target()
     
+    def eval(self, expression):
+        """
+        Evaluate the expression, it can be a string
+        """
+
+        # If there is a yes/no we retunr true/False
+        if isinstance(expression, str):
+                return True if ['yes'] in expression.lower() else False
+            
+    def count(self, target):
+        """
+        Count how many objects can you see in the scene
+        given a certain target
+        """
+
+        # Take the object detector dict
+        # The dict is like this:
+        # {
+        #     # Multiple detections
+        #     "chair":
+        #         {
+        #             "boxes": [[x1, y1, x2, y2], [x1, y1, x2, y2], ...],
+        #             "scores": [0.99, 0.98, ...],
+        #             "xyz": [[x, y, z], [x, y, z], ...],
+        #             "segmentation_mask" : [np.ndarray (or None), np.ndarray (or None), ...]
+        #         }
+        # }
+        #####  IMPORTANT
+        #####  This should be passed to this function as dict["target"], e.g. dict["chair"]
+        
+        n_target = len(target['boxes'])
+        return n_target
+
+    def is_found(self, target):
+        """
+        Check if the target object is found in the scene
+        Take the dictionary of the object detector
+        """
+        target = self.check_variable_type(target)
+        return True if self.count(target) > 0 else False
 
     def save_observation(self, obs, name, bbox=None):
         """
@@ -645,3 +641,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, name, bbox)
 
+    def check_variable_type(self, var):
+        if isinstance(var, str):
+            var = self.get_variable(var)
+
+        elif isinstance(var, dict):
+            pass
+
+        return var

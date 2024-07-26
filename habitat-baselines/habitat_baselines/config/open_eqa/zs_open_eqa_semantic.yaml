@@ -87,13 +87,13 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit2"
-    size: "base"
-    thresh: 0.3
+    type: "grounding-dino"
+    size: "tiny"
+    thresh: 0.7
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
-    use_additional_detector: True
+    use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet50"
     additional_thresh: 0.8
@@ -110,7 +110,7 @@ habitat_baselines:
   vqa:
     use_vqa: True
     type: 'blip'
-    size: 'large'
+    size: 'base'
     quantization: 16
     vqa_strategy: 'simple-vqa'
   # Segmenter settings
@@ -118,22 +118,22 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
-    cls_threshold: 0.999
+    cls_threshold: 0.7
     # 0.7
   value_mapper:
     use_value_mapper: True
-    type: "blip"
-    size: "large"
-    visualize: True
+    type: "clip"
+    size: "base"
+    visualize: False
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 800
-    pixels_per_meter: 20
-    save_image_embed: True
+    map_size: 500
+    pixels_per_meter: 10
+    save_image_embed: False
 
   LLM:
     use_LLM: False

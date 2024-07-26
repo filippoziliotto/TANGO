@@ -154,8 +154,7 @@ class DebugObservation:
         if bboxes is not None:
             assert segmentation is None, "Cannot have both segmentation and bboxes"
             draw = ImageDraw.Draw(image)
-            for i, box1 in enumerate(bboxes):
-                box = box1[0]
+            for i, box in enumerate(bboxes):
                 color = 'red'
                 draw.rectangle(box, outline=color, width=5)
 

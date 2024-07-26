@@ -32,6 +32,11 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
             try: floor = episode["floor"]
             except: floor = None
             break
+
+    if len(object.split(" ")) > 1:
+        object_var = object.replace(" ", "_")
+    else:
+        object_var = object
    
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):
@@ -43,9 +48,9 @@ while True:
     if room:
         while True:
             explore_scene()
-            object = detect_objects("{object}")
-            if object:
-                navigate_to(object)
+            {object_var} = detect_objects("{object}")
+            if is_found({object_var}):
+                navigate_to({object_var})
                 answer = answer_question("{question}")
                 stop_navigation()"""
         
@@ -53,9 +58,9 @@ while True:
         prompt = f"""
 while True:
     explore_scene()
-    object = detect_objects('{object}')
-    if object:
-        navigate_to(object)
+    {object_var} = detect_objects('{object}')
+    if is_found({object_var}):
+        navigate_to({object_var})
         answer = answer_question("{question}")
         stop_navigation()"""
 

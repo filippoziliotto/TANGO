@@ -103,12 +103,13 @@ class FrontierMap:
         return inputs
     
     def compute_similarity(self, type, inputs):
+        image_embed = None
+
         # Compute cosine similarity and return image embeddings
         if type in ['clip']:
             outputs = self.encoder(**inputs)
             image_embed = outputs.image_embeds.detach().cpu().numpy()
             text_embed = outputs.text_embeds.detach().cpu().numpy()
-            self._text_embed = text_embed
 
             # Compute cosine similarity
             cosine_sim = cosine_similarity(image_embed, text_embed)[0][0]
@@ -123,10 +124,7 @@ class FrontierMap:
                 image_embed = normalize(self.encoder.vision_proj(image_embed.last_hidden_state[:, 0, :]), dim=-1)
                 image_embed = image_embed.squeeze(0).detach().cpu().numpy()
             
-        if self.save_image_embed:
-            return cosine_sim, image_embed
-        else:
-            return cosine_sim, None
+        return cosine_sim, image_embed
 
     def sort_waypoints(self) -> Tuple[np.ndarray, List[float]]:
         """
@@ -156,16 +154,16 @@ class FrontierMap:
 
         
         if self.type in ["blip"]:
-            inputs = self.processor(image, text, return_tensors="pt").to("cuda:0")
+            inputs = self.processor(image, text, return_tensors="pt").to(self.device)
             text_embeds = self.encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
             text_embeds = normalize(self.encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
         elif self.type in ["clip"]:
             inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
             outputs = self.encoder(**inputs)
-            text_embeds = outputs.text_embeds.detach().cpu().numpy()
+            text_embeds = outputs.text_embeds.squeeze(0).detach().cpu().numpy()
 
         assert feature_map.shape[-1] == text_embeds.shape[-1], "Feature map and text embeddings have to have the same dimension"
-        
+
         mask_non_zero = np.any(feature_map, axis=2)
         cosine_sims = cosine_similarity(feature_map[mask_non_zero], text_embeds.reshape(1, -1))
 
@@ -187,6 +185,13 @@ def from_feature_to_image(cosine_sim: np.ndarray , feature_map: np.ndarray, mask
     # Create the image
     zero_mask = embed_map == 0
     embed_map[zero_mask] = np.max(embed_map)
+
+    # Step 2: Apply a sigmoid transformation
+    # Adjust the steepness of the sigmoid function with a parameter 'alpha'
+    apply_sigmoid = False
+    if apply_sigmoid:
+        alpha = 12  # Increase alpha to make the contrast sharper
+        embed_map = 1 / (1 + np.exp(-alpha * (embed_map - 0.5)))
             
     # Convert to 
     embed_map = monochannel_to_inferno_rgb(embed_map)

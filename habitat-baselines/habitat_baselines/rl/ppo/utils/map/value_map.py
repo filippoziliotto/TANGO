@@ -57,6 +57,7 @@ class ValueMap(BaseMap):
         fusion_type: str = "default",
         obstacle_map: Optional["ObstacleMap"] = None,  # type: ignore # noqa: F821
         pixels_per_meter: Optional[int] = None,
+        use_feature_map: bool = False,
     ) -> None:
         """
         Args:
@@ -72,7 +73,9 @@ class ValueMap(BaseMap):
         if PLAYING:
             size = 2000
         super().__init__(size)
+        self.size = size
         self._value_map = np.zeros((size, size, value_channels), np.float32)
+        self.use_feature_map = use_feature_map
         self._embed_map = np.zeros((size, size, 256), np.float32)
         self._value_channels = value_channels
         self._use_max_confidence = use_max_confidence
@@ -436,14 +439,15 @@ class ValueMap(BaseMap):
         new_map[new_map_mask] = 0
 
         # Using max confidence for feature map
-        emap = self._map.copy()
-        new_emap = new_map.copy()
-        emap[emap > 0] = 1
-        new_emap[new_emap > 0] = 1
-        new_map_mask = np.logical_and(new_emap < self._decision_threshold, new_emap < emap)
-        new_emap[new_map_mask] = 0
-        higher_new_map_mask = new_emap > emap
-        self._embed_map[higher_new_map_mask] = image_embed
+        if self.use_feature_map:
+            emap = self._map.copy()
+            new_emap = new_map.copy()
+            emap[emap > 0] = 1
+            new_emap[new_emap > 0] = 1
+            new_map_mask = np.logical_and(new_emap < self._decision_threshold, new_emap < emap)
+            new_emap[new_map_mask] = 0
+            higher_new_map_mask = new_emap > emap
+            self._embed_map[higher_new_map_mask] = image_embed
 
         if self._use_max_confidence:
             # For every pixel that has a higher new_map in the new map than the

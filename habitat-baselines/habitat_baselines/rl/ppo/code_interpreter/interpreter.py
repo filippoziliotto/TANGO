@@ -654,7 +654,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Evaluate the expression, it can be a string
         """
-
+        
         # If there is a yes/no we retunr true/False
         if isinstance(expression, str):
                 return True if ['yes'] in expression.lower() else False

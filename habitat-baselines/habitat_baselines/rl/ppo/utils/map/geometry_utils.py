@@ -1,9 +1,11 @@
+# GEOMETRY UTILS
 # Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved.
 
 import math
 from typing import Tuple
-
+import torch
 import numpy as np
+from habitat.utils.visualizations.utils import images_to_video
 
 
 def rho_theta(curr_pos: np.ndarray, curr_heading: float, curr_goal: np.ndarray) -> Tuple[float, float]:
@@ -34,6 +36,31 @@ def rho_theta(curr_pos: np.ndarray, curr_heading: float, curr_goal: np.ndarray) 
 
     return float(rho), float(theta)
 
+def get_polar_from_frontier(
+        value_map: np.ndarray,
+        robot_xy: np.ndarray,
+        heading: float,
+        frontier: List[np.ndarray],
+        device: str = "cuda",
+    ):
+        """
+        Returns the polar coordinates (rho, theta) of the frontier point (x,y),
+        this is used to calculate the polar coordinates of the best frontier found
+        by the frontier search algorithm.
+
+        Args:
+            value_map (np.ndarray): The 2D value map.
+            robot_xy (np.ndarray): The robot's current position in the map pixel coordinates.
+            heading (float): The robot's current heading in radians.
+            frontier (List[np.ndarray]): A list of frontier points.
+
+        Returns:
+            torch.Tensor: A tensor of shape (1, 2) representing the polar coordinates (rho, theta).
+        """
+        frontier_xy = value_map._px_to_xy(frontier.reshape(1, 2))[0]
+        robot_xy = np.array([robot_xy[0], -robot_xy[1]])
+        rho, theta = rho_theta(robot_xy, heading, frontier_xy)
+        return torch.tensor([[rho, theta]], device=device, dtype=torch.float32)
 
 def get_rotation_matrix(angle: float, ndims: int = 2) -> np.ndarray:
     """Returns a 2x2 or 3x3 rotation matrix for a given angle; if 3x3, the z-axis is
@@ -275,7 +302,7 @@ def pt_from_rho_theta(rho: float, theta: float) -> np.ndarray:
     return np.array([x, y])
 
 
-
+# VISUALIZATION UTILS
 # Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved.
 
 from typing import List, Tuple, Union
@@ -283,6 +310,45 @@ from typing import List, Tuple, Union
 import cv2
 import numpy as np
 
+def save_exploration_video(
+        stacked_frames: List[np.ndarray], 
+        output_dir: str = "video_dir", 
+        output_name: str = "exploration_policy.mp4", 
+        crop: bool = True):
+    """
+    Save the video of the value map and the obstacle map stacked togheter at each timestep.
+    This only works if using the exploration policy of https://github.com/bdaiinstitute/vlfm/tree/main
+
+    Args:
+        stacked_frames (List[np.ndarray]): List of tuples of the value map and the obstacle map stacked togheter.
+        output_dir (str, optional): Directory where to save the video. Defaults to "images".
+        output_name (str, optional): Name of the video. Defaults to "exploration_policy.mp4".
+        crop (bool, optional): Whether to crop the video to reduce white space between obstacle and value maps.
+    """ 
+
+    # Take the last obstacle map
+    if crop:
+        image_array = stacked_frames[-1][0]
+        # Find non-white areas
+        # Assuming the non-white parts are those where any of the channels is not 255
+        non_white = np.any(image_array != 255, axis=-1)
+            
+        # Find the bounding box of non-white areas
+        coords = np.argwhere(non_white)
+        y0, x0 = coords.min(axis=0) + 1
+        y1, x1 = coords.max(axis=0) + 80 # slices are exclusive at the top
+
+        # Crop all the images on the list
+        stacked_frames = [(obs_frame[y0:y1, x0:x1],val_frame[y0:y1, x0:x1]) for (obs_frame, val_frame) in stacked_frames]
+            
+    stacked_frames = [(np.concatenate((obs_frame, val_frame), axis=1)) for (obs_frame, val_frame) in stacked_frames]
+
+    images_to_video(
+        images = stacked_frames,
+        output_dir = output_dir,
+        video_name = output_name,
+        verbose = True,
+    )
 
 def rotate_image(
     image: np.ndarray,

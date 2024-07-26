@@ -1,13 +1,9 @@
-# Torch imports
+# Main CV imports
 import torch
 import numpy as np
 from PIL import Image
 from typing import Tuple, List
-
-import matplotlib.pyplot as plt
-from sklearn.metrics.pairwise import cosine_similarity
 import cv2
-
 from torchvision.transforms import ToTensor
 from torchvision.transforms.functional import rgb_to_grayscale
 
@@ -17,21 +13,23 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_vqa_model, get_matcher_model, 
     get_captioner_model, get_segmentation_model,
     get_roomcls_model, get_llm_model,
-    get_value_mapper
 )
+
+# Dataset imports
 from habitat_baselines.rl.ppo.utils.nms import nms
 from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
-from habitat.utils.visualizations.utils import images_to_video
 
 # Map generator imports
-from habitat.utils.visualizations.maps import from_grid
 from habitat_baselines.rl.ppo.utils.map.obstacle_map import ObstacleMap
 from habitat_baselines.rl.ppo.utils.map.frontier_map import FrontierMap
 from habitat_baselines.rl.ppo.utils.map.value_map import ValueMap
 from habitat_baselines.rl.ppo.utils.map.frontier_exploration.utils.acyclic_enforcer import AcyclicEnforcer
-from habitat_baselines.rl.ppo.utils.map.geometry_utils import xyz_yaw_to_tf_matrix, closest_point_within_threshold, rho_theta
+from habitat_baselines.rl.ppo.utils.map.geometry_utils import (
+    xyz_yaw_to_tf_matrix, closest_point_within_threshold, 
+    get_polar_from_frontier, save_exploration_video
+)
 
 
 class ObjectDetector:
@@ -465,11 +463,15 @@ class ValueMapper:
             use_feature_map = save_image_embed
         )
 
+    """
+    Map methods
+    """
+
     def reset_map(self):
 
         # At the end of episode save the video
         if self.visualize and self.save_video:
-            self.save_map_video(self.video_frames, "video_dir/open_eqa", "open_eqa_example.mp4")
+            save_exploration_video(self.video_frames, "video_dir/open_eqa", "open_eqa_example.mp4")
 
         self.frontier_map.reset()
         self.obstacle_map.reset()
@@ -477,7 +479,7 @@ class ValueMapper:
         self.frontiers_at_step = []
         self.video_frames = []
 
-    def preprocess_text(self, target):
+    def preprocess_target(self, target):
         assert target is not None or target != "", "Target should not be empty"
 
         # Only target name
@@ -502,7 +504,7 @@ class ValueMapper:
     def update_map(self, curr_image, text):
 
         # Extract target prompt
-        prompt = self.preprocess_text(text)
+        prompt = self.preprocess_target(text)
 
         # Update maps
         self.obstacle_map.update_map(
@@ -538,7 +540,7 @@ class ValueMapper:
         )
 
         # Update the best frontier
-        self.best_frontier_polar = self._get_best_frontier(
+        self.best_frontier_polar = self.get_best_frontier(
             frontiers=self.obstacle_map._get_frontiers()
         )
 
@@ -565,7 +567,11 @@ class ValueMapper:
                 image = self.habitat_env.get_current_observation(type="rgb")
                 self.frontier_map.compute_map_cosine_similarity(feature_map, text, image, True)
 
-    def _get_best_frontier(
+    """
+    Frontier calculation methods
+    """
+
+    def get_best_frontier(
         self,
         frontiers: np.ndarray,
     ) -> Tuple[np.ndarray, float]:
@@ -588,7 +594,7 @@ class ValueMapper:
         top_two_values = tuple(sorted_values[:2])
 
         # If no frontier is found, sample random point
-        if self.no_frontiers_found(frontiers, robot_xy, heading):
+        if not self.frontiers_found(frontiers):
             return None
 
         # If there is a last point pursued, then we consider sticking to pursuing it
@@ -642,16 +648,19 @@ class ValueMapper:
         self._last_frontier = best_frontier
 
         # We update the target only if the best frontier has changed
-        self.best_frontier_polar = self._get_polar_from_frontier(robot_xy, heading, best_frontier)
+        self.best_frontier_polar = get_polar_from_frontier(self.value_map, robot_xy, heading, best_frontier)
 
         return self.best_frontier_polar
 
-    def no_frontiers_found(self, frontiers: np.ndarray, robot_xy: np.ndarray, heading: float):
+    def frontiers_found(
+            self, 
+            frontiers: np.ndarray,
+        ):
         # Check if now new frontier is found
         self.frontiers_at_step.append(frontiers)
         if self.frontiers_at_step[-1].size == 0:
-            return True
-        return False
+            return False
+        return True
             
     def _sort_frontiers_by_value(
         self, frontiers: np.ndarray,
@@ -665,17 +674,9 @@ class ValueMapper:
         if itm_policy == "v3":
             return self.value_map.sort_waypoints(frontiers, 0.5, reduce_fn=self._reduce_values)
 
-    def _get_polar_from_frontier(
-            self,
-            robot_xy: np.ndarray,
-            heading: float,
-            frontier: List[np.ndarray],
-        ):
-        frontier_xy = self.value_map._px_to_xy(frontier.reshape(1, 2))[0]
-        robot_xy = np.array([robot_xy[0], -robot_xy[1]])
-        rho, theta = rho_theta(robot_xy, heading, frontier_xy)
-        return torch.tensor([[rho, theta]], device="cuda", dtype=torch.float32)
-
+    """
+    Additional methods to get the camera parameters and the current depth
+    """
     def _get_cameras_parameters(self, config):
             # Get camera parameters
         self._min_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.min_depth
@@ -722,33 +723,5 @@ class ValueMapper:
         else:
             return [v[0] for v in values]
 
-    def save_map_video(self, stacked_frames: List[np.ndarray], output_dir, output_name, crop=True):
-        """
-        Save the video of the map exploration
-        """ 
 
-        # Take the last obstacle map
-        if crop:
-            image_array = stacked_frames[-1][0]
-            # Find non-white areas
-            # Assuming the non-white parts are those where any of the channels is not 255
-            non_white = np.any(image_array != 255, axis=-1)
-            
-            # Find the bounding box of non-white areas
-            coords = np.argwhere(non_white)
-            y0, x0 = coords.min(axis=0) + 1
-            y1, x1 = coords.max(axis=0) + 80 # slices are exclusive at the top
-
-            # Crop all the images on the list
-            stacked_frames = [(obs_frame[y0:y1, x0:x1],val_frame[y0:y1, x0:x1]) for (obs_frame, val_frame) in stacked_frames]
-            
-        stacked_frames = [(np.concatenate((obs_frame, val_frame), axis=1)) for (obs_frame, val_frame) in stacked_frames]
-
-        images_to_video(
-            images = stacked_frames,
-            output_dir = output_dir,
-            video_name = output_name,
-            verbose = True,
-        )
-        
 

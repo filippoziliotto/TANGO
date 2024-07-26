@@ -9,6 +9,16 @@ from habitat_baselines.rl.ppo.models.models import (
 )
 from habitat_baselines.rl.ppo.utils.names import eqa_objects
 
+def parse_return_statement(line):
+    # return ---> stop_navigation() primitive
+    split = line[0].split("return")
+    if len(split) > 1:
+        var = split[1].strip()
+        return f"stop_navigation('{var}')"
+    var = None
+    return f"stop_navigation()"
+    
+
 class PseudoCodeInterpreter:
     """
     Low level interpreter for pseudo code
@@ -20,7 +30,12 @@ class PseudoCodeInterpreter:
 
     def parse(self, pseudo_code):
         self.pseudo_code = pseudo_code
+        # Stip the indetations and split the lines
         self.lines = [(line.strip(), (len(line) - len(line.lstrip())) // 4) for line in self.pseudo_code.strip().split('\n')]
+        # Change return statement to stop_navigation()
+        self.lines = [(parse_return_statement(line), line[1]) if "return" in line[0] else line for line in self.lines]
+        # Add to explore_scene a while loop
+        # TODO:
         self.current_line = 0
         self.variables = {'episode_is_over': False}
         self.loop_exit_flag = False
@@ -138,6 +153,22 @@ class PseudoCodeInterpreter:
 
     def current_indentation(self, line):
         return len(line) - len(line.lstrip())
+
+    def check_variable_type(self, var):
+        if isinstance(var, str):
+            var = self.get_variable(var)
+
+        elif isinstance(var, dict):
+            pass
+
+        return var
+    
+    def var_to_str(self, var):
+        if isinstance(var, int):
+            var = str(var)
+        else:
+            raise NotImplementedError(f"TODO: Variable type {type(var)} not supported")
+
 class PseudoCodePrimitives(PseudoCodeInterpreter): 
     """
     Primitive functions interpreter if primitives are added
@@ -169,7 +200,6 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'eval': self.eval,
             'is_found': self.is_found,
         }
-
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Primitive functions interactive with habitat
@@ -312,10 +342,21 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
-    def stop_navigation(self):
+    def stop_navigation(self, output_var=None):
         """
         Target reached stopping the navigation
         """
+
+        if output_var is not None:
+            # If integer, convert to string
+            if not isinstance(output_var, str):
+                output_var = self.var_to_str(output_var)
+            else:
+                output_var = self.get_variable(eval(output_var))
+            self.update_variable("output_answer", output_var)
+            # Needed for Open-EQA
+            self.habitat_env.eqa_vars['pred_answer'] = output_var
+
         self.habitat_env.execute_action(action='stop')
         self.habitat_env.update_episode_stats()
 
@@ -564,7 +605,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             return crop_image
         else: return None
         
-
     """
     Python subroutines or logical modules
     """
@@ -624,7 +664,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         #####  This should be passed to this function as dict["target"], e.g. dict["chair"]
         
         n_target = len(target['boxes'])
-        return n_target
+        return int(n_target)
 
     def is_found(self, target):
         """
@@ -641,11 +681,4 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, name, bbox)
 
-    def check_variable_type(self, var):
-        if isinstance(var, str):
-            var = self.get_variable(var)
 
-        elif isinstance(var, dict):
-            pass
-
-        return var

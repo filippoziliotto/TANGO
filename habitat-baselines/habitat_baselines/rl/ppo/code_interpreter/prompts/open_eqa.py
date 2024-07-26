@@ -52,7 +52,7 @@ while True:
             if is_found({object_var}):
                 navigate_to({object_var})
                 answer = answer_question("{question}")
-                stop_navigation()"""
+                return answer"""
         
     elif room is None and object is not None:
         prompt = f"""
@@ -62,7 +62,7 @@ while True:
     if is_found({object_var}):
         navigate_to({object_var})
         answer = answer_question("{question}")
-        stop_navigation()"""
+        return answer"""
 
     elif room is not None and object is None:
         room_label = roomcls_labels[room]
@@ -72,7 +72,7 @@ while True:
     room = classify_room("{room_label}")
     if room:
         answer = answer_question("{question}")
-        stop_navigation()"""    
+        return answer"""    
 
     elif look_around:
         prompt = f"""
@@ -80,7 +80,7 @@ while True:
     explore_scene()
     look_around()
     answer = answer_question("{question}")
-    stop_navigation()"""
+    return answer"""
 
     if floor is not None:
         if floor == 1:

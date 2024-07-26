@@ -118,7 +118,7 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
-    cls_threshold: 0.7
+    cls_threshold: 0.4
     # 0.7
   value_mapper:
     use_value_mapper: True

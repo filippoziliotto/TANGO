@@ -17,6 +17,22 @@ def parse_return_statement(line):
         return f"stop_navigation('{var}')"
     var = None
     return f"stop_navigation()"
+
+def parse_while_statement(lines):
+    # List of all lines
+    # Line is a tuple (line, indentation)
+    # explore_scene() becomes while True: explore_scene()
+    
+    modified_lines = []
+    increment = 0
+    for _, (string, integer) in enumerate(lines):
+        if "explore_scene" in string:
+            # Insert the ("while True:", integer) tuple
+            modified_lines.append(("while True:", integer))
+        # Add the original tuple to the modified list with incremented integer
+        modified_lines.append((string, integer + 1))
+    
+    return modified_lines
     
 
 class PseudoCodeInterpreter:
@@ -35,7 +51,8 @@ class PseudoCodeInterpreter:
         # Change return statement to stop_navigation()
         self.lines = [(parse_return_statement(line), line[1]) if "return" in line[0] else line for line in self.lines]
         # Add to explore_scene a while loop
-        # TODO:
+        self.lines = parse_while_statement(self.lines)
+        # Initialiaze other variables
         self.current_line = 0
         self.variables = {'episode_is_over': False}
         self.loop_exit_flag = False

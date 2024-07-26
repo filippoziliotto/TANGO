@@ -26,7 +26,7 @@ while True:
             navigate_to(object)
             target = select('{object}')
             answer = answer_question('{question}', target)
-            stop_navigation()"""
+            return answer"""
     else:
         prompt = f"""
 while True:
@@ -36,7 +36,7 @@ while True:
         navigate_to(object)
         target = select('{object}')
         answer = answer_question('{question}', target)
-        stop_navigation()"""
+        return answer"""
 
     return prompt
 

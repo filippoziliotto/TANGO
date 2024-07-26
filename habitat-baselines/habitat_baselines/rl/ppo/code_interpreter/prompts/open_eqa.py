@@ -42,45 +42,40 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     if (room is not None) and (object is not None):
         room_label = roomcls_labels[room]
         prompt = f"""
-while True:
+explore_scene()
+room = classify_room("{room_label}")
+if room:
     explore_scene()
-    room = classify_room("{room_label}")
-    if room:
-        while True:
-            explore_scene()
-            {object_var} = detect_objects("{object}")
-            if is_found({object_var}):
-                navigate_to({object_var})
-                answer = answer_question("{question}")
-                return answer"""
-        
-    elif room is None and object is not None:
-        prompt = f"""
-while True:
-    explore_scene()
-    {object_var} = detect_objects('{object}')
+    {object_var} = detect_objects("{object}")
     if is_found({object_var}):
         navigate_to({object_var})
         answer = answer_question("{question}")
         return answer"""
+        
+    elif room is None and object is not None:
+        prompt = f"""
+explore_scene()
+{object_var} = detect_objects('{object}')
+if is_found({object_var}):
+    navigate_to({object_var})
+    answer = answer_question("{question}")
+    return answer"""
 
     elif room is not None and object is None:
         room_label = roomcls_labels[room]
         prompt = f"""
-while True:
-    explore_scene()
-    room = classify_room("{room_label}")
-    if room:
-        answer = answer_question("{question}")
-        return answer"""    
+explore_scene()
+room = classify_room("{room_label}")
+if room:
+    answer = answer_question("{question}")
+    return answer"""    
 
     elif look_around:
         prompt = f"""
-while True:
-    explore_scene()
-    look_around()
-    answer = answer_question("{question}")
-    return answer"""
+explore_scene()
+look_around()
+answer = answer_question("{question}")
+return answer"""
 
     if floor is not None:
         if floor == 1:

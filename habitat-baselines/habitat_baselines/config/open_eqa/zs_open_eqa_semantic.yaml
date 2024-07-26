@@ -89,7 +89,7 @@ habitat_baselines:
     use_detector: True
     type: "grounding-dino"
     size: "tiny"
-    thresh: 0.7
+    thresh: 0.5
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings

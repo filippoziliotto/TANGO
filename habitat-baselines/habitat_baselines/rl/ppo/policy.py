@@ -260,6 +260,11 @@ class NetPolicy(nn.Module, Policy):
         nn.Module.__init__(self)
         self.net = net
         self.dim_actions = get_num_actions(action_space)
+
+        # Avoid look_up and loo_down action in agent definition
+        if self.dim_actions > 4:
+            self.dim_actions = 4
+
         self.action_distribution: Union[CategoricalNet, GaussianNet]
 
         if policy_config is None:

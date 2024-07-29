@@ -239,10 +239,15 @@ class HabitatEvaluator(Evaluator):
             self.step_data = [3]
         elif self.action_to_take in ['turn_left']:
             self.step_data = [2]
+        elif self.action_to_take in ['look_up']:
+            self.step_data = [4]
+        elif self.action_to_take in ['look_down']:
+            self.step_data = [5]
         elif (self.action_to_take is None) and self.action_data.actions.item() == 0:
             self.step_data = [a.item() for a in self.action_data.env_actions.cpu()]
             self.prev_actions.copy_(self.action_data.actions) # type: ignore
             self.step_data = [torch.randint(1, 4, (1,), device=self.device).item()]
+
         else:
             pass
             

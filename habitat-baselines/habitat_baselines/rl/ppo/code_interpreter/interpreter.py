@@ -216,6 +216,8 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'select': self.select,
             'eval': self.eval,
             'is_found': self.is_found,
+            'look_up': self.look_up,
+            'look_down': self.look_down,
         }
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -437,6 +439,26 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         for i in range(steps):
             self.habitat_env.execute_action(action='turn_left')
             self.habitat_env.update_episode_stats()
+
+    def look_up(self):
+        """
+        Look up primitive
+        """
+        # Look up action 
+        self.habitat_env.execute_action(action='look_up')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def look_down(self):
+        """
+        Look Down primitive
+        """
+        # Look down action
+        self.habitat_env.execute_action(action='look_down')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+        
+
 
     """
     Computer Vision modules

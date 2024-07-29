@@ -417,9 +417,13 @@ class PointNavResNetNet(Net):
         self.prev_action_embedding: nn.Module
         self.discrete_actions = discrete_actions
         self._n_prev_action = 32
+
+        # Do not consider "look-up" and "look-down" in action space
+        num_actions = 4
+
         if discrete_actions:
             self.prev_action_embedding = nn.Embedding(
-                action_space.n + 1, self._n_prev_action
+                num_actions + 1, self._n_prev_action
             )
         else:
             num_actions = get_num_actions(action_space)

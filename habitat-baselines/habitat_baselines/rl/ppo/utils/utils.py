@@ -7,6 +7,7 @@ from habitat.tasks.utils import cartesian_to_polar
 from habitat.utils.geometry_utils import (
     quaternion_rotate_vector,
 )
+import magnum as mn
 
 from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           Owlv2ForObjectDetection, OwlViTForObjectDetection,
@@ -298,6 +299,15 @@ def match_images(frames_rgb):
 
     return stitched_image
 
+def rotate_camera_sensor(sim, amount):
+
+    sensor_names = list(sim.agents[0]._sensors.keys())  # type: ignore
+    for sensor_name in sensor_names:
+        sensor = sim.agents[0]._sensors[sensor_name].node  # type: ignore
+        sensor.rotation = sensor.rotation * mn.Quaternion.rotation(
+            mn.Deg(amount), mn.Vector3.x_axis()
+        )
+    
 """
 Prompt Utils for code interpreter
 """

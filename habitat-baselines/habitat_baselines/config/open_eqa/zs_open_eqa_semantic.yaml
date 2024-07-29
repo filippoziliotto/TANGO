@@ -8,6 +8,8 @@ defaults:
     - move_forward
     - turn_left
     - turn_right
+    - look_up
+    - look_down
   - /habitat/task/measurements:
     - num_steps
     - distance_to_goal
@@ -144,7 +146,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.
   
-  test_episode_count: 20
+  test_episode_count: 50
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

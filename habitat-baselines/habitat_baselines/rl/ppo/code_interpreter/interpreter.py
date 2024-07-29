@@ -374,9 +374,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # Needed for Open-EQA
             self.habitat_env.eqa_vars['pred_answer'] = output_var
 
+        # Call STOP action and finish the episode
         self.habitat_env.execute_action(action='stop')
         self.habitat_env.update_episode_stats()
 
+        # Exit all the loops in the pseudo-code
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
 
@@ -482,7 +484,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes, take the first detection
             self.save_observation(obs, 'detection', detection_dict[target_name]['boxes'])
-            pass
+            pass 
 
         else:
             # If the target is not found, update the semantic exploration
@@ -654,10 +656,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Evaluate the expression, it can be a string
         """
+        # This is done to avoid possible mistakes in variables naming
+        tmp_vars = self.variables.copy()
+        tmp_expr = expression
+
+        # If the expression is an integer
+        if isinstance(expression, int):
+            tmp_expr = str(tmp_expr)
         
-        # If there is a yes/no we retunr true/False
-        if isinstance(expression, str):
-                return True if ['yes'] in expression.lower() else False
+        eval_expression = eval(expression, tmp_vars)
+
+        # Save the variable to the interpreter class
+        self.define_variable('expression', eval_expression)
+
+        return eval_expression
             
     def count(self, target):
         """

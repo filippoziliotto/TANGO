@@ -674,6 +674,29 @@ class ValueMapper:
         if itm_policy == "v3":
             return self.value_map.sort_waypoints(frontiers, 0.5, reduce_fn=self._reduce_values)
 
+    def _reduce_values(self, values: List[Tuple[float, float]]) -> List[float]:
+        """
+        Reduce the values to a single value per frontier
+
+        Args:
+            values: A list of tuples of the form (target_value, exploration_value). If
+                the highest target_value of all the value tuples is below the threshold,
+                then we return the second element (exploration_value) of each tuple.
+                Otherwise, we return the first element (target_value) of each tuple.
+
+        Returns:
+            A list of values, one per frontier.
+        """
+        target_values = [v[0] for v in values]
+        max_target_value = max(target_values)
+
+        if max_target_value < self._exploration_thresh:
+            explore_values = [v[1] for v in values]
+            return explore_values
+        else:
+            return [v[0] for v in values]
+
+
     """
     Additional methods to get the camera parameters and the current depth
     """
@@ -700,28 +723,6 @@ class ValueMapper:
         camera_yaw = habitat_env.get_current_observation(type='compass')
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
-
-    def _reduce_values(self, values: List[Tuple[float, float]]) -> List[float]:
-        """
-        Reduce the values to a single value per frontier
-
-        Args:
-            values: A list of tuples of the form (target_value, exploration_value). If
-                the highest target_value of all the value tuples is below the threshold,
-                then we return the second element (exploration_value) of each tuple.
-                Otherwise, we return the first element (target_value) of each tuple.
-
-        Returns:
-            A list of values, one per frontier.
-        """
-        target_values = [v[0] for v in values]
-        max_target_value = max(target_values)
-
-        if max_target_value < self._exploration_thresh:
-            explore_values = [v[1] for v in values]
-            return explore_values
-        else:
-            return [v[0] for v in values]
 
 
 

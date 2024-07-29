@@ -1,12 +1,13 @@
-# GEOMETRY UTILS
-# Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved.
+################### GEOMETRY UTILS #####################################
+# Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved. #
+################### GEOMETRY UTILS #####################################
 
 import math
-from typing import Tuple
 import torch
 import numpy as np
+from typing import List, Tuple, Union
 from habitat.utils.visualizations.utils import images_to_video
-
+import cv2
 
 def rho_theta(curr_pos: np.ndarray, curr_heading: float, curr_goal: np.ndarray) -> Tuple[float, float]:
     """Calculates polar coordinates (rho, theta) relative to a given position and
@@ -302,13 +303,9 @@ def pt_from_rho_theta(rho: float, theta: float) -> np.ndarray:
     return np.array([x, y])
 
 
-# VISUALIZATION UTILS
-# Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved.
-
-from typing import List, Tuple, Union
-
-import cv2
-import numpy as np
+################### VISUALIZATION UTILS #####################################
+# Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved. #
+################### VISUALIZATION UTILS #####################################
 
 def save_exploration_video(
         stacked_frames: List[np.ndarray], 

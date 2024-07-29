@@ -89,7 +89,7 @@ habitat_baselines:
     use_detector: True
     type: "grounding-dino"
     size: "tiny"
-    thresh: 0.5
+    thresh: 0.8
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
@@ -118,7 +118,7 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
-    cls_threshold: 0.4
+    cls_threshold: 0.7
     # 0.7
   value_mapper:
     use_value_mapper: True

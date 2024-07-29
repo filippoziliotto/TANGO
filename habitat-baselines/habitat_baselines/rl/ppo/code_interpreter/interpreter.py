@@ -24,14 +24,24 @@ def parse_while_statement(lines):
     # explore_scene() becomes while True: explore_scene()
     
     modified_lines = []
-    increment = 0
-    for _, (string, integer) in enumerate(lines):
+    current_increment = 0
+
+    for i, (string, integer) in enumerate(lines):
+        # Check if the current line contains "explore_scene"
         if "explore_scene" in string:
-            # Insert the ("while True:", integer) tuple
-            modified_lines.append(("while True:", integer))
-        # Add the original tuple to the modified list with incremented integer
-        modified_lines.append((string, integer + 1))
-    
+            # Check if the previous line was an "if" statement
+            if i > 0 and lines[i - 1][0].startswith('if'):
+                modified_lines.append(("while True:", integer + 1))
+                current_increment = 2
+            else:
+                modified_lines.append(("while True:", integer))
+                current_increment = 1
+            # Append the "explore_scene" line with the incremented integer
+            modified_lines.append((string, integer + current_increment))
+        else:
+            # For other lines, increment the integer as per the current increment value
+            modified_lines.append((string, integer + current_increment))
+
     return modified_lines
     
 
@@ -415,8 +425,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         current_rotation = self.habitat_env.get_current_position().rotation
         sim.set_agent_state(final_pos, current_rotation)
 
-        self.do_nothing()
-
     def go_upstairs(self):
         """
         Go upstairs primitive, needed
@@ -426,8 +434,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         final_pos = self.habitat_env.get_current_episode_info().goals[0].position
         current_rotation = self.habitat_env.get_current_position().rotation
         sim.set_agent_state(final_pos, current_rotation)
-
-        self.do_nothing()
 
     def do_nothing(self, steps=20):
         """
@@ -458,8 +464,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.update_episode_stats()
         self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
         
-
-
     """
     Computer Vision modules
     """
@@ -621,9 +625,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         room_cls, confidence = self.room_classifier.classify(obs)
 
         if (room_cls == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
-            room = room_cls
+            # This is useful for the self.is_found primitive
+            room = { "boxes": [[0,128,0,128]], "scores": [0.7], } 
+
         else:
-            room = None
+            room = { "boxes": [], "scores": [], } 
 
         self.update_variable('room', room)
         self.map_scene(room_name)
@@ -687,6 +693,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             tmp_expr = str(tmp_expr)
         
         eval_expression = eval(expression, tmp_vars)
+
+        if not isinstance(eval_expression, str):
+            eval_expression = str(eval_expression)
 
         # Save the variable to the interpreter class
         self.define_variable('expression', eval_expression)

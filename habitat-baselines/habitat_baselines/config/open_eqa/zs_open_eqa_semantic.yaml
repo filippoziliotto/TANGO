@@ -49,6 +49,12 @@ habitat:
     measurements:
       distance_to_goal:
         distance_to: POINT
+    # In the case look up/down actions are used
+    actions:
+      look_up:
+        tilt_angle: 20
+      look_down:
+        tilt_angle: 20
 
   environment:
     max_episode_steps: 518
@@ -89,9 +95,9 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "grounding-dino"
-    size: "tiny"
-    thresh: 0.8
+    type: "owl-vit2"
+    size: "base"
+    thresh: 0.1
     nms_thresh: 0.5
     store_detections: False
     # Additional object detector settings
@@ -124,8 +130,8 @@ habitat_baselines:
     # 0.7
   value_mapper:
     use_value_mapper: True
-    type: "clip"
-    size: "base"
+    type: "blip"
+    size: "large"
     visualize: False
     save_video: False
     policy: "v1"

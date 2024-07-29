@@ -37,6 +37,10 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
         object_var = object.replace(" ", "_")
     else:
         object_var = object
+
+    room = "bathroom"
+    object = "mirror"
+    question = "How many lights are above the bathroom mirror?"
    
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):
@@ -49,8 +53,21 @@ if room:
     {object_var} = detect_objects("{object}")
     if is_found({object_var}):
         navigate_to({object_var})
+        look_up()
         answer = answer_question("{question}")
         return answer"""
+        #         prompt = f"""
+        # explore_scene()
+        # room = classify_room("{room_label}")
+        # if is_found(room):
+        #     explore_scene()
+        #     {object_var} = detect_objects("{object}")
+        #     if is_found({object_var}):
+        #         look_up()
+        #         lights = detect_objects("light") 
+        #         n_lights = count(lights)
+        #         ans = eval("n_lights if n_lights > 0 else 0") 
+        #         return ans"""
         
     elif room is None and object is not None:
         prompt = f"""

@@ -279,6 +279,17 @@ def get_value_mapper(device, type, size):
     model.eval()
     return model.to(device), processor
 
+def get_classifier_model(type, size, device):
+    if type in ['clip']:
+        if size in ['base']:
+            model_name = "openai/clip-vit-base-patch32"
+        elif size in ['large']:
+            model_name = "openai/clip-vit-large-patch14"
+        processor = CLIPProcessor.from_pretrained(model_name)
+        model = CLIPModel.from_pretrained(model_name)
+    model.eval()
+    return model.to(device), processor
+
 """
 Camera related or similar utils
 """

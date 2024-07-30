@@ -12,7 +12,7 @@ from habitat_baselines.rl.ppo.utils.utils import (
     get_detector_model,
     get_vqa_model, get_matcher_model, 
     get_captioner_model, get_segmentation_model,
-    get_roomcls_model, get_llm_model,
+    get_roomcls_model, get_llm_model, get_classifier_model,
 )
 
 # Dataset imports
@@ -33,7 +33,7 @@ from habitat_baselines.rl.ppo.utils.map.geometry_utils import (
 
 
 class ObjectDetector:
-    def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False):
+    def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False, use_detection_cls=False):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.type = type
         self.thresh = thresh 
@@ -41,6 +41,12 @@ class ObjectDetector:
         self.store_detections = store_detections
         self.detection_dict = dict()
         self.model, self.processor = get_detector_model(type, size, store_detections, self.device)
+
+        # Use classifier to avoid false positives
+        if self.use_detection_cls:
+            self.classifier_type = "clip"
+            self.classifier_size = "large"
+            self.classifier = Classifier(self.classifier_type, self.classifier_size)
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -147,12 +153,11 @@ class ObjectDetector:
 
         selected_boxes, selected_scores = nms(selected_boxes, selected_scores, self.nms_thresh)
 
-        final_detections = sorted(zip(selected_boxes, selected_scores, [obj_name] * len(selected_boxes)), 
-                                key=lambda x: x[1], reverse=True)
+        final_detections = [selected_boxes, selected_scores, [obj_name] * len(selected_boxes)]
         
-        detections = [det[0] for det in final_detections]
-        scores = [det[1] for det in final_detections]
-        labels = [det[2] for det in final_detections]
+        detections = final_detections[0]
+        scores = final_detections[1]
+        labels = final_detections[2]
 
         return {'boxes': detections, 'scores': scores, 'labels': labels}
 
@@ -177,9 +182,70 @@ class ObjectDetector:
 
         if len(target_dict) < 1:
             target_dict = {target_name : {"boxes": [], "scores": []}}
+
+        if self.use_detection_cls:
+            target_dict = self.classifier.query_obj(image, target_dict)
             
         # If no detection is found return original detection dict
         return target_dict
+
+class Classifier:
+    def __init__(self, type, size):
+
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        self.model, self.processor = get_classifier_model(type, size, self.device)
+        self.confidence_threshold = 0.2
+        self.cls_nms_thresh = 0.5
+
+    def calculate_sim(self,inputs):
+        img_feats = self.model.get_image_features(inputs['pixel_values'])
+        text_feats = self.model.get_text_features(inputs['input_ids'])
+        img_feats = img_feats / img_feats.norm(p=2, dim=-1, keepdim=True)
+        text_feats = text_feats / text_feats.norm(p=2, dim=-1, keepdim=True)
+        return torch.matmul(img_feats,text_feats.t())
+
+    def query_obj(self, img, detection_dict):
+        img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
+        valid_detections = {}
+
+        for class_name, detection_info in detection_dict.items():
+            bboxes = detection_info['boxes']
+
+            if len(bboxes) == 0:
+                valid_detections[class_name] = {'boxes': [], 'scores': []}
+                continue
+
+            images = [img_pil.crop(bbox) for bbox in bboxes]
+            obj_name = [class_name, 'other']
+            text = [f'a photo of {q}' for q in obj_name]
+            inputs = self.processor(text=text, images=images, return_tensors="pt", padding=True)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+
+            with torch.no_grad():
+                sim = self.calculate_sim(inputs)
+
+            sim_scores = sim.cpu().numpy()
+            cat_ids = sim_scores.argmax(1)
+
+            class_boxes = []
+            class_scores = []
+
+            for i, cat_id in enumerate(cat_ids):
+                detected_class = obj_name[cat_id]
+                class_score = sim_scores[i, cat_id]
+                if detected_class == class_name and class_score >= self.confidence_threshold:
+                    class_boxes.append(bboxes[i])
+                    class_scores.append(class_score)
+
+            if class_boxes:
+                class_boxes, class_scores = nms(class_boxes, class_scores, self.cls_nms_thresh)
+
+            valid_detections[class_name] = {
+                'boxes': class_boxes,
+                'scores': class_scores
+            }
+
+        return valid_detections
 
 class VQA:
     def __init__(self, type, size, quantization, vqa_strategy):
@@ -723,6 +789,7 @@ class ValueMapper:
         camera_yaw = habitat_env.get_current_observation(type='compass')
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
+
 
 
 

@@ -459,6 +459,8 @@ class ObjectDetectorConfig(HabitatBaselinesBaseConfig):
     thresh: float = 0.5
     nms_thresh: float = 0.5
     store_detections: bool = False
+    use_detection_cls: bool = False
+    
     # Additional closed set detector 
     use_additional_detector: bool = False
     additional_type: str = "detr101"

@@ -153,9 +153,13 @@ class DebugObservation:
         # TODO: add labels
         if bboxes is not None:
             assert segmentation is None, "Cannot have both segmentation and bboxes"
+
             draw = ImageDraw.Draw(image)
             for i, box in enumerate(bboxes):
-                color = 'red'
+                if i==0:
+                    color = 'blue'
+                else:
+                    color = 'red'
                 draw.rectangle(box, outline=color, width=5)
 
         file_path = os.path.join(output_path, prefix + ".png")

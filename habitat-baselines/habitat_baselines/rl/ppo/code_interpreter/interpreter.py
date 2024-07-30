@@ -206,7 +206,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
         self.primitives = {
             # Exploration functions
             'explore_scene': self.explore_scene,
-            'detect_objects': self.detect_objects,
+            'detect': self.detect,
             'navigate_to': self.navigate_to,
             'feature_match': self.feature_match,
             'stop_navigation': self.stop_navigation,   
@@ -246,6 +246,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 thresh=self.habitat_env.object_detector.thresh,
                 nms_thresh=self.habitat_env.object_detector.nms_thresh,
                 store_detections=self.habitat_env.object_detector.store_detections,
+                use_detection_cls=self.habitat_env.object_detector.use_detection_cls,
             )
             print('Object detector loaded')
             if self.habitat_env.object_detector.use_additional_detector:
@@ -255,6 +256,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     thresh=self.habitat_env.object_detector.additional_thresh,
                     nms_thresh=self.habitat_env.object_detector.additional_nms_thresh,
                     store_detections=False,
+                    use_detection_cls=self.habitat_env.object_detector.use_detection_cls,
                 )
                 print('Additional object detector loaded')
 
@@ -467,7 +469,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Computer Vision modules
     """
-    def detect_objects(self, target_name):
+    def detect(self, target_name):
         """
         (Each frame) detect objects in the scene using object detection model
         The actual class is defined in models.py
@@ -592,7 +594,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # TODO: ideal code would be
         # while True:
         #     explore_scene()
-        #     object = detect_objects('chair')
+        #     object = detect('chair')
         #     if object:
         #         navigate_to(object)
         #         view = look_around()
@@ -641,7 +643,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Select the target object from the scene
         """
         img  = self.habitat_env.get_current_observation(type='rgb')
-        bbox = self.detect_objects(target)
+        bbox = self.detect(target)
 
         if bbox:
             crop_image_mask = bbox[0][0]
@@ -721,7 +723,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         #         }
         # }
         #####  IMPORTANT
-        #####  This should be passed to this function as dict["target"], e.g. dict["chair"]
+        #####  This dictionary is passed to this primitive from detector like this: dict["target"], e.g. dict["chair"]
         
         n_target = len(target['boxes'])
         return int(n_target)

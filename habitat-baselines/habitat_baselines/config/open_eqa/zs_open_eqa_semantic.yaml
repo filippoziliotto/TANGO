@@ -130,8 +130,8 @@ habitat_baselines:
     # 0.7
   value_mapper:
     use_value_mapper: True
-    type: "blip"
-    size: "large"
+    type: "clip"
+    size: "base"
     visualize: False
     save_video: False
     policy: "v1"

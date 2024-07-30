@@ -39,14 +39,13 @@ class ObjectDetector:
         self.thresh = thresh 
         self.nms_thresh = nms_thresh
         self.store_detections = store_detections
+        self.use_detection_cls = use_detection_cls
         self.detection_dict = dict()
         self.model, self.processor = get_detector_model(type, size, store_detections, self.device)
 
         # Use classifier to avoid false positives
         if self.use_detection_cls:
-            self.classifier_type = "clip"
-            self.classifier_size = "large"
-            self.classifier = Classifier(self.classifier_type, self.classifier_size)
+            self.classifier = Classifier()
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -190,10 +189,16 @@ class ObjectDetector:
         return target_dict
 
 class Classifier:
-    def __init__(self, type, size):
-
+    """
+    We want to avoid false positives in the detection
+    So we filter the detection using aopen-set classifier ['target_name', 'other']
+    We only Use Clip large, TODO implement also other possibilities
+    """
+    def __init__(self):
+        self.type = "clip"
+        self.size = "large"
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model, self.processor = get_classifier_model(type, size, self.device)
+        self.model, self.processor = get_classifier_model(self.type, self.size, self.device)
         self.confidence_threshold = 0.2
         self.cls_nms_thresh = 0.5
 

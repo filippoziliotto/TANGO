@@ -33,7 +33,7 @@ from habitat_baselines.rl.ppo.utils.map.geometry_utils import (
 
 
 class ObjectDetector:
-    def __init__(self, type, size, thresh=.3, nms_thresh=.5, store_detections=False, use_detection_cls=False):
+    def __init__(self, type, size, thresh=.3, nms_thresh=.3, store_detections=False, use_detection_cls=False):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.type = type
         self.thresh = thresh 
@@ -138,6 +138,9 @@ class ObjectDetector:
                 self.store_detections_into_dict(boxes, scores, labels)
             boxes, scores, labels = self.class_ids_to_labels(boxes, scores, labels, obj_name)
 
+        # select only boxes, labels and scores where i-th score > self.thresh
+        # TODO:
+
         if not boxes:
             return {'boxes': [], 'scores': [], 'labels': []}
         
@@ -150,6 +153,10 @@ class ObjectDetector:
                 selected_scores.append(score)
                 selected_labels.append(obj_name)
 
+        # TODO: use pytorch nms
+        # valid_indices = torchvision.ops.nms(torch.tensor(selected_boxes), torch.tensor(selected_scores), self.nms_thresh)
+        # selected_boxes = [selected_boxes[i] for i in valid_indices]
+        # selected_scores = [selected_scores[i] for i in valid_indices]
         selected_boxes, selected_scores = nms(selected_boxes, selected_scores, self.nms_thresh)
 
         final_detections = [selected_boxes, selected_scores, [obj_name] * len(selected_boxes)]
@@ -200,7 +207,7 @@ class Classifier:
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.model, self.processor = get_classifier_model(self.type, self.size, self.device)
         self.confidence_threshold = 0.2
-        self.cls_nms_thresh = 0.5
+        self.cls_nms_thresh = 0.3
 
     def calculate_sim(self,inputs):
         img_feats = self.model.get_image_features(inputs['pixel_values'])

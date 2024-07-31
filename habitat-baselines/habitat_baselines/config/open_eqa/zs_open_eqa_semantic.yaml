@@ -100,6 +100,7 @@ habitat_baselines:
     thresh: 0.1
     nms_thresh: 0.5
     store_detections: False
+    use_detection_cls: True
     # Additional object detector settings
     use_additional_detector: False
     additional_type: "detr"

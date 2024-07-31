@@ -505,13 +505,31 @@ class SegmenterConfig(HabitatBaselinesBaseConfig):
     use_segmenter: bool = False
 
 @dataclass
+class OpenAIGPTConfig(HabitatBaselinesBaseConfig):
+    """
+    Language model config settings
+    """
+    use_gpt_api: bool = False
+    model: str = "gpt-3.5"
+    temperature: float = None
+
+@dataclass
+class OpenSourceLLMConfig(HabitatBaselinesBaseConfig):
+    """
+    Language model config settings
+    """
+    use_open_source_llm: bool = False
+    model: str = "phi3"
+    quantization: str = "8"
+
+@dataclass
 class LLMConfig(HabitatBaselinesBaseConfig):
     """
     Language model config settings
     """
     use_LLM: bool = False
-    type: str = "phi3"
-    quantization: str = "8"
+    api_call: OpenAIGPTConfig = OpenAIGPTConfig()
+    open_source_call: OpenSourceLLMConfig = OpenSourceLLMConfig()
     
 @dataclass
 class RoomClassifierConfig(HabitatBaselinesBaseConfig):

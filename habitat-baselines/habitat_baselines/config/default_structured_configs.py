@@ -511,7 +511,7 @@ class OpenAIGPTConfig(HabitatBaselinesBaseConfig):
     """
     use_gpt_api: bool = False
     model: str = "gpt-3.5"
-    temperature: float = None
+    # temperature: float = None
 
 @dataclass
 class OpenSourceLLMConfig(HabitatBaselinesBaseConfig):

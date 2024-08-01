@@ -146,7 +146,14 @@ habitat_baselines:
 
   LLM:
     use_LLM: False
-    type: "phi3"
+    api_call:
+      use_gpt_api: False
+      model: "gpt-3.5"
+
+    open_source_call: 
+      use_open_source_llm: False
+      model: "phi3"
+      quantization: "8"
     
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

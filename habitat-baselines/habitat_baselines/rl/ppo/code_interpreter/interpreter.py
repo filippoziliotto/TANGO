@@ -67,6 +67,10 @@ class PseudoCodeInterpreter:
         self.variables = {'episode_is_over': False}
         self.loop_exit_flag = False
 
+        # Count exploration targets is equal to the length of self.exploration_targets
+        # We have False for each target not yet explored
+        self.exploration_targets = [(False, line.split("(")[1].split(")")[0]) for line in self.lines if 'detect' in line[0]]
+
     def run(self):
         stack = []
         while not self.loop_exit_flag and self.current_line < len(self.lines):
@@ -320,6 +324,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             )
             print('Value mapper loaded')
 
+
     """
     Habitat environment modules to define actions
     """
@@ -474,6 +479,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         (Each frame) detect objects in the scene using object detection model
         The actual class is defined in models.py
         """
+
+        # If room in target name, classify the room and return
+        # TODO: use the correct list
+        if target_name in ['kitchen', 'living room', 'bedroom', 'bathroom', 'dining room']:
+            return self.classify_room(target_name)
+
+
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
@@ -504,11 +516,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             for target in detection_dict:
                 detection_dict[target_name]['xyz'] = []
                 for target_bbox in detection_dict[target]['boxes']:
-                    detection_dict[target]['xyz'].append(self.target.coordinates.from_bbox_to_cartesian(
-                        depth_obs, 
-                        target_bbox, 
-                        self.habitat_env.get_current_position()
-                    ))
+                    detection_dict[target]['xyz'].append(
+                        self.target.coordinates.from_bbox_to_cartesian(
+                            depth=depth_obs, 
+                            bbox=target_bbox, 
+                            agent_state=self.habitat_env.get_current_position()
+                        )
+                    )
 
             # For debugging purposes, take the first detection
             self.save_observation(obs, 'detection', detection_dict[target_name]['boxes'])
@@ -733,9 +747,25 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Check if the target object is found in the scene
         Take the dictionary of the object detector
         """
-        target = self.check_variable_type(target)
-        return True if self.count(target) > 0 else False
 
+        target = self.check_variable_type(target)
+        target_detected = self.count(target) > 0
+
+        # If target is found we update the self.exploration_targets variable
+        if target_detected:
+            for i, (found, target_name) in enumerate(self.exploration_targets):
+                if target_name == target and not found:
+                    self.exploration_targets[i] = (True, target_name)
+                    break     
+
+        # Update the starting map with the first unexplored target
+        for found, target_name in self.exploration_targets:
+            if not found:
+                self.value_mapper.update_starting_map(text=target_name)
+                break
+
+        return target_detected
+    
     def save_observation(self, obs, name, bbox=None):
         """
         Save the observation for debugging purposes

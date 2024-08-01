@@ -63,7 +63,7 @@ class CodeGenerator(object):
         self.eqa_vars = {}
 
         # LLM configurations
-        if self.config.habitat_baselines.LLM.use_LLM:
+        if self.habitat_env.config.habitat_baselines.LLM.use_LLM:
             assert self.config.habitat_baselines.LLM.use_gpt_api or self.config.habitat_baselines.LLM.open_source_call, "Please specify the LLM API or open-source model to use."
             if self.config.habitat_baselines.LLM.use_gpt_api:
                 self.client = OpenAI()

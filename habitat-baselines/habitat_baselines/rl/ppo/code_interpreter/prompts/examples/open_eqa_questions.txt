@@ -1,0 +1,557 @@
+Question: Where is the grey bed? | Answer: In the bedroom across the first one.
+Question: Is the bathroom shower curtain open or closed? | Answer: Open
+Question: What is to the right of the light switch in the bathroom? | Answer: A hand towel
+Question: What is hanging on the wall near the bottom of the stairs? | Answer: A smoke detector
+Question: What is above the mirror in the bathroom? | Answer: Lights
+Question: Is the kitchen on the same floor as the bedroom? | Answer: No.
+Question: Where did I put my pink shirt? | Answer: In the bedroom closet
+Question: What animal is shown in the picture in the bedroom? | Answer: A bird
+Question: After washing my hands in the sink, what should I use to dry my hands? | Answer: Use the hand towel
+Question: Is the bathroom furnished? | Answer: Yes.
+Question: How can I turn off the lamp in the bedroom? | Answer: Use the pull cords
+Question: Is there space on the dining table to work on my laptop? | Answer: Yes
+Question: Is the bathroom door open? | Answer: Partially
+Question: When coming down the stairs, you exit near a couch. What's across from the stairs? | Answer: The bathroom
+Question: Does the bathroom door open "into" or "out" of the bathroom | Answer: Out
+Question: Where is the robed statue | Answer: By the stairs in the back of the first level
+Question: Where is the entryway couch | Answer: Under the stairs by the main entrance
+Question: What's to the left of the toilet? | Answer: Radiator
+Question: What's to the right of the toilet? | Answer: A bathtub
+Question: is the table in the living room completely clean? | Answer: no
+Question: what color are the numbers written on the wall clock? | Answer: white
+Question: what color are the chairs? | Answer: brown
+Question: where is the clock? | Answer: in the living room hallway next to the television
+Question: how can I clean my hands? | Answer: there is a sink in the kitchen
+Question: is the television on or off? | Answer: off
+Question: where is the paper roll? | Answer: In the kitchen counter right next to the gas stove
+Question: where can I keep a new knife I got? | Answer: there is a knife holder in the kitchen counter next to the gas stove.
+Question: what is between the fruit bowl and knife set? | Answer: a container of spices
+Question: is the fan on or off? | Answer: off
+Question: what is kept on the tray in the kitchen counter? | Answer: banana
+Question: where can I keep a couple of apples? | Answer: on the fruit basket in the kitchen counter.
+Question: where can I keep a photo frame? | Answer: on the counter below the television with other frames
+Question: what color is the poof in the living room? | Answer: Grey
+Question: Where is the white poof? | Answer: the room with the glass table
+Question: Where can I clean fruit while facing the dining room table? | Answer: the island
+Question: Where is the painting of a feather? | Answer: Living room
+Question: What material is the stool base in the kitchen? | Answer: metal
+Question: What can I do to decrease CO2 when cooking? | Answer: use range hood 
+Question: What can I use for practicing pullups? | Answer: The stairs
+Question: What is in the basket by the front door? | Answer: an umbrella
+Question: Can you fit a large pizza on the table next to the downstairs couch? | Answer: Yes
+Question: What is the first appliance left of the sink? | Answer: coffee machine
+Question: How many coat hooks are available? | Answer: 5
+Question: Is the AC vent on the stairs open or closed? | Answer: open
+Question: What can I do to increase the speed of the ceiling fan? | Answer: Turn the dial on the switch panel next to the front door
+Question: What is in between the two picture frames on the blue wall in the living room? | Answer: The TV
+Question: What is the white object on the wall above the TV? | Answer: Air conditioning unit
+Question: What type of ceiling is in the living room? | Answer: A vaulted ceiling
+Question: What color is the staircase railing? | Answer: Brown
+Question: What should I do to cool down? | Answer: Turn on the AC unit
+Question: Is there room on the dining table to eat? | Answer: Yes
+Question: What material is the ceiling in the living room? | Answer: Wood panel
+Question: Is the front door open? | Answer: No
+Question: Is the dining table set with table mats? | Answer: Yes.
+Question: What color are the patio chairs? | Answer: Brown
+Question: Where are the paper towels? | Answer: Above the dishwasher
+Question: What appliance is below the hanging cabinets on the left side of the kitchen? | Answer: A toaster oven
+Question: Where can I get a drink of water? | Answer: From the water dispenser in the fridge
+Question: Are the blinds in the living room all open or all closed? | Answer: Neither, some are open some are closed
+Question: If the lights suddenly go out, where should I go to fix it? | Answer: The circuit breaker box to the left of the laundry room
+Question: What white object can be partially seen in the room across the bedroom?  | Answer: A laundry machine
+Question: Are the drapes in the bedroom open or closed? | Answer: Open
+Question: Where would the garbage disposal switch be located? | Answer: The switches to the right of the sink
+Question: Where is the umbrella? | Answer: On the balcony outside
+Question: What is above the light switch? | Answer: A circuit breaker box
+Question: What kind of staircase does this home have? | Answer: A spiral staircase
+Question: What color is the bed frame? | Answer: White
+Question: What is across the dishwasher? | Answer: A fridge
+Question: Where is the full length mirror? | Answer: upstairs bedroom
+Question: What's below the window of the front door? | Answer: mailslot 
+Question: What is the black and red object in the upstairs bedroom? | Answer: a workout bench
+Question: What is on the opposite wall of the bed? | Answer: TV
+Question: Where can I workout? | Answer: upstairs bedroom
+Question: What type of heating does this house have? | Answer: radiator
+Question: Where is the sweatshirt | Answer: coat rack
+Question: what color are the dining room walls? | Answer: brown
+Question: Is there clutter on the kitchen island? | Answer: no
+Question: What color is the front door? | Answer: white
+Question: Is the refrigerator modern? | Answer: no
+Question: What is the blue object left of the downstairs bed? | Answer: a humidifier
+Question: Where is "Bless this home" written? | Answer: Above the dinner room entrance
+Question: Where is the plaid blanket? | Answer: On the back of the couch
+Question: Where is the "Be Thankful" poster? | Answer: Above the stairs
+Question: Where is the black cross? | Answer: Above the front door
+Question: Does poster above stairs show English letters? | Answer: Yes
+Question: What decorations is on the bathroom counter? | Answer: A plant
+Question: Where should I sit to watch tv? | Answer: Couch
+Question: Are the blinds closed? | Answer: No
+Question: What color is the tray on the coffee table? | Answer: Silver
+Question: Is the dining room table set? | Answer: No
+Question: Do frames near microwave show English letters? | Answer: No
+Question: how do I go down from the above floor to the below floor? | Answer: use the staircase 
+Question: what color is the flower in the bottom floor? | Answer: pink
+Question: is the door of the above room infront of the staircase open or closed? | Answer: open
+Question: what color is the chair? | Answer: black
+Question: is the table in the above room infront of the staircase clean ? | Answer: yes
+Question: is the chair in the above floor pushed in or placed out? | Answer: pushed in
+Question: Is the television turned on or off? | Answer: On
+Question: What material are the stools in the kitchen made out of? | Answer: Leather
+Question: What is the grey item on the bed? | Answer: A blanket
+Question: Where is the ceiling fan? | Answer: Above the bed in the second bedroom
+Question: Where do I reach for laundry detergent? | Answer: For the shelf above the washing machine.
+Question: Is the toilet seat open or closed? | Answer: Closed.
+Question: I want to check my outfit for a dinner party, how can I do this? | Answer: Using the large mirror outside the first bedroom.
+Question: I want to host a dinner party on a summer evening, where should I set the table? | Answer: On the table on the porch.
+Question: What color is the countertop on the porch? | Answer: Black
+Question: Where is the round mirror? | Answer: On the wall above the head of the bed in the first bedroom.
+Question: what does the outside weather look like? | Answer: bright and sunny 
+Question: what is behind the monitor screen? | Answer: window
+Question: what can be seen in the mirror on top of staircase? | Answer: a tripod
+Question: what is the object seen in the mirror used for? | Answer: to take photos and videos
+Question: are the blinds in the workroom shut or not? | Answer: not shut
+Question: is the brown dresser in the bedroom empty? | Answer: no
+Question: where can I keep a flower vase in the bedroom? | Answer: on the bedside board
+Question: where can I keep the keyboard | Answer: on the table in the workroom
+Question: what room is the white table lamp in? | Answer: bedroom
+Question: is the lamp in the bedroom on or off? | Answer: on
+Question: what color is the tripod? | Answer: black
+Question: where is the black chair? | Answer: infront of the monitor in the work room
+Question: Where is the abstract painting with blue circles? | Answer: In the dining room
+Question: Where can I put my jacket? | Answer: On the cloth hanger rack
+Question: Where are the clothes? | Answer: On the hangars next to the stairway
+Question: What is on the dining table? | Answer: Wine glasses
+Question: What kind of material is the wall on the right side of the staircase? | Answer: Exposed stone
+Question: Is there any natural light in this building? | Answer: No.
+Question: What are the objects on the bench around the dining table? | Answer: Pillows
+Question: Is the cloth hanger rack full? | Answer: No.
+Question: Where can I wipe my shoes? | Answer: On the black floor mat
+Question: What color is the jacket on the clothes hangar? | Answer: Maroon or red
+Question: What is to the left of the dining table? | Answer: A wine cabinet
+Question: What kind of staircase is in this building? | Answer: A spiral staircase
+Question: What is on the bed with the blue sheet | Answer: Construction insulation
+Question: Is this house safe to live in? | Answer: No, the house is in disrepair
+Question: How do I turn on the lights? | Answer: I do not see any lights in the house
+Question: What size mattresses are in the house | Answer: Full
+Question: Where can I use the bathroom? | Answer: I did not see a bathroom
+Question: What is between the bed and the chair? | Answer: A nightstand
+Question: Are the doors open or closed? | Answer: Open
+Question: What can I use to heat up some leftovers? | Answer: This house has no kitchen or microwave with which to reheat leftovers
+Question: Is the door of the restroom open or closed? | Answer: Open
+Question: Is the TV on or off | Answer: Off
+Question: In which room is the frame about the minesota twins? | Answer: In the restroom
+Question: I go to the TV room, which object can I use to exercise? | Answer: The Stationary Bike
+Question: What material are most of the cabinets of the kitchen made of? | Answer: Wood
+Question: If you go to the restroom there are ornaments and frames about one sport, which sport is it? | Answer: Baseball
+Question: Which color is the clock on the wall of the kitchen? | Answer: White
+Question: In which room is the stationary bike? | Answer: In the TV room
+Question: What is the flue object on the floor near the toilet? | Answer: A trash can
+Question: What is the object in the TV room, at the right of the couch? | Answer: An stationary bike
+Question: About which baseball team is the frame on the restroom? | Answer: The Minnesota Twins
+Question: If you were to go down the stairs, then straight into the tv room, turn left in the door and go straight until you enter the last room, which room would it be? | Answer: The restroom
+Question: What is the object between the Stationary Bike and the Table with the Lamp? | Answer: An armchair
+Question: There is an object to tell the time in this scene, in which room is it? | Answer: In the kitchen
+Question: what is above the right bed | Answer: a window
+Question: I can't open the windows, how can I cool down the bedroom | Answer: turn on ceiling fan
+Question: what color is the sofa | Answer: blue
+Question: How can I cool down the bedroom | Answer: turn on ceiling fan
+Question: I don't have a news paper, how can I check the news | Answer: use the tv
+Question: what is the object to the right of the TV | Answer: a clock
+Question: Where can I place a glass of water in the living room | Answer: on the drawer next to the sofa
+Question: Is the lamp in the living room on or off | Answer: on
+Question: what color are the bed covers | Answer: blue
+Question: what is the the grey object below the TV | Answer: a box
+Question: what room has a picture of several airplanes  | Answer: the bedroom
+Question: what room has a plant | Answer: the living room
+Question: is the bed made | Answer: yes
+Question: Go to the living room, step close in front of the TV, turn to the left and enter the room, which room is it? | Answer: The studio
+Question: There's something on the wall between the pet cage and the chimney, what is it? | Answer: A window
+Question: Which room is the TV in? | Answer: Living room
+Question: There are ornaments about a festivity near the chimney, about which festivity are they? | Answer: Halloween
+Question: Is there a room to work? If so which room is it? | Answer: Yes, a studio
+Question: Theres a frame about a video game above the brown couch on the top floor, which video game is it? | Answer: Super Mario
+Question: Is the TV on or off? | Answer: Off
+Question: Which color is the wall behind the desk with the computer? | Answer: Blue
+Question: Which color is the dinning table? | Answer: Brown
+Question: Which room is the pet cage closest to? | Answer: Living room
+Question: Is there a place where I can leave my pet? If so where is it? | Answer: Yes, a pet cage in the living room
+Question: Theres something on the ceiling of the living room, what is it? | Answer: A ceiling fan
+Question: Is the light on the staircase on or off? | Answer: On
+Question: What is the object inside the pet cage? | Answer: A teddy bear
+Question: Where can I get recipes for what to cook? | Answer: The open cookbook on the kitchen counter top
+Question: What is hanging from the oven handle? | Answer: A towel
+Question: Where can I get drinking water in the kitchen? | Answer: From water dispenser in the fridge
+Question: What is to the left of the frontdoor? | Answer: A storage closet
+Question: Is the light above the sink turned on? | Answer: Yes
+Question: Where can I warm up? | Answer: Next to the fireplace
+Question: What is shown on the painting above the couch? | Answer: Horses
+Question: What is above the wooden table in the living room? | Answer: A blue, white, and orange painting
+Question: What color is the front door? | Answer: Brown
+Question: What color are the pillows in the kitchen? | Answer: Blue
+Question: Where is the microwave? | Answer: Above the stovetop
+Question: How many staircases are there? | Answer: At least two
+Question: Where was the cardboard box? | Answer: In the kitchen
+Question: What type of floor is in the kitchen? | Answer: linoleum tiles
+Question: Is there anything on top of the cardboard box | Answer: no
+Question: What is between the kitchen and the stairway up? | Answer: A stairway down to the outside
+Question: Where could i wash my hands | Answer: In the kitchen sink
+Question: Is there a light switch on the stairs? | Answer: Yes
+Question: What is between the kitchen and the open closet? | Answer: An empty room
+Question: Is the door to the closet open or closed | Answer: open
+Question: What is happening in this house today? | Answer: Someone is moving
+Question: What is in the corner of the dining room? | Answer: a plant
+Question: Where can I put my scarf? | Answer: Coat hanger
+Question: Is the downstairs closet door open or closed? | Answer: closed
+Question: Are both the dining room table and kitchen counter set? | Answer: Yes
+Question: What color are the livingroom curtains? | Answer: white
+Question: Is there space for another beanbag chair against the far wall downstairs? | Answer: Yes
+Question: Where is the mortar and pestle? | Answer: kitchen alcove
+Question: Where is Yahtzee? | Answer: downstairs
+Question: What material are the chairs at the downstairs table? | Answer: leather
+Question: Where can I find the time? | Answer: Oven clock
+Question: Is there space for another pillow on the back of the bench with the coat hangers? | Answer: No
+Question: What is above the entry way shelf? | Answer: a mirror
+Question: is the door to the washroom open or closed? | Answer: open
+Question: what is above the markers on the whiteboard? | Answer: eraser
+Question: what color are the mittens? | Answer: grey
+Question: is there anything on the bed besides pillows? | Answer: no
+Question: what is the object hanging below the picture frame in the kitchen? | Answer: spatula
+Question: where precisely are the markers in the study room? | Answer: on the whiteboard bottom-right corner
+Question: what is the red object next to the mirror? | Answer: lamp
+Question: how can I clean the whiteboard? | Answer: using the eraser attached to the whiteboard
+Question: what room is the surface cleaner in? | Answer: the room with the whiteboard
+Question: Where should I store fruits that I want to last long? | Answer: In the fridge
+Question: What is at the center of the breakfast table? | Answer: A large fruit bowl
+Question: Is the kitchen countertop clean? | Answer: Yes.
+Question: Where is the breakfast table? | Answer: To the left of the kitchen
+Question: What is the shape of the panels on the floor? | Answer: Square
+Question: What is above the red couch? | Answer: Paintings
+Question: What is in the center of the room with the stairs? | Answer: A red couch
+Question: Is the front door open or closed? | Answer: Open
+Question: Is this home in the suburbs? | Answer: No.
+Question: Where are the light switches? | Answer: To the right of the front door
+Question: Where can I wash my hands? | Answer: In the sink in the kitchen
+Question: What is at the back of the living room, behind the couches? | Answer: A piano
+Question: What is in between the two couches? | Answer: A coffee table
+Question: Is the piano keyboard cover open or closed? | Answer: Open
+Question: Is the person who lives here an avid reader? | Answer: Yes.
+Question: Is there natural light in the room? | Answer: No.
+Question: Where can I lay down and read a book? | Answer: The couch
+Question: Can this home be used for a large dinner party? | Answer: Yes.
+Question: What is above the piano? | Answer: A painting
+Question: What color are the air vents below the window? | Answer: Gold
+Question: What is above the coffee table? | Answer: A chandelier
+Question: Where is the pillow with the face on it? | Answer: On the couch
+Question: What can I use to entertain my guests with music? | Answer: The piano
+Question: Is there space under the kitchen bar area? | Answer: No.
+Question: What can I use to cool down the living room? | Answer: The thermostat
+Question: What color is the smoke detector? | Answer: Yellow or off-white
+Question: Is this home on the first floor? | Answer: No
+Question: Does this house have pull lever door handles or knobs? | Answer: Pull lever
+Question: Is the coat closet in the living room open? | Answer: No.
+Question: What is hanging from the ceiling in the bedroom? | Answer: A dome light
+Question: What material is the dining table? | Answer: Glass
+Question: Is the bedroom window open? | Answer: No.
+Question: What is the gold object on the nightstand? | Answer: A nightlamp
+Question: What is in between the two white cabinets in the kitchen? | Answer: The microwave
+Question: Where can I sit and eat if I don't want to use the dining table? | Answer: Use the kitchen bar counter
+Question: Which room should I go to see the car? | Answer: The bedroom
+Question: Where are the orange flowers? | Answer: Outside the bedroom in a vase on the ground
+Question: How can I cool myself off? | Answer: Turn on the ceiling fan
+Question: Where can I put my shoes? | Answer: On the hanging shoe rack in the closet
+Question: Are both doors in the bedroom open? | Answer: No.
+Question: Are the closet lights turned on? | Answer: Yes
+Question: What is above the painting with the red flowers? | Answer: An air vent
+Question: What is hanging from the ceiling in the bedroom? | Answer: A ceiling fan
+Question: What does the painting in the bathroom depict? | Answer: A pier
+Question: What is the color of the walls in the bedroom? | Answer: Light blue
+Question: Where is the full body mirror? | Answer: In the bedroom by the door
+Question: Is there room for a desk in the bedroom? | Answer: No
+Question: What is depicted on the painting above the bed? | Answer: White flowers
+Question: What is above the bed? | Answer: Two paintings
+Question: What is to the left of the staircase? | Answer: A storage closet
+Question: Is the bedroom door open? | Answer: Yes
+Question: Are the cabinets below the mirror closed? | Answer: Yes.
+Question: What type of flooring does this house feature? | Answer: Wood panels
+Question: What is the large, round, and black object on the wall? | Answer: A clock
+Question: Where is the mirror? | Answer: Next to the staircase above the dark brown cabinet
+Question: What shape are the door knobs? | Answer: Round or spherical
+Question: What is to the left of the mirror? | Answer: A plant in a tall vase
+Question: Can two adults fit on the bed? | Answer: no
+Question: Where is the checkers board? | Answer: Entryway table
+Question: How can I heat the house without wood? | Answer: Thermostat in the living room
+Question: Where can I store the house key? | Answer: The lockbox on the front door
+Question: What is above the bed that's not in the nook? | Answer: A clock
+Question: Is the backdoor open or closed? | Answer: open
+Question: What color is the bedroom poof?  | Answer: blue
+Question: Can another cookie jar fit on the cookie jar shelf? | Answer: yes
+Question: Does this house have forced air heating? | Answer: no
+Question: Where can I access the attic? | Answer: door at the top of the stairs
+Question: What colors is the kitchen backsplash | Answer: black
+Question: Is the microwave door propped open? | Answer: no
+Question: Where is the yellow pillow?  | Answer: The kitchen window
+Question: Is the china cabinet full? | Answer: Yes.
+Question: Where should I look if I want to research a topic? | Answer: The bookshelf in the office room downstairs
+Question: Does this house have a backyard? | Answer: Yes
+Question: What is in the right corner of the room downstairs? | Answer: A bookshelf
+Question: Are the dining table chairs pushed in? | Answer: Yes.
+Question: Where is the drawing of the airpline? | Answer: In the picture frame along the stairway
+Question: what color is the drawer in the bedroom | Answer: light brown
+Question: how many devices can be plugged in on the kitchen counter | Answer: two
+Question: can I clean the floor with a mop? | Answer: yes
+Question: what color is the bed runner | Answer: yellow
+Question: is the lamp in the bedroom on or off | Answer: on
+Question: is the door to the balcony open or closed | Answer: open
+Question: where are chairs to sit | Answer: on the balcony
+Question: how can I increase airflow in the bedroom  | Answer: turn on the ceiling fan
+Question: what is on top of the drawer in the bedroom | Answer: a TV
+Question: what is the pink object on the bed | Answer: a pillow
+Question: how can I warm up dinner? | Answer: in the microwave
+Question: is there an area between the beds to place a glass of water | Answer: yes
+Question: where is the bench | Answer: by the bed
+Question: Are the lights turned on in the bedroom? | Answer: Yes.
+Question: What is above the sink? | Answer: A mirror 
+Question: What shape is the mirror? | Answer: An oval
+Question: Is there space under the bed for storage? | Answer: Yes
+Question: Where is the cartoon cat? | Answer: Its drawn on the pink photo frame
+Question: Does the bedroom have a lot of furniture? | Answer: No
+Question: Is the patio door open? | Answer: No.
+Question: Where is the orange painting? | Answer: Above the bed
+Question: What style of paintings are put up in the bedrrom? | Answer: Abstract
+Question: Where can I take a nap? | Answer: On the bed in the bedroom
+Question: What color is the bed comforter? | Answer: Brown
+Question: What is the object to the left of the bed? | Answer: A radiator
+Question: Where is the microwave? | Answer: On top of the refrigerator
+Question: Where is the pillow with a hexagonal pattern? | Answer: On the bed in the second bedroom.
+Question: what shapes are drawn on the  black board | Answer: star and moon
+Question: where is the star drawn? | Answer: on the blackboard
+Question: what is infront of the blackboard on the wall? | Answer: a small kids table and chair set
+Question: is the bed in the second room completely empty? | Answer: no
+Question: what is between the lamp and the side table in the bedroom? | Answer: electric switch
+Question: what shape are the decorations above the bed? | Answer: triangle
+Question: where is the brown basket? | Answer: next to the small table-chair set infront of the black board
+Question: where can I keep a small container with chalks? | Answer: on the table infront of the blackboard
+Question: are the lamps in the second room on or off? | Answer: on
+Question: Where is the white sofa? | Answer: In the living room
+Question: Is the front door open? | Answer: No
+Question: What's happening in the picture above the stairs by the gray couches? | Answer: People are jumping into the water
+Question: Where can I relax and watch TV | Answer: On the gray couches upstairs from the kitchen
+Question: What color is the chest surrounded by sofas? | Answer: Red
+Question: Could I put something on the chair by the front door? | Answer: Yes
+Question: Is the upstairs TV on? | Answer: No
+Question: Is the kitchen an open floor plan? | Answer: Yes
+Question: I like to drink my coffee outside, what can I do? | Answer: Go out the glass door by the kitchen and onto the porch
+Question: Where is the red chest? | Answer: in the room with the gray sofas
+Question: What is hanging on the bannister? | Answer: A straw hat
+Question: Are all the bedroom doors upstairs open? | Answer: Yes
+Question: Where should I put my jackets and shoes? | Answer: In the storage closet 
+Question: What color is the staircase railing? | Answer: White
+Question: What is to the left of the mirror downstairs? | Answer: Light switch
+Question: What is directly across the staircase? | Answer: A mirror
+Question: Where is the blue cabinet? | Answer: In the upstairs bedroom 
+Question: What is underneath the four paintings upstairs? | Answer: A radiator
+Question: What is on the center of the ceiling in the living room? | Answer: A smoke detector
+Question: How many stories does this house have? | Answer: Three
+Question: Is my backyard safe to let me dog out in? | Answer: Yes, its fenced.
+Question: Are the ceiling lights in the living room turned on? | Answer: Yes
+Question: How can I get to the backyard? | Answer: Through the patio doors in the living room on the first floor
+Question: where are the books | Answer: in the office
+Question: is the office table clean | Answer: yes
+Question: what color are the doors | Answer: white
+Question: what is the black object on the table on the top floor | Answer: Monitor
+Question: where are model houses displayed | Answer: in the hallway by the stairs
+Question: what objects are displayed above the little houses  | Answer: model sail boats
+Question: is the chair in the office occupied | Answer: no
+Question: do I need to install curtains to reduce the day light? | Answer: no
+Question: what color are the steps of the stairs | Answer: red
+Question: can I use a mop to clean the stairs? | Answer: no
+Question: is there room to work from the table in the office | Answer: yes
+Question: What is the picture seen from the kitchen depict? | Answer: A man and a child, looking at something, standing in between trees
+Question: What color are the kitchen cabinets? | Answer: Grey
+Question: What is the blue object above the glass doors? | Answer: A clock
+Question: What is the yellow object hanging on the wall? | Answer: A painting depicting a man
+Question: Where is the microwave? | Answer: Above the oven
+Question: What can I use to check my appearance? | Answer: The mirror above the wooden table near the kitchen.
+Question: Is the backyard fenced? | Answer: Yes
+Question: Is there room for more furniture near the kitchen? | Answer: Yes
+Question: What kind of numbering does the blue clock use? | Answer: Roman numerals
+Question: Where is the red and white checkered rug? | Answer: Underneath the wooden dining table
+Question: Where can I put my apples? | Answer: Use the basket on the kitchen counter
+Question: What color is the trim around the mirror? | Answer: Gold
+Question: Are the kitchen bar chairs tucked in? | Answer: Yes.
+Question: How many basins does the sink have? | Answer: Two
+Question: Are the blackout curtains behind the bed opened or closed? | Answer: Opened
+Question: What is to the left of the black office chair? | Answer: A recumbent exercise bicycle
+Question: What is written on the wall above the sink between the two cupboards? | Answer: We may not have it all together, but together we have it all.
+Question: Where is the large green plant? | Answer: In the entryway.
+Question: What is next to the posters on the wall in the staircase? | Answer:  A calendar.
+Question: Are all of the bulbs in the ceiling fan over the dining room table lit? | Answer: No
+Question: What color are the walls in the bedroom? | Answer: Powder blue
+Question: If I sit at the dining room table, will the back two legs of my chair be touch wood or carpet? | Answer: Wood
+Question: I want to do a quick workout, where can I do this? | Answer: Using the exercise bike in the basement.
+Question: Where is the picture with the red flowers? | Answer: Next to the stairway
+Question: Is the sliding door open or closed? | Answer: Closed
+Question: Where can I store books if the shelf gets full? | Answer: The woven baskets underneath
+Question: Where are the brown woven baskets? | Answer: Below the books in the black cubby shelf
+Question: What is in between the two bedroom doorways? | Answer: A light switch
+Question: Are the walls painted? | Answer: No
+Question: What color is the chair in the bedroom? | Answer: Black
+Question: What objects are in the black cubby shelf? | Answer: Books
+Question: Is the bedroom furnished and ready to live in? | Answer: No.
+Question: Is the chandelier turned on? | Answer: Yes.
+Question: What can be seen outside the bedroom window? | Answer: A pond
+Question: Where is the toy car? | Answer: To the left of the television in the first bedroom.
+Question: What can I use to clean up a spill on the bathroom counter? | Answer: The hand towel
+Question: Where does the dog sleep at night? | Answer: In the crate under the staircase.
+Question: What cartoon character is portrayed in the painting to the right of the television in the first bedroom? | Answer: Donald Duck
+Question: Where can I hang my towel so I don't have to leave the shower to dry off? | Answer: On the glass wall of the shower.
+Question: What is the painting to the right of the television in the first bedroom made out of? | Answer: Dollar bills
+Question: Would you place a drink on your right or left side while watching tv from the lefthand chair in the living room? | Answer: The right
+Question: What color are the window frames? | Answer: Black
+Question: What is the chandelier hanging over? | Answer: The staircase.
+Question: What is the gold object on top of the bureau? | Answer: A lamp.
+Question: Is the fireplace lit? | Answer: No
+Question: Is the television on? | Answer: No
+Question: What is above the table on the wall you see when exiting the bedroom? | Answer: A mirror.
+Question: I need to blow my nose while taking a bath, what can I use? | Answer: There is toilet paper next to the tub.
+Question: What room is the orchid in? | Answer: The bathroom.
+Question: Where can I wash my hands on the second story of the house? | Answer: The bathroom sink
+Question: What is underneath the television? | Answer: A fireplace
+Question: What material are the blue pillow's pillowcases made out of? | Answer: Velvet
+Question: on which floor is the washing machine | Answer: on the second floor
+Question: can you clean all the floors on the top level with a mop | Answer: no
+Question: are there objects on top of the blue drawer  | Answer: no
+Question: where can I store clothes | Answer: in the drawer on the second floor
+Question: what color is the picture frame | Answer: black
+Question: What is the blue object on the top floor | Answer: a drawer
+Question: what floor is the laundry room on | Answer: the 2nd floor
+Question: on which floor do you see plants | Answer: on the first floor
+Question: is this a good home for someone in a wheelchair | Answer: no
+Question: what color are the doors | Answer: white
+Question: is the entrance door to the house open or closed | Answer: closed
+Question: where can I store books | Answer: on the shelf on the second floor
+Question: What color is the trim of the mirror? | Answer: Grey
+Question: What is the circular object on the wall next to the staircase? | Answer: A smoke detector
+Question: What type of furniture is used to display items behind glass doors? | Answer: The china cabinet
+Question: What color is the staircase railing? | Answer: Dark brown
+Question: What can be used to provide privacy in the dining room? | Answer: Curtains
+Question: What is the yellow object on top of the ouch? | Answer: A blanket
+Question: What is hung along the walls of the staircase? | Answer: Photos of people
+Question: Is the dining room light turned on? | Answer: Yes.
+Question: Where is the china cabinet? | Answer: To the left of the dining table
+Question: Where can I dry my shoes when I come into the house? | Answer: On the grey rug behind the front door
+Question: Is the bedroom door open? | Answer: Yes
+Question: What is at the center of the dining table? | Answer: A vase with flowers
+Question: Where is the printer? | Answer: Next to the sofa
+Question: Where is the octagonal mirror? | Answer: In the first bedroom
+Question: What color is the curtain over the sink? | Answer: Green
+Question: It's too bright in the living room, how can I make it darker? | Answer: Lower the shades over the porch door.
+Question: What kind of pants is the man in the mirror wearing? | Answer: Jeans
+Question: Is the coffee pot full or empty? | Answer: Full
+Question: If I sit in the armchair in the living room, what animal can I touch with my right hand? | Answer: An elephant
+Question: where can I sit in the living room? | Answer: on the sofa
+Question: what is right next to the chair? | Answer: a small side table
+Question: what is on the chair? | Answer: a soft pillow
+Question: is the outside door open or closed? | Answer: open
+Question: is the table in the living room clean? | Answer: yes
+Question: is the outside door open or closed? | Answer: open
+Question: where is the standing lamp? | Answer: next to the bed in the bedroom
+Question: what is special about the wall in the living room? | Answer: it seems to be made of stone
+Question: where is the fan? | Answer: in the dining room besides the kitchen
+Question: where is the word friendship written? | Answer: above the door in the living room
+Question: Where is the baby high chair? | Answer: Next to the entrance to the TV room
+Question: Where are the stairs to the basement? | Answer: In the hallway by the bedrooms
+Question: Where is the four blade fan? | Answer: In the living room
+Question: Where is the three blade fan? | Answer: Above the stairs
+Question: where can I keep a new ironed shirt? | Answer: in the closet with other shirts.
+Question: are the electric lamps near the staircase on or off? | Answer: on
+Question: what is the green thing seen from the window as we walk down the staircase? | Answer: leaves of a tree
+Question: where is artwork? | Answer: above the white table on the top floor
+Question: what does the art in the hallway show? | Answer: a caricature of human face
+Question: what color is the door of the bedroom? | Answer: white
+Question: what is between the closet and the bedroom? | Answer: a mirror
+Question: what color are the electric switches in the above floor | Answer: white
+Question: is the closet door open or closed? | Answer: open
+Question: where is the brown table? | Answer: in the bedroom right next to the bed
+Question: what is on the wall infront of the staircase | Answer: lamps
+Question: Where is the doll | Answer: On top of the light brown wooden cabinet
+Question: What color is the comforter? | Answer: Pink
+Question: Is the front door open? | Answer: No
+Question: Where can I take notes? | Answer: On the desk in the bedroom
+Question: What is the large white brick fixture? | Answer: A fireplace
+Question: Where can I check my appearance? | Answer: In the mirror which is above the white drawer in the bedroom
+Question: Does the bedroom have any clutter on the floor? | Answer: No
+Question: Where can I set if I want to warmup? | Answer: By the fireplace
+Question: Where can I brush my teeth? | Answer: In the bathroom sink
+Question: Is the window in the bedroom open? | Answer: Yes
+Question: What type of door design is featured prominently in this home? | Answer: Cross hatch glass door
+Question: What is on top of the washing machine? | Answer: The dryer
+Question: What room is the potted cactus in? | Answer: The bathroom
+Question: How can I reach the wine glasses if I'm too short? | Answer: Using the step-stool in the laundry room.
+Question: What shape is the multicolored chair in the living room? | Answer: Circular
+Question: What is the black object next to the black chair? | Answer: A filing cabinet
+Question: What shape is the couch in the living room? | Answer: It is a c shape.
+Question: Is my study desk free from clutter? | Answer: No
+Question: How can I dry my towel? | Answer: By hanging it on the towel warmer.
+Question: Is the printer plugged in? | Answer: No
+Question: Where did I leave my water bottle? | Answer: On the table next to the desk in the study.
+Question: Could I have a conversation with someone cooking dinner in the kitchen while I sit in the dining room? | Answer: Yes
+Question: Where is the black and grey speaker? | Answer: On the first shelf of the wooden cabinet
+Question: What is leaning in the corner by the coat rack? | Answer: An umbrella
+Question: Are the curtains to the patio door open? | Answer: Yes
+Question: Where can I put my hat? | Answer: On the hat rack
+Question: Is this home in the city? | Answer: No.
+Question: Is the blue lamp by the couch turned on? | Answer: No
+Question: Where is the bongo? | Answer: On top of the brown shelf
+Question: Where can I take a nap? | Answer: On the black couch
+Question: What color pattern is on the pillow on the black couch? | Answer: A leopard skin color pattern
+Question: What is draped on top of the black couch? | Answer: A striped blue blanket
+Question: is the outside home door open or closed? | Answer: closed
+Question: what is on top of the cabinet in the above floor? | Answer: vase
+Question: what color is the lamp light in the room next to the kitchen? | Answer: yellow
+Question: where is the lamp that is switched on? | Answer: in the bedroom on the above floor`
+Question: where is the black bowl? | Answer: on the table outside the kitchen
+Question: is the lamp in the living room on or off? | Answer: off
+Question: how can I clean up smoke from kitchen? | Answer: use the chimney
+Question: what color is the cushion in the study room in the above floor? | Answer: yellow
+Question: Where are the pillows? | Answer: On the sofa in the bedroom.
+Question: What colors are the stripes on the wall with the books? | Answer: Blue, Green, and Red
+Question: Who is the room with the books meant for? | Answer: A child
+Question: What color are the flowers on the black table downstairs? | Answer: White
+Question: What color are the sheets in the bedroom? | Answer: White and grey
+Question: Are the doors downstairs closed? | Answer: Yes.
+Question: What is on the ceiling in front of the upstairs bedroom? | Answer: An air vent
+Question: What cartoon animal is painted on the wall? | Answer: An owl
+Question: Where are the books? | Answer: On the shelves hanging on the wall
+Question: Where can my kids go to read? | Answer: The small yellow table upstairs
+Question: What is on top of the cabinet in the same room as the sofa, aside from a picture frame? | Answer: Books
+Question: where can i find something to drink | Answer: In the fridge below the picture frame
+Question: Where can i relax a bit | Answer: on the red couch
+Question: What room is the plant in? | Answer: The room with the stairs
+Question: What room is the picture in? | Answer: The one with the red sofa
+Question: Is the lamp on or off | Answer: on
+Question: What material is the floor? | Answer: concrete
+Question: Which bin should I put paper in? | Answer: The bin with the yellow lid.
+Question: What color is the car? | Answer: Blue
+Question: Where is the broom? | Answer: Below the garage door opener
+Question: Is the garbage bin open? | Answer: Yes.
+Question: What is the green object in the left of the garage? | Answer: A hose
+Question: Is the house doorway open or closed?q | Answer: Open
+Question: What is the bin with the yellow lid? | Answer: A recycling bin
+Question: What is on the top shelf to the right side of the garage? | Answer: An ice cooler
+Question: What can I use to water my plants? | Answer: The green hose
+Question: What type of car is in the garage? | Answer: A sedan
+Question: Where is the garage opener? | Answer: To the left of the house doorway
+Question: What can I use to keep drinks cold at a picnic? | Answer: The blue cooler
+Question: What is behind the armchair in the living room? | Answer: A dog bed
+Question: What is hanging on the wall in the living room? | Answer: A clock
+Question: What type of numbers are on the clock? | Answer: Roman numerals
+Question: Where is the wreath? | Answer: Hanging on the front door.
+Question: Where is the teddy bear? | Answer: In the dog bed in the living room.
+Question: How many rooms have vehicle wallpaper? | Answer: 2
+Question: Where is the fireplace? | Answer: In the living room, to the right of the radiator and window
+Question: What can be seen through the window in the living room? | Answer: Trees and hills
+Question: Where is the picture of the flowers? | Answer: Above the wooden nightstand 
+Question: Where is the closet with the mirror? | Answer: In the bedroom downstairs
+Question: Where is the map of the united states? | Answer: Above the black couch
+Question: Where is the light purple flower painting? | Answer: Above the toilet in the bathroom upstairs

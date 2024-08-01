@@ -45,29 +45,29 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):
         room_label = roomcls_labels[room]
-        #         prompt = f"""
-        # explore_scene()
-        # room = classify_room("{room_label}")
-        # if room:
-        #     explore_scene()
-        #     {object_var} = detect_objects("{object}")
-        #     if is_found({object_var}):
-        #         navigate_to({object_var})
-        #         look_up()
-        #         answer = answer_question("{question}")
-        #         return answer"""
         prompt = f"""
 explore_scene()
-room = classify_room("{room_label}")
-if is_found(room):
+room = detect("{room_label}")
+if room:
     explore_scene()
     {object_var} = detect("{object}")
     if is_found({object_var}):
+        navigate_to({object_var})
         look_up()
-        lights = detect("light bulb") 
-        n_lights = count(lights)
-        ans = eval("n_lights if n_lights > 0 else 0") 
-        return ans"""
+        answer = answer_question("{question}")
+        return answer"""
+        #         prompt = f"""
+        # explore_scene()
+        # room = detect("{room_label}")
+        # if is_found(room):
+        #     explore_scene()
+        #     {object_var} = detect("{object}")
+        #     if is_found({object_var}):
+        #         look_up()
+        #         lights = detect("light bulb") 
+        #         n_lights = count(lights)
+        #         ans = eval("n_lights if n_lights > 0 else 0") 
+        #         return ans"""
         
     elif room is None and object is not None:
         prompt = f"""

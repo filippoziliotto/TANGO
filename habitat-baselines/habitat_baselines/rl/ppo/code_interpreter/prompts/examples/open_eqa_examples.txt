@@ -1,0 +1,27 @@
+I will provide examples of Pseudo-code program in response to given questions. For each new question, generate ONLY the related Pseudo-code program, given the examples you saw. Use only the functions that you have previously encountered.
+
+Question: How many lights are above the bathroom mirror?
+Program:
+# search for the bedroom
+explore_scene() 
+bathroom = detect("bathroom") 
+
+    if is_found(bathroom): 
+        # search for the mirror in the bathroom
+        explore_scene(bathroom) 
+        mirror = detect("mirror") 
+
+        if is_found(mirror): 
+	        # navigate to it and count how many lights
+            navigate_to(mirror) 
+
+            # look up above the mirror
+            look_up()
+            lights = detect("light") 
+            n_lights = count(lights)
+            ans = eval(" '{n_lights}' if {n_lights} > 0 else '0' ") 
+            return ans
+
+TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+Now, respond to the new question.
+

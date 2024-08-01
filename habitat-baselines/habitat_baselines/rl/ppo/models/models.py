@@ -622,28 +622,57 @@ class ValueMapper:
             frontiers=self.obstacle_map._get_frontiers()
         )
 
+        # Visualize the maps
         if self.visualize:
-            obs_map = self.obstacle_map.visualize(
-                best_frontier = self._last_frontier
-            )
-            cv2.imwrite("images/map.png", obs_map)
+            self.visualize_maps()
 
-            val_map = self.value_map.visualize(
-                # reduce_fn=self._reduce_values,
-                obstacle_map=self.obstacle_map,
-                best_frontier=self._last_frontier
-            )
-            cv2.imwrite("images/value_map.png", val_map)
+    """
+    Visualization methods
+    """
 
-            if self.save_video:
-                self.video_frames.append((obs_map, val_map))
+    def visualize_maps(self):
+        obs_map = self.obstacle_map.visualize(
+            best_frontier = self._last_frontier
+        )
+        cv2.imwrite("images/map.png", obs_map)
 
-            # When now new frontier is found, compute the cosine similarity of features
-            if self.frontiers_at_step[-1].size == 0 and False:
-                feature_map = self.value_map._embed_map
-                text = "bedroom"
-                image = self.habitat_env.get_current_observation(type="rgb")
-                self.frontier_map.compute_map_cosine_similarity(feature_map, text, image, True)
+        val_map = self.value_map.visualize(
+            # reduce_fn=self._reduce_values,
+            obstacle_map=self.obstacle_map,
+            best_frontier=self._last_frontier
+        )
+        cv2.imwrite("images/value_map.png", val_map)
+
+        if self.save_video:
+            self.video_frames.append((obs_map, val_map))
+
+    """
+    Feature map methods, i.e. methods to compute the cosine similarity between the feature map and the text
+    and eventually update the value with the new cosine similarity given by the feature map
+    """
+
+    def compute_feature_map_similarity(self, text):
+        """
+        Method to compute the cosine map from the stored feature map
+        """
+        image = self.habitat_env.get_current_observation(type="rgb")
+        feature_map = self.value_map._embed_map
+        return self.frontier_map.compute_map_cosine_similarity(
+            feature_map = feature_map, 
+            text = text, 
+            image = image, 
+            save_to_disk = True
+        )
+
+    def update_starting_map(self, text):
+        """
+        Method to update the starting map with the initial image and text
+        """
+        feature_value_map = self.compute_feature_map_similarity(text)
+        # We use a simple mean of the two maps as a new starting cosine map
+        self.value_map._value_map = self.value_map._value_map + feature_value_map / 2
+
+        self.visualize_maps()
 
     """
     Frontier calculation methods

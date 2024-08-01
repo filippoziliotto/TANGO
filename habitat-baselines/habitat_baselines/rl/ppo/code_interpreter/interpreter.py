@@ -69,7 +69,7 @@ class PseudoCodeInterpreter:
 
         # Count exploration targets is equal to the length of self.exploration_targets
         # We have False for each target not yet explored
-        self.exploration_targets = [(False, line.split("(")[1].split(")")[0]) for line in self.lines if 'detect' in line[0]]
+        self.exploration_targets = [(False, eval(line[0].split("(")[1].split(")")[0]) ) for line in self.lines if 'detect' in line[0]]
 
     def run(self):
         stack = []
@@ -643,7 +643,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if (room_cls == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
             # This is useful for the self.is_found primitive
             room = { "boxes": [[0,128,0,128]], "scores": [0.7], } 
-
         else:
             room = { "boxes": [], "scores": [], } 
 
@@ -752,17 +751,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         target_detected = self.count(target) > 0
 
         # If target is found we update the self.exploration_targets variable
-        if target_detected:
+        if target_detected and self.value_mapper.save_image_embed:
             for i, (found, target_name) in enumerate(self.exploration_targets):
                 if target_name == target and not found:
                     self.exploration_targets[i] = (True, target_name)
                     break     
 
-        # Update the starting map with the first unexplored target
-        for found, target_name in self.exploration_targets:
-            if not found:
-                self.value_mapper.update_starting_map(text=target_name)
-                break
+            # Update the starting map with the first unexplored target
+            for found, target_name in self.exploration_targets:
+                if not found:
+                    self.value_mapper.update_starting_map(text=target_name)
+                    break
 
         return target_detected
     

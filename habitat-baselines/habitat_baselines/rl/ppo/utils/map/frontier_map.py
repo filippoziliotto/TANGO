@@ -40,7 +40,7 @@ class FrontierMap:
     def reset(self) -> None:
         self.frontiers = []
 
-    def update(self, frontier_locations: List[np.ndarray], curr_image: np.ndarray, text: str) -> None:
+    def update(self, frontier_locations: List[np.ndarray], curr_image: np.ndarray, text: str, value_map: np.ndarray) -> None:
         """
         Takes in a list of frontier coordinates and the current image observation from
         the robot. Any stored frontiers that are not present in the given list are
@@ -67,7 +67,22 @@ class FrontierMap:
             if not any(np.array_equal(frontier.xyz, location) for frontier in self.frontiers):
                 if cosine is None:
                     cosine, curr_embed = self._encode(curr_image, text)
+
                 self.frontiers.append(Frontier(location, cosine, curr_embed))
+
+        # self.frontiers = self.update_frontiers_from_value(self.frontiers, value_map)
+        
+
+    def update_frontiers_from_value(self, frontiers, value_map):
+        """
+        Method to update the starting frontiers with the new map
+        """
+        updated_cosines = []
+        for i, frontier in enumerate(frontiers):
+            updated_cosines = np.max(value_map[int(frontier.xyz[0]) - 40 : int(frontier.xyz[0]) + 40 , int(frontier.xyz[1]) - 40 : int(frontier.xyz[1]) + 40])
+            self.frontiers[i].cosine = updated_cosines
+        return self.frontiers
+    
 
     def _encode(self, image: np.ndarray, text: str) -> float:
         """
@@ -75,6 +90,7 @@ class FrontierMap:
 
         Args:
             image (np.ndarray): The image to encode.
+            text (str): The text to compare the image to.
 
         Returns:
 

@@ -515,6 +515,7 @@ class ValueMapper:
         self._exploration_thresh = exploration_thresh
         self._map_size = map_size
         self._pixels_per_meter = pixels_per_meter
+        self.save_image_embed = save_image_embed
        
         # Map Initializattion
         self.obstacle_map = ObstacleMap(
@@ -584,7 +585,7 @@ class ValueMapper:
         # Extract target prompt
         prompt = self.preprocess_target(text)
 
-        # Update maps
+        # Update obstacle map and compute frontiers
         self.obstacle_map.update_map(
             depth = self._get_current_depth(),
             tf_camera_to_episodic=self._get_tf_camera_to_episodic(self.habitat_env),
@@ -594,15 +595,14 @@ class ValueMapper:
             fy=self._fy,
             topdown_fov = self._topdown_view_angle,
         )
-        self.frontier_map.update(
-            frontier_locations = self.obstacle_map._get_frontiers(),
-            curr_image = curr_image,
-            text = prompt
-        )
+
+        # Compute values of the current FOV for the value map
         self.curr_values, self.curr_embed = self.frontier_map._encode(
             image = curr_image,
-            text = prompt
+            text = prompt,
         )
+
+        # Update the value map
         self.value_map.update_map(
             values = np.array([self.curr_values]),
             depth = self._get_current_depth(),
@@ -612,12 +612,22 @@ class ValueMapper:
             fov = np.deg2rad(self._fov),
             image_embed=self.curr_embed
         )
+    
+        # Update the best frontiers with the new value map values
+        self.frontier_map.update(
+            frontier_locations = self.obstacle_map._get_frontiers(),
+            curr_image = curr_image,
+            text = prompt,
+            value_map=self.value_map._value_map 
+        )
+
+        # Add agent trajectory to the value map
         self.value_map.update_agent_traj(
             robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3],
             robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
-        # Update the best frontier
+        # Update the best frontier amd save to this class
         self.best_frontier_polar = self.get_best_frontier(
             frontiers=self.obstacle_map._get_frontiers()
         )
@@ -668,11 +678,24 @@ class ValueMapper:
         """
         Method to update the starting map with the initial image and text
         """
-        feature_value_map = self.compute_feature_map_similarity(text)
+        feature_value_map = self.compute_feature_map_similarity(text).reshape(self._map_size, self._map_size, 1)
         # We use a simple mean of the two maps as a new starting cosine map
         self.value_map._value_map = self.value_map._value_map + feature_value_map / 2
 
+        # Update also the frontiers
+        self.update_starting_frontiers(self.frontier_map.frontiers, self.value_map._value_map)
+
         self.visualize_maps()
+        
+    def update_starting_frontiers(self, frontiers, new_map):
+        """
+        Method to update the starting frontiers with the new map
+        """
+        updated_frontiers = [
+            setattr(frontier, 'cosine', np.max(new_map[int(frontier.xyz[0]) - 10 : int(frontier.xyz[0]) + 10 , int(frontier.xyz[1]) - 10 : int(frontier.xyz[1]) + 10]))
+            or frontier for frontier in frontiers
+        ]
+        self.frontier_map.frontiers = updated_frontiers
 
     """
     Frontier calculation methods

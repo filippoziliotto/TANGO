@@ -97,7 +97,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.4
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -127,7 +127,7 @@ habitat_baselines:
     use_segmenter: False
   room_classifier:
     use_room_classifier: True
-    cls_threshold: 0.99
+    cls_threshold: 0.7
     # 0.7
   value_mapper:
     use_value_mapper: True
@@ -149,7 +149,6 @@ habitat_baselines:
     api_call:
       use_gpt_api: False
       model: "gpt-3.5"
-
     open_source_call: 
       use_open_source_llm: False
       model: "phi3"

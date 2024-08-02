@@ -4,12 +4,14 @@ from openai import OpenAI
 
 client = OpenAI()
 
-def read_questions(file_name):
+def read_questions(file_name, task):
     """Read the questions from the given file and return a list of questions."""
     questions = []
     with open(file_name, 'r') as file:
         for line in file:
             if line.startswith("Question: "):
+                if task == "open-eqa":
+                    line = line.split("|")[0]
                 questions.append(line)
     return questions
 
@@ -19,14 +21,21 @@ def read_file_to_string(file_name):
         content = file.read()
     return content
 
-def main(path, questions_file, example_file):
+def main(
+        path: str = "habitat_baselines/rl/ppo/code_interpreter/prompts/examples/", 
+        questions_file: str = "open_eqa_questions.txt", 
+        example_file: str = "generic_examples.txt", 
+        task: str = "open-eqa"
+        ):
+
+    assert task in ["objectnav", "iin", "mp3d_eqa", "open_eqa"], "Invalid task name."
 
     # Define the path to the files
     questions_file = path + questions_file
     example_file = path + example_file
 
     # Read questions from the first file
-    questions = read_questions(questions_file)
+    questions = read_questions(questions_file, task)
 
     # Read the example text from the second file
     example_text = read_file_to_string(example_file)
@@ -58,13 +67,13 @@ def main(path, questions_file, example_file):
         time.sleep(.5)
 
     # Save the results to a JSON file
-    # same path as the questions file
-    json_file = path + "open_eqa_api_answer.json"
+    json_file = path + f"{task}_api_answer.json"
     with open(json_file, "w") as json_file:
         json.dump(results, json_file, indent=4)
 
 if __name__ == "__main__":
     path = "habitat_baselines/rl/ppo/code_interpreter/prompts/examples/"
-    questions_file = "open_eqa_questions.txt"
-    example_file = "open_eqa_examples.txt"
-    main(path, questions_file, example_file)
+    questions_file = "mp3d_eqa_questions.txt"
+    example_file = "generic_examples.txt"
+    task = "mp3d_eqa"
+    main(path, questions_file, example_file, task)

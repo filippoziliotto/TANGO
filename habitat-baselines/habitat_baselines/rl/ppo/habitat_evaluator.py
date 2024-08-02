@@ -749,6 +749,23 @@ class HabitatEvaluator(Evaluator):
         code_generator = CodeGenerator(self, debug=True)
         self.code_interpreter = PseudoCodeExecuter(self)
 
+        env = self.envs.call(['habitat_env'])[0]
+        episodes = env.episodes
+        question_ = []
+        answer_ = []
+        for ep in episodes:
+            question_.append(ep.question.question_text)
+            answer_.append(ep.question.answer_text)
+
+        # select only unique elements in the list
+        question_ = list(set(question_))
+        answer_ = list(set(answer_))
+
+        # save list to txt named "mp3d_eqa_questions.txt"
+        with open('habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_questions.txt', 'w') as f:
+            for item in question_:
+                f.write("Question: %s\n" % item)
+
         while self.episode_iterator():
             self.current_episodes_info = self.envs.current_episodes()
 

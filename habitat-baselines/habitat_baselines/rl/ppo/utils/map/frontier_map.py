@@ -28,12 +28,19 @@ class Frontier:
 class FrontierMap:
     frontiers: List[Frontier] = []
 
-    def __init__(self, type, size, encoding_type: str = "cosine", save_image_embed: bool = False):
+    def __init__(self, 
+                 type, 
+                 size, 
+                 encoding_type: str = "cosine", 
+                 save_image_embed: bool = False,
+                 pixels_per_meter: int = 20
+        ):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.encoder, self.processor = get_value_mapper(self.device, type, size)
         self.type = type
         self.encoding_type = encoding_type
         self.save_image_embed = save_image_embed
+        self._pixels_per_meter = pixels_per_meter
 
         self._text_embed = None
 
@@ -70,17 +77,20 @@ class FrontierMap:
 
                 self.frontiers.append(Frontier(location, cosine, curr_embed))
 
-        # self.frontiers = self.update_frontiers_from_value(self.frontiers, value_map)
+        self.frontiers = self.update_frontiers_from_value(self.frontiers, value_map)
         
 
     def update_frontiers_from_value(self, frontiers, value_map):
         """
         Method to update the starting frontiers with the new map
         """
-        updated_cosines = []
         for i, frontier in enumerate(frontiers):
-            updated_cosines = np.max(value_map[int(frontier.xyz[0]) - 40 : int(frontier.xyz[0]) + 40 , int(frontier.xyz[1]) - 40 : int(frontier.xyz[1]) + 40])
+            updated_cosines = np.max(value_map[
+                int(frontier.xyz[0]) - self._pixels_per_meter*2 : int(frontier.xyz[0]) + self._pixels_per_meter*2, 
+                int(frontier.xyz[1]) - self._pixels_per_meter*2 : int(frontier.xyz[1]) + self._pixels_per_meter*2
+            ])
             self.frontiers[i].cosine = updated_cosines
+
         return self.frontiers
     
 

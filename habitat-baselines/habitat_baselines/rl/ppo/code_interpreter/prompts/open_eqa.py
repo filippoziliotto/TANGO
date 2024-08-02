@@ -39,8 +39,8 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
         object_var = object
 
     room = "bathroom"
-    object = "mirror"
-    question = "How many lights are above the bathroom mirror?"
+    object = "shower curtain"
+    question = "is the shower curtain closed or open?"
    
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):
@@ -53,7 +53,6 @@ if is_found(room):
     {object_var} = detect("{object}")
     if is_found({object_var}):
         navigate_to({object_var})
-        look_up()
         answer = answer_question("{question}")
         return answer"""
         #         prompt = f"""

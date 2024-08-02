@@ -531,6 +531,7 @@ class ValueMapper:
             size=size, 
             encoding_type="cosine",
             save_image_embed=save_image_embed,
+            pixels_per_meter=self._pixels_per_meter,
         )
         self.value_map = ValueMap(
             value_channels=value_channels,
@@ -679,23 +680,28 @@ class ValueMapper:
         Method to update the starting map with the initial image and text
         """
         feature_value_map = self.compute_feature_map_similarity(text).reshape(self._map_size, self._map_size, 1)
+
         # We use a simple mean of the two maps as a new starting cosine map
         self.value_map._value_map = self.value_map._value_map + feature_value_map / 2
 
         # Update also the frontiers
+        # TODO: heck if this is usefull
         self.update_starting_frontiers(self.frontier_map.frontiers, self.value_map._value_map)
-
-        self.visualize_maps()
+        if self.visualize:
+            self.visualize_maps()
         
-    def update_starting_frontiers(self, frontiers, new_map):
+    def update_starting_frontiers(self, frontiers, value_map_from_feature):
         """
         Method to update the starting frontiers with the new map
         """
-        updated_frontiers = [
-            setattr(frontier, 'cosine', np.max(new_map[int(frontier.xyz[0]) - 10 : int(frontier.xyz[0]) + 10 , int(frontier.xyz[1]) - 10 : int(frontier.xyz[1]) + 10]))
-            or frontier for frontier in frontiers
-        ]
-        self.frontier_map.frontiers = updated_frontiers
+
+        for i, frontier in enumerate(frontiers):
+            updated_cosines = np.max(value_map_from_feature[
+                int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter , 
+                int(frontier.xyz[1]) - self._pixels_per_meter : int(frontier.xyz[1]) + self._pixels_per_meter
+            ])
+            self.frontier_map.frontiers[i].cosine = updated_cosines
+
 
     """
     Frontier calculation methods

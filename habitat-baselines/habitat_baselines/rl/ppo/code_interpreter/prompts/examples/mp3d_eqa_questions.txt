@@ -1,0 +1,88 @@
+Question: what color is the table in the dining room?
+Question: what color is the stove?
+Question: what color is the fireplace in the lounge?
+Question: what room is the oven located in?
+Question: what color is the picture in the family room?
+Question: what color is the plant in the living room?
+Question: what color is the fireplace in the dining room?
+Question: what color is the door in the closet?
+Question: what color is the curtain in the hallway?
+Question: what color is the shelving in the hallway?
+Question: what color is the fireplace?
+Question: what color is the towel in the bedroom?
+Question: what color is the cabinet in the bedroom?
+Question: what color is the oven?
+Question: what color is the cabinet in the kitchen?
+Question: what color is the door in the rec room?
+Question: what color is the shelving in the bedroom?
+Question: what color is the toaster?
+Question: what color is the picture in the hallway?
+Question: what color is the picture in the closet?
+Question: what color is the stove in the kitchen?
+Question: what color is the sofa in the lounge?
+Question: what color is the shelving in the living room?
+Question: what color is the clothes dryer?
+Question: what color is the tv stand in the family room?
+Question: what color is the table in the foyer?
+Question: what color is the counter?
+Question: what color is the bed?
+Question: what color is the curtain in the office?
+Question: what color is the oven in the kitchen?
+Question: what color is the picture in the lounge?
+Question: what color is the door in the dining room?
+Question: what color is the curtain in the family room?
+Question: what room is the tv stand located in?
+Question: what color is the plant in the foyer?
+Question: what color is the door in the living room?
+Question: what color is the door in the kitchen?
+Question: what color is the shelving in the family room?
+Question: what color is the curtain in the bathroom?
+Question: what room is the microwave located in?
+Question: what color is the table in the living room?
+Question: what color is the refrigerator?
+Question: what color is the fireplace in the living room?
+Question: what color is the tv stand?
+Question: what room is the clothes dryer located in?
+Question: what color is the chair in the living room?
+Question: what color is the picture in the kitchen?
+Question: what color is the table in the bathroom?
+Question: what color is the fridge in the kitchen?
+Question: what color is the picture in the bathroom?
+Question: what color is the counter in the dining room?
+Question: what color is the fireplace in the family room?
+Question: what color is the plant in the kitchen?
+Question: what color is the picture in the dining room?
+Question: what color is the plant in the family room?
+Question: what color is the sink in the kitchen?
+Question: what color is the cabinet in the rec room?
+Question: what color is the clothes dryer in the laundry room?
+Question: what color is the cabinet in the foyer?
+Question: what color is the counter in the laundry room?
+Question: what color is the bed in the bedroom?
+Question: what room is the bed located in?
+Question: what color is the shelving in the lounge?
+Question: what color is the curtain in the bedroom?
+Question: what color is the sofa in the family room?
+Question: what color is the chair in the family room?
+Question: what color is the picture in the laundry room?
+Question: what room is the counter located in?
+Question: what color is the microwave?
+Question: what color is the wardrobe?
+Question: what color is the shelving in the office?
+Question: what color is the plant in the lounge?
+Question: what color is the shelving?
+Question: what color is the door in the hallway?
+Question: what color is the plant in the hallway?
+Question: what color is the door in the office?
+Question: what color is the fridge?
+Question: what room is the fireplace located in?
+Question: what color is the cabinet in the closet?
+Question: what color is the sofa in the living room?
+Question: what room is the shelving located in?
+Question: what color is the picture in the office?
+Question: what color is the toaster in the kitchen?
+Question: what color is the picture in the living room?
+Question: what room is the wardrobe located in?
+Question: what room is the refrigerator located in?
+Question: what color is the table in the kitchen?
+Question: what color is the plant in the dining room?

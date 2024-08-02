@@ -748,12 +748,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         target = self.check_variable_type(target)
-        target_detected = self.count(target) > 0
+        is_found_target = self.count(target) > 0
+
 
         # If target is found we update the self.exploration_targets variable
-        if target_detected and self.value_mapper.save_image_embed:
+        # Needed if we want to update the value with the stored feature map
+        if is_found_target and self.value_mapper.save_image_embed:
             for i, (found, target_name) in enumerate(self.exploration_targets):
-                if target_name == target and not found:
+                if target['boxes'] and not found:
                     self.exploration_targets[i] = (True, target_name)
                     break     
 
@@ -763,7 +765,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     self.value_mapper.update_starting_map(text=target_name)
                     break
 
-        return target_detected
+
+        return is_found_target
     
     def save_observation(self, obs, name, bbox=None):
         """

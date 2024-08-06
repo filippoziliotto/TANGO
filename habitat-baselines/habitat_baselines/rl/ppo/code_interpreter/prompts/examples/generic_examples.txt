@@ -160,4 +160,4 @@ if is_found(laptop):
             navigate_to(couch) 
             return 
 
-Now, respond to the new question.
+Now, respond to the new question, ONLY with the related Pseudo-code.

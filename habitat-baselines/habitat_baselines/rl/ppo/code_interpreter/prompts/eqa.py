@@ -1,6 +1,18 @@
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 from habitat_baselines.rl.ppo.utils.names import rooms_eqa, colors_eqa, roomcls_labels, compact_labels
 import spacy
+import json
+
+
+def read_prompts_from_api_file(file_name, question):
+    """Read the prompts from the json file and return the promt for a given question"""
+    with open(file_name, 'r') as file:
+        content = json.load(file)
+
+    # Find the prompt for the given question
+    for item in content.items():
+        if item[1]["question"].rstrip('\n') == question:
+            return item[1]["answer"]
 
 """
 Prompt examples and utils for EQA task
@@ -13,9 +25,20 @@ def generate_eqa_prompt(prompt_utils: PromptUtils):
     object = episode_utils[3]
     print(f'{question} {gt_answer}.')
 
-    if (room is not None) and (room in list(roomcls_labels.keys())):
-        room_label = roomcls_labels[room]
-        prompt = f"""
+
+    if not episode_utils.debug:
+        pass
+        # TODO:
+        # question = "Question: " + "what color is the table in the dining room?"
+        # if question:
+        #     file_name = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
+        #     prompt = read_prompts_from_api_file(file_name, question)
+        #     return prompt
+
+    else:
+        if (room is not None) and (room in list(roomcls_labels.keys())):
+            room_label = roomcls_labels[room]
+            prompt = f"""
 while True:
     explore_scene()
     room = classify_room()
@@ -27,8 +50,8 @@ while True:
             target = select('{object}')
             answer = answer_question('{question}', target)
             return answer"""
-    else:
-        prompt = f"""
+        else:
+            prompt = f"""
 while True:
     explore_scene()
     object = detect_objects('{object}')

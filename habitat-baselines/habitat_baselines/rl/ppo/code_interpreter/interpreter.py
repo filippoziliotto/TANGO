@@ -58,6 +58,8 @@ class PseudoCodeInterpreter:
         self.pseudo_code = pseudo_code
         # Stip the indetations and split the lines
         self.lines = [(line.strip(), (len(line) - len(line.lstrip())) // 4) for line in self.pseudo_code.strip().split('\n')]
+        # If there is a line starting with "" comment delete or empty line
+        self.lines = [line for line in self.lines if not line[0].startswith("#") and line[0] != ""]
         # Change return statement to stop_navigation()
         self.lines = [(parse_return_statement(line), line[1]) if "return" in line[0] else line for line in self.lines]
         # Add to explore_scene a while loop
@@ -295,6 +297,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.room_classifier = RoomClassifier(
                 path = self.habitat_env.room_classifier.model_path,
                 cls_threshold = self.habitat_env.room_classifier.cls_threshold,
+                open_set_cls_thresh = self.habitat_env.room_classifier.open_set_cls_thresh,
+                open_set_cls = self.habitat_env.room_classifier.open_set_cls,
             )
 
             print('Room classifier loaded')
@@ -638,18 +642,18 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
  
         # This should be better than the 180° view
         # Returns None if not the correct room
-        room_cls, confidence = self.room_classifier.classify(obs)
+        room, confidence = self.room_classifier.classify(obs, room_name)
 
-        if (room_cls == room_name) and (confidence >= self.habitat_env.room_classifier.cls_threshold):
-            # This is useful for the self.is_found primitive
-            room = { "boxes": [[0,128,0,128]], "scores": [0.7], } 
+        if ['other'] not in room:
+            room_det = self.detect(room_name)
+
         else:
-            room = { "boxes": [], "scores": [], } 
+            room_det = self.room_classifier.convert_to_det_dict(room_name)
 
         self.update_variable('room', room)
         self.map_scene(room_name)
 
-        return room
+        return room_det
     
     def select(self, target):
         """

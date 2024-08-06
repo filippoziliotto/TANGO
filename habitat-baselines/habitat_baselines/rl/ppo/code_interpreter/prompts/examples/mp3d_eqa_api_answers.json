@@ -1,0 +1,354 @@
+{
+    "question_1": {
+        "question": "what color is the table in the dining room?",
+        "generated_code": "# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the table\n    explore_scene()\n    table = detect(\"table\")\n\n    if is_found(table):\n        # answer the question\n        navigate_to(table)\n        ans = answer(\"what color is the table?\")\n        return ans"
+    },
+    "question_2": {
+        "question": "what color is the stove?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the stove\n    explore_scene()\n    stove = detect(\"stove\")\n\n    if is_found(stove):\n        # answer the question\n        navigate_to(stove)\n        ans = answer(\"what color is the stove?\")\n        return ans"
+    },
+    "question_3": {
+        "question": "what color is the fireplace in the lounge?",
+        "generated_code": "# search for the lounge\nexplore_scene()\nlounge = detect(\"lounge\")\n\nif is_found(lounge):\n    # search for the fireplace\n    explore_scene()\n    fireplace = detect(\"fireplace\")\n\n    if is_found(fireplace):\n        # answer the question\n        navigate_to(fireplace)\n        ans = answer(\"what color is the fireplace?\")\n        return ans"
+    },
+    "question_4": {
+        "question": "what room is the oven located in?",
+        "generated_code": "# search for the oven\nexplore_scene()\noven = detect(\"oven\")\n\nif is_found(oven):\n    # answer the question\n    navigate_to(oven)\n    ans = answer(\"which room is the oven located in?\")\n    return ans"
+    },
+    "question_5": {
+        "question": "what color is the picture in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_6": {
+        "question": "what color is the plant in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    },
+    "question_7": {
+        "question": "what color is the fireplace in the dining room?",
+        "generated_code": "# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the fireplace\n    explore_scene()\n    fireplace = detect(\"fireplace\")\n\n    if is_found(fireplace):\n        # answer the question\n        navigate_to(fireplace)\n        ans = answer(\"what color is the fireplace?\")\n        return ans"
+    },
+    "question_8": {
+        "question": "what color is the door in the closet?",
+        "generated_code": "``` \n# search for the closet\nexplore_scene()\ncloset = detect(\"closet\")\n\nif is_found(closet):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans\n```"
+    },
+    "question_9": {
+        "question": "what color is the curtain in the hallway?",
+        "generated_code": "# search for the hallway\nexplore_scene()\nhallway = detect(\"hallway\")\n\nif is_found(hallway):\n    # search for the curtain\n    explore_scene()\n    curtain = detect(\"curtain\")\n\n    if is_found(curtain):\n        # answer the question\n        navigate_to(curtain)\n        ans = answer(\"what color is the curtain?\")\n        return ans"
+    },
+    "question_10": {
+        "question": "what color is the shelving in the hallway?",
+        "generated_code": "```plaintext\n# search for the hallway\nexplore_scene()\nhallway = detect(\"hallway\")\n\nif is_found(hallway):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans\n```"
+    },
+    "question_11": {
+        "question": "what color is the fireplace?",
+        "generated_code": "# search for the fireplace\nexplore_scene()\nfireplace = detect(\"fireplace\")\n\nif is_found(fireplace):\n    # answer the question\n    navigate_to(fireplace)\n    ans = answer(\"what color is the fireplace?\")\n    return ans"
+    },
+    "question_12": {
+        "question": "what color is the towel in the bedroom?",
+        "generated_code": "# search for the bedroom\nexplore_scene()\nbedroom = detect(\"bedroom\")\n\nif is_found(bedroom):\n    # search for the towel\n    explore_scene()\n    towel = detect(\"towel\")\n\n    if is_found(towel):\n        # answer the question\n        navigate_to(towel)\n        ans = answer(\"what color is the towel?\")\n        return ans"
+    },
+    "question_13": {
+        "question": "what color is the cabinet in the bedroom?",
+        "generated_code": "# search for the bedroom\nexplore_scene()\nbedroom = detect(\"bedroom\")\n\nif is_found(bedroom):\n    # search for the cabinet\n    explore_scene()\n    cabinet = detect(\"cabinet\")\n\n    if is_found(cabinet):\n        # answer the question\n        navigate_to(cabinet)\n        ans = answer(\"what color is the cabinet?\")\n        return ans"
+    },
+    "question_14": {
+        "question": "what color is the oven?",
+        "generated_code": "# search for the oven\nexplore_scene()\noven = detect(\"oven\")\n\nif is_found(oven):\n    # answer the question\n    navigate_to(oven)\n    ans = answer(\"what color is the oven?\")\n    return ans"
+    },
+    "question_15": {
+        "question": "what color is the cabinet in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the cabinet\n    explore_scene()\n    cabinet = detect(\"cabinet\")\n\n    if is_found(cabinet):\n        # answer the question\n        navigate_to(cabinet)\n        ans = answer(\"what color is the cabinet?\")\n        return ans"
+    },
+    "question_16": {
+        "question": "what color is the door in the rec room?",
+        "generated_code": "# search for the rec room\nexplore_scene()\nrec_room = detect(\"rec room\")\n\nif is_found(rec_room):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans"
+    },
+    "question_17": {
+        "question": "what color is the shelving in the bedroom?",
+        "generated_code": "# search for the bedroom\nexplore_scene()\nbedroom = detect(\"bedroom\")\n\nif is_found(bedroom):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans"
+    },
+    "question_18": {
+        "question": "what color is the toaster?",
+        "generated_code": "# search for the toaster\nexplore_scene()\ntoaster = detect(\"toaster\")\n\nif is_found(toaster):\n    # answer the question\n    navigate_to(toaster)\n    ans = answer(\"what color is the toaster?\")\n    return ans"
+    },
+    "question_19": {
+        "question": "what color is the picture in the hallway?",
+        "generated_code": "# search for the hallway\nexplore_scene()\nhallway = detect(\"hallway\")\n\nif is_found(hallway):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_20": {
+        "question": "what color is the picture in the closet?",
+        "generated_code": "# search for the closet\nexplore_scene()\ncloset = detect(\"closet\")\n\nif is_found(closet):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_21": {
+        "question": "what color is the stove in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the stove\n    explore_scene()\n    stove = detect(\"stove\")\n\n    if is_found(stove):\n        # answer the question\n        navigate_to(stove)\n        ans = answer(\"what color is the stove?\")\n        return ans"
+    },
+    "question_22": {
+        "question": "what color is the sofa in the lounge?",
+        "generated_code": "# search for the lounge\nexplore_scene()\nlounge = detect(\"lounge\")\n\nif is_found(lounge):\n    # search for the sofa\n    explore_scene()\n    sofa = detect(\"sofa\")\n\n    if is_found(sofa):\n        # answer the question\n        navigate_to(sofa)\n        ans = answer(\"what color is the sofa?\")\n        return ans"
+    },
+    "question_23": {
+        "question": "what color is the shelving in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans"
+    },
+    "question_24": {
+        "question": "what color is the clothes dryer?",
+        "generated_code": "``` \n# search for the clothes dryer\nexplore_scene()\nclothes_dryer = detect(\"clothes dryer\")\n\nif is_found(clothes_dryer):\n    # answer the question\n    navigate_to(clothes_dryer)\n    ans = answer(\"what color is the clothes dryer?\")\n    return ans\n```"
+    },
+    "question_25": {
+        "question": "what color is the tv stand in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the tv stand\n    explore_scene()\n    tv_stand = detect(\"tv stand\")\n\n    if is_found(tv_stand):\n        # answer the question\n        navigate_to(tv_stand)\n        ans = answer(\"what color is the tv stand?\")\n        return ans"
+    },
+    "question_26": {
+        "question": "what color is the table in the foyer?",
+        "generated_code": "# search for the foyer\nexplore_scene()\nfoyer = detect(\"foyer\")\n\nif is_found(foyer):\n    # search for the table\n    explore_scene()\n    table = detect(\"table\")\n\n    if is_found(table):\n        # answer the question\n        navigate_to(table)\n        ans = answer(\"what color is the table?\")\n        return ans"
+    },
+    "question_27": {
+        "question": "what color is the counter?",
+        "generated_code": "# search for the counter\nexplore_scene()\ncounter = detect(\"counter\")\n\nif is_found(counter):\n    # answer the question\n    navigate_to(counter)\n    ans = answer(\"what color is the counter?\")\n    return ans"
+    },
+    "question_28": {
+        "question": "what color is the bed?",
+        "generated_code": "# search for the bed\nexplore_scene()\nbed = detect(\"bed\")\n\nif is_found(bed):\n    # answer the question\n    navigate_to(bed)\n    ans = answer(\"what color is the bed?\")\n    return ans"
+    },
+    "question_29": {
+        "question": "what color is the curtain in the office?",
+        "generated_code": "# search for the office\nexplore_scene()\noffice = detect(\"office\")\n\nif is_found(office):\n    # search for the curtain\n    explore_scene()\n    curtain = detect(\"curtain\")\n\n    if is_found(curtain):\n        # answer the question\n        navigate_to(curtain)\n        ans = answer(\"what color is the curtain?\")\n        return ans"
+    },
+    "question_30": {
+        "question": "what color is the oven in the kitchen?",
+        "generated_code": "``` \n# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the oven\n    explore_scene()\n    oven = detect(\"oven\")\n\n    if is_found(oven):\n        # answer the question\n        navigate_to(oven)\n        ans = answer(\"what color is the oven?\")\n        return ans\n```"
+    },
+    "question_31": {
+        "question": "what color is the picture in the lounge?",
+        "generated_code": "# search for the lounge\nexplore_scene()\nlounge = detect(\"lounge\")\n\nif is_found(lounge):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_32": {
+        "question": "what color is the door in the dining room?",
+        "generated_code": "``` \n# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans\n```"
+    },
+    "question_33": {
+        "question": "what color is the curtain in the family room?",
+        "generated_code": "``` \n# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the curtain\n    explore_scene()\n    curtain = detect(\"curtain\")\n\n    if is_found(curtain):\n        # answer the question\n        navigate_to(curtain)\n        ans = answer(\"what color is the curtain?\")\n        return ans\n```"
+    },
+    "question_34": {
+        "question": "what room is the tv stand located in?",
+        "generated_code": "# search for the tv stand\nexplore_scene()\ntv_stand = detect(\"tv stand\")\n\nif is_found(tv_stand):\n    # answer the question\n    navigate_to(tv_stand)\n    ans = answer(\"which room is the tv stand located in?\")\n    return ans"
+    },
+    "question_35": {
+        "question": "what color is the plant in the foyer?",
+        "generated_code": "# search for the foyer\nexplore_scene()\nfoyer = detect(\"foyer\")\n\nif is_found(foyer):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    },
+    "question_36": {
+        "question": "what color is the door in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans"
+    },
+    "question_37": {
+        "question": "what color is the door in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans"
+    },
+    "question_38": {
+        "question": "what color is the shelving in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans"
+    },
+    "question_39": {
+        "question": "what color is the curtain in the bathroom?",
+        "generated_code": "# search for the bathroom\nexplore_scene()\nbathroom = detect(\"bathroom\")\n\nif is_found(bathroom):\n    # search for the curtain\n    explore_scene()\n    curtain = detect(\"curtain\")\n\n    if is_found(curtain):\n        # answer the question\n        navigate_to(curtain)\n        ans = answer(\"what color is the curtain?\")\n        return ans"
+    },
+    "question_40": {
+        "question": "what room is the microwave located in?",
+        "generated_code": "```plaintext\n# search for the microwave\nexplore_scene()\nmicrowave = detect(\"microwave\")\n\nif is_found(microwave):\n    # answer the question\n    navigate_to(microwave)\n    ans = answer(\"which room is the microwave located in?\")\n    return ans\n```"
+    },
+    "question_41": {
+        "question": "what color is the table in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the table\n    explore_scene()\n    table = detect(\"table\")\n\n    if is_found(table):\n        # answer the question\n        navigate_to(table)\n        ans = answer(\"what color is the table?\")\n        return ans"
+    },
+    "question_42": {
+        "question": "what color is the refrigerator?",
+        "generated_code": "```pseudo\n# search for the refrigerator\nexplore_scene()\nrefrigerator = detect(\"refrigerator\")\n\nif is_found(refrigerator):\n    # answer the question\n    navigate_to(refrigerator)\n    ans = answer(\"what color is the refrigerator?\")\n    return ans\n```"
+    },
+    "question_43": {
+        "question": "what color is the fireplace in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the fireplace\n    explore_scene()\n    fireplace = detect(\"fireplace\")\n\n    if is_found(fireplace):\n        # answer the question\n        navigate_to(fireplace)\n        ans = answer(\"what color is the fireplace?\")\n        return ans"
+    },
+    "question_44": {
+        "question": "what color is the tv stand?",
+        "generated_code": "# search for the tv stand\nexplore_scene()\ntv_stand = detect(\"tv stand\")\n\nif is_found(tv_stand):\n    # answer the question\n    navigate_to(tv_stand)\n    ans = answer(\"what color is the tv stand?\")\n    return ans"
+    },
+    "question_45": {
+        "question": "what room is the clothes dryer located in?",
+        "generated_code": "# search for the clothes dryer\nexplore_scene()\nclothes_dryer = detect(\"clothes dryer\")\n\nif is_found(clothes_dryer):\n    # answer the question\n    navigate_to(clothes_dryer)\n    ans = answer(\"which room is the clothes dryer located in?\")\n    return ans"
+    },
+    "question_46": {
+        "question": "what color is the chair in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the chair\n    explore_scene()\n    chair = detect(\"chair\")\n\n    if is_found(chair):\n        # answer the question\n        navigate_to(chair)\n        ans = answer(\"what color is the chair?\")\n        return ans"
+    },
+    "question_47": {
+        "question": "what color is the picture in the kitchen?",
+        "generated_code": "# search for the kitchen  \nexplore_scene()  \nkitchen = detect(\"kitchen\")  \n\nif is_found(kitchen):  \n    # search for the picture  \n    explore_scene()  \n    picture = detect(\"picture\")  \n\n    if is_found(picture):  \n        # answer the question  \n        navigate_to(picture)  \n        ans = answer(\"what color is the picture?\")  \n        return ans"
+    },
+    "question_48": {
+        "question": "what color is the table in the bathroom?",
+        "generated_code": "# search for the bathroom\nexplore_scene()\nbathroom = detect(\"bathroom\")\n\nif is_found(bathroom):\n    # search for the table\n    explore_scene()\n    table = detect(\"table\")\n\n    if is_found(table):\n        # answer the question\n        navigate_to(table)\n        ans = answer(\"what color is the table?\")\n        return ans"
+    },
+    "question_49": {
+        "question": "what color is the fridge in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the fridge\n    explore_scene()\n    fridge = detect(\"fridge\")\n\n    if is_found(fridge):\n        # answer the question\n        navigate_to(fridge)\n        ans = answer(\"what color is the fridge?\")\n        return ans"
+    },
+    "question_50": {
+        "question": "what color is the picture in the bathroom?",
+        "generated_code": "# search for the bathroom\nexplore_scene() \nbathroom = detect(\"bathroom\") \n\nif is_found(bathroom): \n    # search for the picture\n    explore_scene() \n    picture = detect(\"picture\") \n\n    if is_found(picture): \n        # answer the question\n        navigate_to(picture) \n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_51": {
+        "question": "what color is the counter in the dining room?",
+        "generated_code": "# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the counter\n    explore_scene()\n    counter = detect(\"counter\")\n\n    if is_found(counter):\n        # answer the question\n        navigate_to(counter)\n        ans = answer(\"what color is the counter?\")\n        return ans"
+    },
+    "question_52": {
+        "question": "what color is the fireplace in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the fireplace\n    explore_scene()\n    fireplace = detect(\"fireplace\")\n\n    if is_found(fireplace):\n        # answer the question\n        navigate_to(fireplace)\n        ans = answer(\"what color is the fireplace?\")\n        return ans"
+    },
+    "question_53": {
+        "question": "what color is the plant in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    },
+    "question_54": {
+        "question": "what color is the picture in the dining room?",
+        "generated_code": "# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_55": {
+        "question": "what color is the plant in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    },
+    "question_56": {
+        "question": "what color is the sink in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the sink\n    explore_scene()\n    sink = detect(\"sink\")\n\n    if is_found(sink):\n        # answer the question\n        navigate_to(sink)\n        ans = answer(\"what color is the sink?\")\n        return ans"
+    },
+    "question_57": {
+        "question": "what color is the cabinet in the rec room?",
+        "generated_code": "# search for the rec room\nexplore_scene()\nrec_room = detect(\"rec room\")\n\nif is_found(rec_room):\n    # search for the cabinet\n    explore_scene()\n    cabinet = detect(\"cabinet\")\n\n    if is_found(cabinet):\n        # answer the question\n        navigate_to(cabinet)\n        ans = answer(\"what color is the cabinet?\")\n        return ans"
+    },
+    "question_58": {
+        "question": "what color is the clothes dryer in the laundry room?",
+        "generated_code": "# search for the laundry room\nexplore_scene()\nlaundry_room = detect(\"laundry room\")\n\nif is_found(laundry_room):\n    # search for the clothes dryer\n    explore_scene()\n    clothes_dryer = detect(\"clothes dryer\")\n\n    if is_found(clothes_dryer):\n        # answer the question\n        navigate_to(clothes_dryer)\n        ans = answer(\"what color is the clothes dryer?\")\n        return ans"
+    },
+    "question_59": {
+        "question": "what color is the cabinet in the foyer?",
+        "generated_code": "# search for the foyer\nexplore_scene()\nfoyer = detect(\"foyer\")\n\nif is_found(foyer):\n    # search for the cabinet\n    explore_scene()\n    cabinet = detect(\"cabinet\")\n\n    if is_found(cabinet):\n        # answer the question\n        navigate_to(cabinet)\n        ans = answer(\"what color is the cabinet?\")\n        return ans"
+    },
+    "question_60": {
+        "question": "what color is the counter in the laundry room?",
+        "generated_code": "# search for the laundry room\nexplore_scene()\nlaundry_room = detect(\"laundry room\")\n\nif is_found(laundry_room):\n    # search for the counter\n    explore_scene()\n    counter = detect(\"counter\")\n\n    if is_found(counter):\n        # answer the question\n        navigate_to(counter)\n        ans = answer(\"what color is the counter?\")\n        return ans"
+    },
+    "question_61": {
+        "question": "what color is the bed in the bedroom?",
+        "generated_code": "# search for the bedroom\nexplore_scene()\nbedroom = detect(\"bedroom\")\n\nif is_found(bedroom):\n    # search for the bed\n    explore_scene()\n    bed = detect(\"bed\")\n\n    if is_found(bed):\n        # answer the question\n        navigate_to(bed)\n        ans = answer(\"what color is the bed?\")\n        return ans"
+    },
+    "question_62": {
+        "question": "what room is the bed located in?",
+        "generated_code": "# search for the bed\nexplore_scene()\nbed = detect(\"bed\")\n\nif is_found(bed):\n    # answer the question\n    navigate_to(bed)\n    ans = answer(\"which room is the bed located in?\")\n    return ans"
+    },
+    "question_63": {
+        "question": "what color is the shelving in the lounge?",
+        "generated_code": "# search for the lounge\nexplore_scene()\nlounge = detect(\"lounge\")\n\nif is_found(lounge):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans"
+    },
+    "question_64": {
+        "question": "what color is the curtain in the bedroom?",
+        "generated_code": "# search for the bedroom\nexplore_scene()\nbedroom = detect(\"bedroom\")\n\nif is_found(bedroom):\n    # search for the curtain\n    explore_scene()\n    curtain = detect(\"curtain\")\n\n    if is_found(curtain):\n        # answer the question\n        navigate_to(curtain)\n        ans = answer(\"what color is the curtain?\")\n        return ans"
+    },
+    "question_65": {
+        "question": "what color is the sofa in the family room?",
+        "generated_code": "# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the sofa\n    explore_scene()\n    sofa = detect(\"sofa\")\n\n    if is_found(sofa):\n        # answer the question\n        navigate_to(sofa)\n        ans = answer(\"what color is the sofa?\")\n        return ans"
+    },
+    "question_66": {
+        "question": "what color is the chair in the family room?",
+        "generated_code": "``` \n# search for the family room\nexplore_scene()\nfamily_room = detect(\"family room\")\n\nif is_found(family_room):\n    # search for the chair\n    explore_scene()\n    chair = detect(\"chair\")\n\n    if is_found(chair):\n        # answer the question\n        navigate_to(chair)\n        ans = answer(\"what color is the chair?\")\n        return ans\n```"
+    },
+    "question_67": {
+        "question": "what color is the picture in the laundry room?",
+        "generated_code": "# search for the laundry room\nexplore_scene()\nlaundry_room = detect(\"laundry room\")\n\nif is_found(laundry_room):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_68": {
+        "question": "what room is the counter located in?",
+        "generated_code": "# search for the counter\nexplore_scene()\ncounter = detect(\"counter\")\n\nif is_found(counter):\n    # answer the question\n    navigate_to(counter)\n    ans = answer(\"which room is the counter located in?\")\n    return ans"
+    },
+    "question_69": {
+        "question": "what color is the microwave?",
+        "generated_code": "``` \n# search for the microwave\nexplore_scene()\nmicrowave = detect(\"microwave\")\n\nif is_found(microwave):\n    # answer the question\n    navigate_to(microwave)\n    ans = answer(\"what color is the microwave?\")\n    return ans\n```"
+    },
+    "question_70": {
+        "question": "what color is the wardrobe?",
+        "generated_code": "# search for the wardrobe\nexplore_scene()\nwardrobe = detect(\"wardrobe\")\n\nif is_found(wardrobe):\n    # answer the question\n    navigate_to(wardrobe)\n    ans = answer(\"what color is the wardrobe?\")\n    return ans"
+    },
+    "question_71": {
+        "question": "what color is the shelving in the office?",
+        "generated_code": "# search for the office\nexplore_scene()\noffice = detect(\"office\")\n\nif is_found(office):\n    # search for the shelving\n    explore_scene()\n    shelving = detect(\"shelving\")\n\n    if is_found(shelving):\n        # answer the question\n        navigate_to(shelving)\n        ans = answer(\"what color is the shelving?\")\n        return ans"
+    },
+    "question_72": {
+        "question": "what color is the plant in the lounge?",
+        "generated_code": "``` \n# search for the lounge\nexplore_scene()\nlounge = detect(\"lounge\")\n\nif is_found(lounge):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans\n```"
+    },
+    "question_73": {
+        "question": "what color is the shelving?",
+        "generated_code": "# search for the shelving\nexplore_scene()\nshelving = detect(\"shelving\")\n\nif is_found(shelving):\n    # answer the question\n    navigate_to(shelving)\n    ans = answer(\"what color is the shelving?\")\n    return ans"
+    },
+    "question_74": {
+        "question": "what color is the door in the hallway?",
+        "generated_code": "# search for the hallway\nexplore_scene()\nhallway = detect(\"hallway\")\n\nif is_found(hallway):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans"
+    },
+    "question_75": {
+        "question": "what color is the plant in the hallway?",
+        "generated_code": "# search for the hallway\nexplore_scene()\nhallway = detect(\"hallway\")\n\nif is_found(hallway):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    },
+    "question_76": {
+        "question": "what color is the door in the office?",
+        "generated_code": "# search for the office\nexplore_scene()\noffice = detect(\"office\")\n\nif is_found(office):\n    # search for the door\n    explore_scene()\n    door = detect(\"door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"what color is the door?\")\n        return ans"
+    },
+    "question_77": {
+        "question": "what color is the fridge?",
+        "generated_code": "# search for the fridge\nexplore_scene()\nfridge = detect(\"fridge\")\n\nif is_found(fridge):\n    # answer the question\n    navigate_to(fridge)\n    ans = answer(\"what color is the fridge?\")\n    return ans"
+    },
+    "question_78": {
+        "question": "what room is the fireplace located in?",
+        "generated_code": "# search for the fireplace\nexplore_scene()\nfireplace = detect(\"fireplace\")\n\nif is_found(fireplace):\n    # answer the question\n    navigate_to(fireplace)\n    ans = answer(\"which room is the fireplace located in?\")\n    return ans"
+    },
+    "question_79": {
+        "question": "what color is the cabinet in the closet?",
+        "generated_code": "# search for the closet\nexplore_scene()\ncloset = detect(\"closet\")\n\nif is_found(closet):\n    # search for the cabinet\n    explore_scene()\n    cabinet = detect(\"cabinet\")\n\n    if is_found(cabinet):\n        # answer the question\n        navigate_to(cabinet)\n        ans = answer(\"what color is the cabinet?\")\n        return ans"
+    },
+    "question_80": {
+        "question": "what color is the sofa in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the sofa\n    explore_scene()\n    sofa = detect(\"sofa\")\n\n    if is_found(sofa):\n        # answer the question\n        navigate_to(sofa)\n        ans = answer(\"what color is the sofa?\")\n        return ans"
+    },
+    "question_81": {
+        "question": "what room is the shelving located in?",
+        "generated_code": "# search for the shelving\nexplore_scene()\nshelving = detect(\"shelving\")\n\nif is_found(shelving):\n    # answer the question\n    navigate_to(shelving)\n    ans = answer(\"which room is the shelving located in?\")\n    return ans"
+    },
+    "question_82": {
+        "question": "what color is the picture in the office?",
+        "generated_code": "# search for the office\nexplore_scene()\noffice = detect(\"office\")\n\nif is_found(office):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_83": {
+        "question": "what color is the toaster in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the toaster\n    explore_scene()\n    toaster = detect(\"toaster\")\n\n    if is_found(toaster):\n        # answer the question\n        navigate_to(toaster)\n        ans = answer(\"what color is the toaster?\")\n        return ans"
+    },
+    "question_84": {
+        "question": "what color is the picture in the living room?",
+        "generated_code": "# search for the living room\nexplore_scene()\nliving_room = detect(\"living room\")\n\nif is_found(living_room):\n    # search for the picture\n    explore_scene()\n    picture = detect(\"picture\")\n\n    if is_found(picture):\n        # answer the question\n        navigate_to(picture)\n        ans = answer(\"what color is the picture?\")\n        return ans"
+    },
+    "question_85": {
+        "question": "what room is the wardrobe located in?",
+        "generated_code": "# search for the wardrobe\nexplore_scene()\nwardrobe = detect(\"wardrobe\")\n\nif is_found(wardrobe):\n    # answer the question\n    navigate_to(wardrobe)\n    ans = answer(\"which room is the wardrobe located in?\")\n    return ans"
+    },
+    "question_86": {
+        "question": "what room is the refrigerator located in?",
+        "generated_code": "``` \n# search for the refrigerator\nexplore_scene()\nrefrigerator = detect(\"refrigerator\")\n\nif is_found(refrigerator):\n    # answer the question\n    navigate_to(refrigerator)\n    ans = answer(\"which room is the refrigerator located in?\")\n    return ans\n```"
+    },
+    "question_87": {
+        "question": "what color is the table in the kitchen?",
+        "generated_code": "# search for the kitchen\nexplore_scene()\nkitchen = detect(\"kitchen\")\n\nif is_found(kitchen):\n    # search for the table\n    explore_scene()\n    table = detect(\"table\")\n\n    if is_found(table):\n        # answer the question\n        navigate_to(table)\n        ans = answer(\"what color is the table?\")\n        return ans"
+    },
+    "question_88": {
+        "question": "what color is the plant in the dining room?",
+        "generated_code": "# search for the dining room\nexplore_scene()\ndining_room = detect(\"dining room\")\n\nif is_found(dining_room):\n    # search for the plant\n    explore_scene()\n    plant = detect(\"plant\")\n\n    if is_found(plant):\n        # answer the question\n        navigate_to(plant)\n        ans = answer(\"what color is the plant?\")\n        return ans"
+    }
+}

@@ -128,6 +128,8 @@ habitat_baselines:
   room_classifier:
     use_room_classifier: True
     cls_threshold: 0.7
+    use_open_set_cls: True 
+    open_set_cls_thresh: 0.3
     # 0.7
   value_mapper:
     use_value_mapper: True

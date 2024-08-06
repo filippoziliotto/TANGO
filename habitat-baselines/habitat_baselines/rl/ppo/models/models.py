@@ -416,12 +416,20 @@ class SegmenterModel:
         return self.predict(img)
 
 class RoomClassifier:
-    def __init__(self, path, cls_threshold=0.3):
+    def __init__(self, path, cls_threshold=0.3, open_set_cls_thresh = 0.3, open_set_cls=True):
         self.path = path
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.model, self.processor = get_roomcls_model(self.path, self.device)
-        self.cls_threshold = cls_threshold
+        self.cls_thresh = cls_threshold
+        self.use_open_set_cls = open_set_cls
+        self.open_set_cls_thresh = open_set_cls_thresh
 
+        self.simple_rooms = [
+                    'living room', 'family room', 'closet','laundry room',
+                    'hallway', 'dining room','office','bathroom','foyer','kitchen',
+                    'lounge', 'bedroom', 'rec room',
+        ]
+        
     def preprocess(self, img):
         img = torch.tensor(img)
         inputs = self.processor(images=img, return_tensors="pt")
@@ -440,11 +448,50 @@ class RoomClassifier:
     def postprocess(self, output):
         return compact_labels[self.model.config.id2label[output]]
 
-    def classify(self, img):
+    def classify(self, img, target=None):
+        # Use open-set room classifier with standard clip
+        if self.use_open_set_cls:
+            assert target is not None, "Target should not be None"
+            return self.open_set_classifier(img, target)
+        
+        # Use normal room classifier
         predicted_class, confidence = self.predict(img)
         room = self.postprocess(predicted_class)
-        return room, confidence
+        if room == target and confidence >= self.cls_thresh:
+            return room, confidence
+        
+        # Normally return something else
+        return "other", 0.0
 
+    def open_set_predict(self, img, target):
+        img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
+        obj_name = [target, 'other'] + self.simple_rooms
+
+        # If target already in simple rooms list, remove it
+        if target in self.simple_rooms:
+            obj_name.remove(target)
+
+        text = [f'a photo of {q}' for q in obj_name]
+        inputs = self.processor(text=text, images=[img_pil], return_tensors="pt", padding=True)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+
+        with torch.no_grad():
+            sim = self.calculate_sim(inputs)
+
+        # Only one image, binary results
+        sim_scores = sim.cpu().numpy()
+        cat_ids = sim_scores.argmax(1)
+
+        for i, cat_id in enumerate(cat_ids):
+            detected_class = obj_name[cat_id]
+            class_score = sim_scores[i, cat_id]
+            if detected_class == target and class_score >= self.open_set_cls_thresh:
+                return target, class_score
+
+        return "other", 0.0
+
+    def convert_to_det_dict(self, target):
+        return {target: {'boxes': [], 'scores': []}}
     
 class LLMmodel:
     def __init__(self, type, quantization, helper):

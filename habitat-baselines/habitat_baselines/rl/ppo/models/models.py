@@ -507,6 +507,27 @@ class RoomClassifier:
     def convert_to_det_dict(self):
         return {'boxes': [], 'scores': []}
     
+def visualize_attention(image, attention):
+    # Get the average attention weights across all heads
+    avg_attention = torch.mean(attention, dim=1).squeeze(0).mean(dim=0)
+    avg_attention = avg_attention.detach().numpy()
+
+    # Reshape attention to the size of the image
+    avg_attention = avg_attention.reshape(7, 7)  # Example shape, adjust as needed
+    
+    # Resize attention map to match the image size
+    avg_attention = np.kron(avg_attention, np.ones((32, 32)))  # 32x32 upscale
+    
+    # Normalize the attention map
+    avg_attention = (avg_attention - avg_attention.min()) / (avg_attention.max() - avg_attention.min())
+
+    # Convert image to numpy array
+    image_np = np.array(image.resize((224, 224)))
+
+    # save attention map to attention.png
+    cv2.imwrite("attention.png", avg_attention)
+
+
 class LLMmodel:
     def __init__(self, type, quantization, helper):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"

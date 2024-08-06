@@ -365,6 +365,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Target fixed (approaching the target)
         see target.py for more details
         """
+        target_name = target_object
         target_object = self.check_variable_type(target_object)
 
         # Now we are in navigation mode, given a precise target
@@ -373,6 +374,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.target.set_target_coords_from_bbox(depth_obs, target_object['boxes'][0])
         
         while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
+            depth_obs = self.habitat_env.get_current_observation(type='depth')
+
+            # Update the navigation ot the object with detection primitive
+            detection_dict = self.detect(target_name)
+            if detection_dict['boxes']:
+                self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
+
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
@@ -485,10 +493,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         # If room in target name, classify the room and return
-        # TODO: use the correct list
-        if target_name in ['kitchen', 'living room', 'bedroom', 'bathroom', 'dining room']:
-            return self.classify_room(target_name)
-
+        # TODO: integrate detect module with classify_room
 
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
@@ -646,7 +651,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # If room is found then lets use an object detector to find the bboxes
         if room == room_name:
-            room_det = self.detect(room_name)
+            # room_det = self.detect(room_name)
+            room_det = {'boxes': [[0,0,100,100]], 'scores': confidence}
         else:
             room_det = self.room_classifier.convert_to_det_dict()
 

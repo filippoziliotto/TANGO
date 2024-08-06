@@ -47,7 +47,7 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
         room_label = roomcls_labels[room]
         prompt = f"""
 explore_scene()
-room = detect("{room_label}")
+room = classify_room("{room_label}")
 if is_found(room):
     explore_scene()
     {object_var} = detect("{object}")

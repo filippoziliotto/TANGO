@@ -79,7 +79,6 @@ class FrontierMap:
 
         self.frontiers = self.update_frontiers_from_value(self.frontiers, value_map)
         
-
     def update_frontiers_from_value(self, frontiers, value_map):
         """
         Method to update the starting frontiers with the new map
@@ -92,7 +91,6 @@ class FrontierMap:
             self.frontiers[i].cosine = updated_cosines
 
         return self.frontiers
-    
 
     def _encode(self, image: np.ndarray, text: str) -> float:
         """

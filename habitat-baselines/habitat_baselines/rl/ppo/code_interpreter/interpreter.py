@@ -298,7 +298,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 path = self.habitat_env.room_classifier.model_path,
                 cls_threshold = self.habitat_env.room_classifier.cls_threshold,
                 open_set_cls_thresh = self.habitat_env.room_classifier.open_set_cls_thresh,
-                open_set_cls = self.habitat_env.room_classifier.open_set_cls,
+                use_open_set_cls = self.habitat_env.room_classifier.use_open_set_cls,
             )
 
             print('Room classifier loaded')
@@ -644,11 +644,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # Returns None if not the correct room
         room, confidence = self.room_classifier.classify(obs, room_name)
 
-        if ['other'] not in room:
+        # If room is found then lets use an object detector to find the bboxes
+        if room == room_name:
             room_det = self.detect(room_name)
-
         else:
-            room_det = self.room_classifier.convert_to_det_dict(room_name)
+            room_det = self.room_classifier.convert_to_det_dict()
 
         self.update_variable('room', room)
         self.map_scene(room_name)

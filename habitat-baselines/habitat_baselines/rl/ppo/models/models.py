@@ -216,6 +216,10 @@ class Classifier:
         text_feats = text_feats / text_feats.norm(p=2, dim=-1, keepdim=True)
         return torch.matmul(img_feats,text_feats.t())
 
+    def visualize_attention(image, attention):
+        # TODO: add attentionmap to the image
+        raise NotImplementedError
+
     def query_obj(self, img, detection_dict):
         img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
         valid_detections = {}
@@ -416,13 +420,17 @@ class SegmenterModel:
         return self.predict(img)
 
 class RoomClassifier:
-    def __init__(self, path, cls_threshold=0.3, open_set_cls_thresh = 0.3, open_set_cls=True):
+    def __init__(self, path, cls_threshold=0.3, open_set_cls_thresh = 0.3, use_open_set_cls=True):
         self.path = path
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.model, self.processor = get_roomcls_model(self.path, self.device)
-        self.cls_thresh = cls_threshold
-        self.use_open_set_cls = open_set_cls
-        self.open_set_cls_thresh = open_set_cls_thresh
+        self.use_open_set_cls = use_open_set_cls
+
+        if use_open_set_cls:
+            self.model, self.processor = get_classifier_model("clip", "large", self.device)
+            self.open_set_cls_thresh = open_set_cls_thresh
+        else:
+            self.model, self.processor = get_roomcls_model(self.path, self.device)
+            self.cls_thresh = cls_threshold
 
         self.simple_rooms = [
                     'living room', 'family room', 'closet','laundry room',
@@ -434,6 +442,13 @@ class RoomClassifier:
         img = torch.tensor(img)
         inputs = self.processor(images=img, return_tensors="pt")
         return inputs.to(self.device)
+
+    def calculate_sim(self,inputs):
+        img_feats = self.model.get_image_features(inputs['pixel_values'])
+        text_feats = self.model.get_text_features(inputs['input_ids'])
+        img_feats = img_feats / img_feats.norm(p=2, dim=-1, keepdim=True)
+        text_feats = text_feats / text_feats.norm(p=2, dim=-1, keepdim=True)
+        return torch.matmul(img_feats,text_feats.t())
 
     def predict(self, img):
         inputs = self.preprocess(img)
@@ -452,7 +467,7 @@ class RoomClassifier:
         # Use open-set room classifier with standard clip
         if self.use_open_set_cls:
             assert target is not None, "Target should not be None"
-            return self.open_set_classifier(img, target)
+            return self.open_set_predict(img, target)
         
         # Use normal room classifier
         predicted_class, confidence = self.predict(img)
@@ -482,16 +497,15 @@ class RoomClassifier:
         sim_scores = sim.cpu().numpy()
         cat_ids = sim_scores.argmax(1)
 
-        for i, cat_id in enumerate(cat_ids):
-            detected_class = obj_name[cat_id]
-            class_score = sim_scores[i, cat_id]
-            if detected_class == target and class_score >= self.open_set_cls_thresh:
-                return target, class_score
+        detected_class = obj_name[cat_ids.item()]
+        class_score = sim_scores[0, cat_ids.item()]
+        if detected_class == target and class_score >= self.open_set_cls_thresh:
+            return target, class_score
 
         return "other", 0.0
 
-    def convert_to_det_dict(self, target):
-        return {target: {'boxes': [], 'scores': []}}
+    def convert_to_det_dict(self):
+        return {'boxes': [], 'scores': []}
     
 class LLMmodel:
     def __init__(self, type, quantization, helper):

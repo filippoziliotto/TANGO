@@ -12,30 +12,29 @@ def read_prompts_from_api_file(file_name, question):
     # Find the prompt for the given question
     for item in content.items():
         if item[1]["question"].rstrip('\n') == question:
-            return item[1]["answer"]
+            return item[1]["generated_code"]
 
 """
 Prompt examples and utils for EQA task
 """
 def generate_eqa_prompt(prompt_utils: PromptUtils):
+
+    #Read current Episode question
     episode_utils = prompt_utils.get_eqa_target()
     question = episode_utils[0]
-    gt_answer = episode_utils[1]
-    room = episode_utils[2]
-    object = episode_utils[3]
-    print(f'{question} {gt_answer}.')
 
-
-    if not episode_utils.debug:
-        pass
-        # TODO:
-        # question = "Question: " + "what color is the table in the dining room?"
-        # if question:
-        #     file_name = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
-        #     prompt = read_prompts_from_api_file(file_name, question)
-        #     return prompt
+    if not prompt_utils.debug:
+        #Read answer from GPT API json file
+        prompt = read_prompts_from_api_file(prompt_utils.answers_path, question)
+        return prompt
 
     else:
+        # Debugging, to cancel!!!
+        # raise NotImplementedError("Debugging mode NA, please use the API to generate the prompt")
+        gt_answer = episode_utils[1]
+        room = episode_utils[2]
+        object = episode_utils[3]
+        print(f'{question} {gt_answer}.')
         if (room is not None) and (room in list(roomcls_labels.keys())):
             room_label = roomcls_labels[room]
             prompt = f"""

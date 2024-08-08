@@ -326,7 +326,8 @@ class PromptUtils:
 
     def __init__(self, habitat_env):
         self.habitat_env = habitat_env
-        self.debug = True
+        self.debug = False
+        self.answers_path = self.habitat_env.config.habitat_baselines.LLM.llm_answers_path
 
     def get_objectgoal_target(self):
         return self.habitat_env.get_current_episode_info.goals[0].object_category

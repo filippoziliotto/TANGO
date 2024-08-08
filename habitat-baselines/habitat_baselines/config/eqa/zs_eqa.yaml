@@ -84,9 +84,9 @@ habitat_baselines:
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_nav_select
+    run_name: zs_eqa_vlfm
   save_obs:
-    save_to_disk: False
+    save_to_disk: True
   sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
@@ -139,9 +139,9 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 800
+    map_size: 1000
     pixels_per_meter: 20
-    save_image_embed: True
+    save_image_embed: False
 
   LLM:
     use_LLM: False
@@ -152,6 +152,7 @@ habitat_baselines:
       use_open_source_llm: False
       model: "phi3"
       quantization: "8"
+    llm_answers_path: "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

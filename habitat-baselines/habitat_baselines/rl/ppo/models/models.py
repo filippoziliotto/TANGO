@@ -187,7 +187,7 @@ class ObjectDetector:
             target_dict[label]["scores"].append(score)
 
         if len(target_dict) < 1:
-            target_dict = {target_name : {"boxes": [], "scores": []}}
+            target_dict = {target_name : {"boxes": [], "scores": [], "labels": []}}
 
         if self.use_detection_cls:
             target_dict = self.classifier.query_obj(image, target_dict)
@@ -258,7 +258,8 @@ class Classifier:
 
             valid_detections[class_name] = {
                 'boxes': class_boxes,
-                'scores': class_scores
+                'scores': class_scores,
+                'labels': [class_name] * len(class_boxes)
             }
 
         return valid_detections
@@ -450,6 +451,56 @@ class RoomClassifier:
         text_feats = text_feats / text_feats.norm(p=2, dim=-1, keepdim=True)
         return torch.matmul(img_feats,text_feats.t())
 
+    def calculate_attention(self, text, img):
+        img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
+        inputs = self.processor(text=text, images=[img_pil], return_tensors="pt", padding=True)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        outputs = self.model(**inputs, output_attentions=True)
+        attention = outputs.vision_model_output.attentions[-1][:, :, :-1, :-1].detach().cpu()
+
+        feature_maps = []
+
+        def forward_hook(module, input, output):
+            feature_maps.append(output)
+
+        hook = self.model.vision_model.encoder.layers[-1].self_attn.out_proj.register_forward_hook(forward_hook)
+
+        hook.remove()
+
+        # Get the target
+        target = outputs.last_hidden_state[:, 0, :]
+
+        # Backward pass to compute gradients
+        self.model.zero_grad()
+        target.mean().backward(retain_graph=True)
+
+        # Extract gradients and feature maps
+        gradients = self.model.vision_model.encoder.layers[-1].self_attn.out_proj.weight.grad
+        feature_maps = feature_maps[0].detach()
+
+        # Compute the Grad-CAM
+        weights = torch.mean(gradients, dim=[0,1], keepdim=True)
+        grad_cam = torch.sum(weights * feature_maps, dim=1).squeeze().cpu().numpy()
+
+        # Normalize the Grad-CAM
+        grad_cam = np.maximum(grad_cam, 0)
+        grad_cam = cv2.resize(grad_cam, (img.shape[1], img.shape[0]))
+        grad_cam = (grad_cam - grad_cam.min()) / (grad_cam.max() - grad_cam.min())
+        grad_cam = np.uint8(grad_cam * 255)
+
+        # Apply a colormap to the Grad-CAM
+        heatmap = cv2.applyColorMap(grad_cam, cv2.COLORMAP_JET)
+
+        # Convert original image to BGR for OpenCV
+        original_image_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        # Combine the heatmap with the original image
+        overlay_image = cv2.addWeighted(original_image_bgr, 0.6, heatmap, 0.4, 0)
+
+        cv2.imwrite("images/attention_map.png", overlay_image)
+
+        return attention
+
     def predict(self, img):
         inputs = self.preprocess(img)
         with torch.no_grad():
@@ -482,6 +533,8 @@ class RoomClassifier:
         img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
         obj_name = [target, 'other'] + self.simple_rooms
 
+        # attention = self.calculate_attention(target, img)
+
         # If target already in simple rooms list, remove it
         if target in self.simple_rooms:
             obj_name.remove(target)
@@ -505,27 +558,27 @@ class RoomClassifier:
         return "other", 0.0
 
     def convert_to_det_dict(self):
-        return {'boxes': [], 'scores': []}
+        return {'boxes': [], 'scores': [], 'labels': []}
     
-def visualize_attention(image, attention):
-    # Get the average attention weights across all heads
-    avg_attention = torch.mean(attention, dim=1).squeeze(0).mean(dim=0)
-    avg_attention = avg_attention.detach().numpy()
+    def visualize_attention(image, attention):
+        # Get the average attention weights across all heads
+        avg_attention = torch.mean(attention, dim=1).squeeze(0).mean(dim=0)
+        avg_attention = avg_attention.detach().numpy()
 
-    # Reshape attention to the size of the image
-    avg_attention = avg_attention.reshape(7, 7)  # Example shape, adjust as needed
-    
-    # Resize attention map to match the image size
-    avg_attention = np.kron(avg_attention, np.ones((32, 32)))  # 32x32 upscale
-    
-    # Normalize the attention map
-    avg_attention = (avg_attention - avg_attention.min()) / (avg_attention.max() - avg_attention.min())
+        # Reshape attention to the size of the image
+        avg_attention = avg_attention.reshape(7, 7)  # Example shape, adjust as needed
+        
+        # Resize attention map to match the image size
+        avg_attention = np.kron(avg_attention, np.ones((32, 32)))  # 32x32 upscale
+        
+        # Normalize the attention map
+        avg_attention = (avg_attention - avg_attention.min()) / (avg_attention.max() - avg_attention.min())
 
-    # Convert image to numpy array
-    image_np = np.array(image.resize((224, 224)))
+        # Convert image to numpy array
+        image_np = np.array(image.resize((224, 224)))
 
-    # save attention map to attention.png
-    cv2.imwrite("attention.png", avg_attention)
+        # save attention map to attention.png
+        cv2.imwrite("attention.png", avg_attention)
 
 
 class LLMmodel:

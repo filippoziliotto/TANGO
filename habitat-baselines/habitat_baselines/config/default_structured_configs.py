@@ -530,6 +530,7 @@ class LLMConfig(HabitatBaselinesBaseConfig):
     use_LLM: bool = False
     api_call: OpenAIGPTConfig = OpenAIGPTConfig()
     open_source_call: OpenSourceLLMConfig = OpenSourceLLMConfig()
+    llm_answers_path: str = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
     
 @dataclass
 class RoomClassifierConfig(HabitatBaselinesBaseConfig):

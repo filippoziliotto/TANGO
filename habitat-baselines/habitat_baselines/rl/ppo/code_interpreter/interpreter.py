@@ -1,5 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from habitat_baselines.rl.ppo.utils.target import Target
 from habitat_baselines.rl.ppo.utils.helper import LLMHelper
 from habitat_baselines.rl.ppo.models.models import (
@@ -7,7 +5,7 @@ from habitat_baselines.rl.ppo.models.models import (
     ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel,
     ValueMapper
 )
-from habitat_baselines.rl.ppo.utils.names import eqa_objects
+from habitat_baselines.rl.ppo.utils.names import eqa_objects, rooms_eqa
 
 def parse_return_statement(line):
     # return ---> stop_navigation() primitive
@@ -365,7 +363,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Target fixed (approaching the target)
         see target.py for more details
         """
-        target_name = target_object
+
         target_object = self.check_variable_type(target_object)
 
         # Now we are in navigation mode, given a precise target
@@ -377,7 +375,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             depth_obs = self.habitat_env.get_current_observation(type='depth')
 
             # Update the navigation ot the object with detection primitive
-            detection_dict = self.detect(target_name)
+            detection_dict = self.detect(target_object['labels'][0])
             if detection_dict['boxes']:
                 self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
 
@@ -493,7 +491,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         # If room in target name, classify the room and return
-        # TODO: integrate detect module with classify_room
+        if target_name in rooms_eqa:
+            return self.classify_room(target_name)
 
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')

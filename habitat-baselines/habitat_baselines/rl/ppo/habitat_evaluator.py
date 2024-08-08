@@ -33,7 +33,7 @@ from habitat_baselines.rl.ppo.code_interpreter.code_generator import CodeGenerat
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
-from habitat_baselines.rl.ppo.utils.utils import match_images
+from habitat_baselines.rl.ppo.utils.utils import match_images, failure_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
 from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import save_open_eqa_results
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
@@ -735,6 +735,15 @@ class HabitatEvaluator(Evaluator):
         }
         return views
 
+    def handle_run_error(self, task):
+        """
+        Handle LLM wrong prompts that will cause episode run errors
+        if an error is triggered the episode is considered a failure
+        but still has to be handled to continue the valuation part
+        """
+        pass
+        # TODO: 
+
     def evaluate_agent(
         self,
         **kwargs,
@@ -759,7 +768,11 @@ class HabitatEvaluator(Evaluator):
             self.code_interpreter.parse(self.pseudo_code)
 
             # Run the code
-            self.code_interpreter.run()
+            try:
+                self.code_interpreter.run()
+            except:
+                # Handle issues and keep the valuation running
+                self.handle_run_error(self.task_name)
 
         self.display_results()
 

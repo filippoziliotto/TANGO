@@ -24,6 +24,7 @@ def generate_eqa_prompt(prompt_utils: PromptUtils):
     question = episode_utils[0]
 
     if not prompt_utils.debug:
+        return "andfewfnwjfnf"
         #Read answer from GPT API json file
         prompt = read_prompts_from_api_file(prompt_utils.answers_path, question)
         return prompt

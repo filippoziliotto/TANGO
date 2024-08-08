@@ -153,6 +153,7 @@ habitat_baselines:
       model: "phi3"
       quantization: "8"
     llm_answers_path: "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
+    debugging: False
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

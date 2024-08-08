@@ -735,15 +735,6 @@ class HabitatEvaluator(Evaluator):
         }
         return views
 
-    def handle_run_error(self, task):
-        """
-        Handle LLM wrong prompts that will cause episode run errors
-        if an error is triggered the episode is considered a failure
-        but still has to be handled to continue the valuation part
-        """
-        pass
-        # TODO: 
-
     def evaluate_agent(
         self,
         **kwargs,
@@ -772,7 +763,7 @@ class HabitatEvaluator(Evaluator):
                 self.code_interpreter.run()
             except:
                 # Handle issues and keep the valuation running
-                self.handle_run_error(self.task_name)
+                self.code_interpreter.handle_errors()
 
         self.display_results()
 

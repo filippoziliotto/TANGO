@@ -481,6 +481,32 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.update_episode_stats()
         self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
         
+    def handle_errors(self):
+        """
+        Handle errors in the execution of the pseudo code
+        this is useful if the LLM produces faluty code
+        """
+        
+        if self.habitat_env.task_name in ['eqa', 'open_eqa']:
+            self.habitat_env.eqa_vars['pred_answer'] = "none"
+            self.habitat_env.eqa_vars['orig_answer'] = "none"
+
+        # Call STOP action and finish the episode
+        self.habitat_env.execute_action(action='stop')
+        self.habitat_env.update_episode_stats()
+
+        # Exit all the loops in the pseudo-code
+        self.loop_exit_flag = True
+        self.update_variable('episode_is_over', True) 
+
+        # Reset deteciton dict
+        if self.habitat_env.object_detector.store_detections:   
+            self.object_detector.reset_detection_dict()
+
+        # Reset value mapper
+        if self.habitat_env.value_mapper.use_value_mapper:
+            self.value_mapper.reset_map()
+
     """
     Computer Vision modules
     """

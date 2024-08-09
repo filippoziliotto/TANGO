@@ -22,7 +22,7 @@ defaults:
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - open_eqa_question_sensor
+    - question_sensor
     - compass_sensor
     - gps_sensor
     - heading_sensor

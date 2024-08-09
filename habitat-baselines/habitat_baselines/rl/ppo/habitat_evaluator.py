@@ -33,7 +33,7 @@ from habitat_baselines.rl.ppo.code_interpreter.code_generator import CodeGenerat
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
-from habitat_baselines.rl.ppo.utils.utils import match_images, failure_prompt
+from habitat_baselines.rl.ppo.utils.utils import match_images
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
 from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import save_open_eqa_results
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa

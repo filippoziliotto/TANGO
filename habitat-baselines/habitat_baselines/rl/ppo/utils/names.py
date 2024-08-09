@@ -139,6 +139,29 @@ rooms_eqa = [
     'lounge','spa','bedroom', 'rec room',
 ]
 
+merged_rooms = [
+    'living room', 'closet', 'laundry room', 'hallway', 'dining room',
+    'office', 'bathroom', 'kitchen', 'bedroom'
+]
+
+room_mapping = {
+    'living room': 'living room',
+    'family room': 'living room',
+    'tv room': 'living room',
+    'lounge': 'living room',
+    'rec room': 'living room',
+    'closet': 'closet',
+    'laundry room': 'laundry room',
+    'hallway': 'hallway',
+    'foyer': 'hallway',
+    'dining room': 'dining room',
+    'office': 'office',
+    'bathroom': 'bathroom',
+    'spa': 'spa',
+    'kitchen': 'kitchen',
+    'bedroom': 'bedroom'
+}
+
 colors_eqa = [
     'black','brown','off-white','white','blue','tan','grey',
     'slate grey','silver','green','yellow green','red brown',

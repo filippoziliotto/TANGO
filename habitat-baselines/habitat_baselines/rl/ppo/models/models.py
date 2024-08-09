@@ -17,7 +17,10 @@ from habitat_baselines.rl.ppo.utils.utils import (
 
 # Dataset imports
 from habitat_baselines.rl.ppo.utils.nms import nms
-from habitat_baselines.rl.ppo.utils.names import class_names_coco, desired_classes_ids, compact_labels
+from habitat_baselines.rl.ppo.utils.names import (
+    class_names_coco, desired_classes_ids, 
+    compact_labels, rooms_eqa, merged_rooms, room_mapping
+)
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import (
     eqa_classification, generate_eqa_question)
 
@@ -421,7 +424,7 @@ class SegmenterModel:
         return self.predict(img)
 
 class RoomClassifier:
-    def __init__(self, path, cls_threshold=0.3, open_set_cls_thresh = 0.3, use_open_set_cls=True):
+    def __init__(self, path, cls_threshold=0.3, open_set_cls_thresh = 0.2, use_open_set_cls=True):
         self.path = path
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.use_open_set_cls = use_open_set_cls
@@ -433,11 +436,7 @@ class RoomClassifier:
             self.model, self.processor = get_roomcls_model(self.path, self.device)
             self.cls_thresh = cls_threshold
 
-        self.simple_rooms = [
-                    'living room', 'family room', 'closet','laundry room',
-                    'hallway', 'dining room','office','bathroom','foyer','kitchen',
-                    'lounge', 'bedroom', 'rec room',
-        ]
+        self.simple_rooms = merged_rooms + ['other']
         
     def preprocess(self, img):
         img = torch.tensor(img)
@@ -531,13 +530,15 @@ class RoomClassifier:
 
     def open_set_predict(self, img, target):
         img_pil = Image.fromarray(np.uint8(img)).convert('RGB')
-        obj_name = [target, 'other'] + self.simple_rooms
+
+        orig_target = target
+        target = room_mapping[target]
+
+        obj_name = self.simple_rooms
+        if target not in obj_name:
+            obj_name.append(target)
 
         # attention = self.calculate_attention(target, img)
-
-        # If target already in simple rooms list, remove it
-        if target in self.simple_rooms:
-            obj_name.remove(target)
 
         text = [f'a photo of {q}' for q in obj_name]
         inputs = self.processor(text=text, images=[img_pil], return_tensors="pt", padding=True)
@@ -553,7 +554,7 @@ class RoomClassifier:
         detected_class = obj_name[cat_ids.item()]
         class_score = sim_scores[0, cat_ids.item()]
         if detected_class == target and class_score >= self.open_set_cls_thresh:
-            return target, class_score
+            return orig_target, class_score
 
         return "other", 0.0
 

@@ -215,7 +215,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'feature_match': self.feature_match,
             'stop_navigation': self.stop_navigation,   
             # Base Vision module functions 
-            'answer_question': self.answer_question,
+            'answer': self.answer,
             'look_around': self.look_around,
             'describe_scene': self.describe_scene,
             'segment_scene': self.segment_scene,
@@ -352,7 +352,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             # Support for EQA in the case max step is reached
             if self.habitat_env.task_name in ['eqa', 'open_eqa']:
-                _ = self.answer_question(
+                _ = self.answer(
                     question=self.habitat_env.eqa_vars['question'])
             self.stop_navigation()
 
@@ -586,7 +586,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         else:
             return False
 
-    def answer_question(self, question, image=None):
+    def answer(self, question, image=None):
         """
         VQA module for answering questions
         The actual class is defined in models.py
@@ -647,7 +647,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         #         navigate_to(object)
         #         view = look_around()
         #         segment = segment_scene(view, target='chair')
-        #         answer = answer_question('how many chairs are there?')
+        #         answer = answer('how many chairs are there?')
         #         stop_navigation()
 
         obs = self.habitat_env.get_current_observation(type='rgb')

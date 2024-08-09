@@ -22,6 +22,8 @@ def generate_eqa_prompt(prompt_utils: PromptUtils):
     #Read current Episode question
     episode_utils = prompt_utils.get_eqa_target()
     question = episode_utils[0]
+    gt_answer = episode_utils[1]
+    print(f'{question} {gt_answer}.')
 
     if not prompt_utils.debug:
         #Read answer from GPT API json file

@@ -130,6 +130,9 @@ class Matterport3dDatasetV1(Dataset):
              
             self.episodes[ep_index] = episode
 
+        ##### TYPE: only objects in coco labels
+        #from habitat_baselines.rl.ppo.utils.names import class_names_coco
+        #self.episodes = [episode for episode in self.episodes if episode.question.eqa_object in list(class_names_coco.values())]
 
         ##### TYPE: location "which room" questions
         # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['location']]

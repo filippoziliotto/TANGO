@@ -352,9 +352,6 @@ class PromptUtils:
         gt_answer = ep_infos.question.answer_text
         return (id_, question, gt_answer)
 
-def failure_prompt(task):
-    if task in ['eqa']:
-        return "stop_navigation( none )"
 """
 Utils to sample points from different
 floors since HM3D-sem is not fully annotated

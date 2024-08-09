@@ -56,7 +56,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 518
+    max_episode_steps: 118
   simulator:
     # turn_angle: 20
     agents:
@@ -101,7 +101,7 @@ habitat_baselines:
     use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet50"
-    additional_thresh: 0.8
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
@@ -127,6 +127,8 @@ habitat_baselines:
   room_classifier:
     use_room_classifier: True
     cls_threshold: 0.7
+    use_open_set_cls: True
+    open_set_cls_thresh: 0.2
 
   value_mapper:
     use_value_mapper: True
@@ -139,8 +141,8 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 1000
-    pixels_per_meter: 20
+    map_size: 500
+    pixels_per_meter: 10
     save_image_embed: False
 
   LLM:

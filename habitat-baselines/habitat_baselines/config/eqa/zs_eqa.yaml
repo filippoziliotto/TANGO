@@ -22,7 +22,7 @@ defaults:
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - question_sensor
+    - open_eqa_question_sensor
     - compass_sensor
     - gps_sensor
     - heading_sensor
@@ -34,7 +34,7 @@ defaults:
   - _self_
 
 habitat:
-  seed: 2024
+  seed: 100
   dataset:
     type: MP3DEQA-v1
     split: train
@@ -56,7 +56,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 118
+    max_episode_steps: 40
   simulator:
     # turn_angle: 20
     agents:
@@ -141,8 +141,8 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 250
+    pixels_per_meter: 5
     save_image_embed: False
 
   LLM:

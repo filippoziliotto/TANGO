@@ -379,7 +379,9 @@ class SelectBaseOrArmActionConfig(ActionConfig):
 class AnswerActionConfig(ActionConfig):
     type: str = "AnswerAction"
 
-
+@dataclass
+class OpenEQAAnswerActionConfig(ActionConfig):
+    type: str = "OpenEQAAnswerAction"
 # -----------------------------------------------------------------------------
 # # TASK_SENSORS
 # -----------------------------------------------------------------------------
@@ -1385,6 +1387,10 @@ class AnswerAccuracyMeasurementConfig(MeasurementConfig):
     type: str = "AnswerAccuracy"
 
 @dataclass
+class OpenEQAAnswerAccuracyMeasurementConfig(MeasurementConfig):
+    type: str = "OpenEQAAnswerAccuracy"
+
+@dataclass
 class AnswerSimilarityMeasurementConfig(MeasurementConfig):
     type: str = "AnswerSimilarity"
 
@@ -2062,6 +2068,12 @@ cs.store(
     node=AnswerActionConfig,
 )
 cs.store(
+    package="habitat.task.actions.open_eqa_answer",
+    group="habitat/task/actions",
+    name="open_eqa_answer",
+    node=OpenEQAAnswerActionConfig,
+)
+cs.store(
     package="habitat.task.actions.oracle_nav_action",
     group="habitat/task/actions",
     name="oracle_nav_action",
@@ -2334,9 +2346,9 @@ cs.store(
     node=QuestionSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.openeqa_question_sensor",
+    package="habitat.task.lab_sensors.open_eqa_question_sensor",
     group="habitat/task/lab_sensors",
-    name="openeqa_question_sensor",
+    name="open_eqa_question_sensor",
     node=OpenEQAQuestionSensorConfig,
 )
 cs.store(
@@ -2546,6 +2558,12 @@ cs.store(
     group="habitat/task/measurements",
     name="answer_accuracy",
     node=AnswerAccuracyMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.open_eqa_answer_accuracy",
+    group="habitat/task/measurements",
+    name="open_eqa_answer_accuracy",
+    node=OpenEQAAnswerAccuracyMeasurementConfig,
 )
 cs.store(
     package="habitat.task.measurements.answer_similarity",

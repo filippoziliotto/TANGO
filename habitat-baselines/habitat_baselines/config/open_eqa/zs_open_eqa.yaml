@@ -4,7 +4,7 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
-    - answer
+    - open_eqa_answer
     - move_forward
     - turn_left
     - turn_right
@@ -12,7 +12,7 @@ defaults:
     - num_steps
     - distance_to_goal
     # - episode_info
-    - answer_accuracy
+    - open_eqa_answer_accuracy
     # - answer_similarity
     - minimum_number_of_actions
     - stop_before_episode_end
@@ -20,7 +20,7 @@ defaults:
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - openeqa_question_sensor
+    - open_eqa_question_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent

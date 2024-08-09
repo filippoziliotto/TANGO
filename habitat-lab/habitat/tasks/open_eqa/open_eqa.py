@@ -48,7 +48,7 @@ class OpenEQAQuestionSensor(Sensor):
         super().__init__(*args, **kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
-        return "question"
+        return "open_eqa_question"
 
     def _get_sensor_type(self, *args: Any, **kwargs: Any) -> SensorTypes:
         return SensorTypes.TOKEN_IDS
@@ -106,7 +106,7 @@ class MinimumNumberOfActions(Measure):
         pass
 
 @registry.register_measure
-class AnswerAccuracy(Measure):
+class OpenEQAAnswerAccuracy(Measure):
     """AnswerAccuracy"""
 
     def __init__(self, dataset, *args: Any, **kwargs: Any):
@@ -114,7 +114,7 @@ class AnswerAccuracy(Measure):
         super().__init__(**kwargs)
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
-        return "answer_accuracy"
+        return "open_eqa_answer_accuracy"
 
     def reset_metric(self, *args: Any, **kwargs: Any):
         self._metric = 0
@@ -125,7 +125,7 @@ class AnswerAccuracy(Measure):
         if episode is None:
             return
 
-        if action["action"] == AnswerAction.name or action["action"] == 0:
+        if action["action"] == OpenEQAAnswerAction.name or action["action"] == 0:
             self._metric = (
                 1
                 if episode.question.answer_text
@@ -164,7 +164,7 @@ class StopBeforeEpisodeEnd(Measure):
 
         self._metric = (
                 1.
-                if (action["action"] == AnswerAction.name or action["action"] == 0) \
+                if (action["action"] == OpenEQAAnswerAction.name or action["action"] == 0) \
                 and (current_step < self._max_steps)
                 else 0.
             )
@@ -211,9 +211,9 @@ class OPENEQATask(NavigationTask):
 
 
 @registry.register_task_action
-class AnswerAction(Action):
+class OpenEQAAnswerAction(Action):
     _answer: Optional[str]
-    name: str = "answer"
+    name: str = "open_eqa_answer"
 
     def __init__(self, *args: Any, sim, dataset, **kwargs: Any) -> None:
         self._sim = sim

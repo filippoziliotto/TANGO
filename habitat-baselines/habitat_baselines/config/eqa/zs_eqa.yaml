@@ -56,7 +56,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 40
+    max_episode_steps: 200
   simulator:
     # turn_angle: 20
     agents:
@@ -84,9 +84,9 @@ habitat_baselines:
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_vlfm
+    run_name: zs_eqa_vlfmss
   save_obs:
-    save_to_disk: True
+    save_to_disk: False
   sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
@@ -134,7 +134,7 @@ habitat_baselines:
     use_value_mapper: True
     type: "blip"
     size: "large"
-    visualize: True
+    visualize: False
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
@@ -162,7 +162,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.2
   
-  test_episode_count: -1
+  test_episode_count: 10
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

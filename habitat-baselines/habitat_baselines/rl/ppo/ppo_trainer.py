@@ -67,6 +67,8 @@ from habitat_baselines.utils.info_dict import (
 from habitat_baselines.utils.timing import g_timer
 
 
+
+
 @baseline_registry.register_trainer(name="ddppo")
 @baseline_registry.register_trainer(name="ppo")
 class PPOTrainer(BaseRLTrainer):
@@ -884,8 +886,12 @@ class PPOTrainer(BaseRLTrainer):
         if "extra_state" in ckpt_dict and "step" in ckpt_dict["extra_state"]:
             step_id = ckpt_dict["extra_state"]["step"]
 
-        evaluator = hydra.utils.instantiate(config.habitat_baselines.evaluator)
+        # Needed to run in the math.unipd cluser (don't know why???)
+        # evaluator = hydra.utils.instantiate(config.habitat_baselines.evaluator)
+        from habitat_baselines.rl.ppo.habitat_evaluator import HabitatEvaluator
+        evaluator = HabitatEvaluator()
         assert isinstance(evaluator, Evaluator)
+
         evaluator.evaluate_agent(
             agent = self._agent,
             envs = self.envs,

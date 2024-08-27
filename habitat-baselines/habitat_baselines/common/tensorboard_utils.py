@@ -11,7 +11,6 @@ import numpy as np
 import torch
 from omegaconf import OmegaConf
 from torch.utils.tensorboard import SummaryWriter
-from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import save_open_eqa_results
 
 try:
     import wandb
@@ -172,140 +171,8 @@ class WeightsAndBiasesWriter:
     ) -> None:
         raise NotImplementedError("Not supported")
 
-    def log_episode_stats(
-            self, 
-            task: str,
-            stats_episodes: dict,
-            eqa_vars: dict,
-            config: dict,
-    ):
-
-        last_key = list(stats_episodes.keys())[-1]
-        v = stats_episodes[last_key]
-        episode_info = f"Episode {len(stats_episodes)}, {last_key}:"
-
-        # EQA support results prints
-        if task in ['eqa']:
-            formatted_results = (
-                f"num_steps: {v['num_steps']} | "
-                f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-                f"stop_before_end: {v['stop_before_episode_end']} | "
-                f"minimum_actions: {v['minimum_number_of_actions']} | "
-                f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
-                f"Answer accuracy: {v['answer_accuracy']:.2f} | "
-                f"Answer similarity: {v['answer_similarity']:.2f} | "
-                f"Answer: {eqa_vars['pred_answer']} | "
-                f"Original Answer: {eqa_vars['orig_answer']} |"
-            )
-        elif task in ['open_eqa']:
-            formatted_results = (
-                f"num_steps: {v['num_steps']} | "
-                f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-                f"minimum_actions: {v['minimum_number_of_actions']} | "
-                f"stop_before_end: {v['stop_before_episode_end']} | "
-                f"Answer: {eqa_vars['pred_answer']} | "
-                )
-            if len(stats_episodes) == 1: is_first =  True
-            else: is_first = False
-            save_open_eqa_results(is_first, eqa_vars, config, v['num_steps'], v['minimum_number_of_actions'])
-        
-        # Objectnav and Instance Imagenav support results prints
-        else:
-            formatted_results = (
-                f"num_steps: {v['num_steps']} | "
-                f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-                f"success: {v['success']:.2f} | "
-                f"spl: {v['spl']:.2f} | "
-                f"soft_spl: {v['soft_spl']:.2f}"
-            )
-            print(f"{episode_info}\n{formatted_results}")
-            print('-----------------------')
-
-        return 
-
-    def log_final_results(
-            self,
-            task: str = "objectnav",
-            stats_episodes: dict = None,
-            aggregated_stats: dict = None,
-            all_ks: set = None,
-            step_id: int = 0,
-    ):
-        """
-        Log results to wandb, differentiate results based on task
-        the inputs are all variables of HabitatEvaluator class
-        """
-
-        # If wandb is not selected pass
-        if not self.writer:
-            return
-
-        if task in ['objectnav', 'instance_imagenav']:
-            for stat_key in all_ks:
-                aggregated_stats[stat_key] = np.mean(
-                    [v[stat_key] for v in stats_episodes.values() if stat_key in v]
-                )    
-            metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
-            for k, v in metrics.items():
-                self.add_scalar(f"eval_metrics/{k}", v, step_id)        
-                
-            self.add_scalar(
-                    "eval_reward/average_reward", aggregated_stats["reward"], step_id
-                )
-            
-            # Print final results
-            print('-----------------------')
-            print('| EVALUATION FINISHED |')
-            print('-----------------------')
-
-            for k, v in aggregated_stats.items():
-                print(f"Average episode {k}: {v:.4f}")
-            print('-----------------------')      
-
-        elif task in ['eqa']:
-            for stat_key in all_ks:
-                aggregated_stats[stat_key] = np.mean(
-                    [v[stat_key] for v in stats_episodes.values() if stat_key in v]
-                )    
-
-            # Remove infinite values and calculate mean
-            aggregated_stats['distance_to_goal'] = np.mean(
-                [v['distance_to_goal'] for v in stats_episodes.values() if v['distance_to_goal'] != float('inf')]
-            )
-            aggregated_stats['smallest_distance_to_target'] = np.mean(
-                [v['smallest_distance_to_target'] for v in stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
-            )
-            
-            # Remove 'minimum_number_of_actions' from metrics
-            del aggregated_stats['minimum_number_of_actions']
-            metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
-
-            print('-----------------------')
-            print('| EVALUATION FINISHED |')
-            print('-----------------------')
-
-            for k, v in aggregated_stats.items():
-                print(f"Average episode {k}: {v:.4f}")
-            print('-----------------------')    
-
-        elif task in ['open_eqa']:
-            for stat_key in all_ks:
-                aggregated_stats[stat_key] = np.mean(
-                    [v[stat_key] for v in stats_episodes.values() if stat_key in v]
-                )
-            metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
-
-            print('-----------------------')
-            print('| EVALUATION FINISHED |')
-            print('-----------------------')
-
-            for k, v in aggregated_stats.items():
-                print(f"Average episode {k}: {v:.4f}")
-            print('-----------------------')    
-
-        wandb.log(aggregated_stats)
-
-        return aggregated_stats, metrics
+    def log_results(self, aggregated_stats):
+        wandb.log(aggregated_stats)  # type: ignore[attr-defined]
 
 
 # def log_eqa_results_by_distance(self):

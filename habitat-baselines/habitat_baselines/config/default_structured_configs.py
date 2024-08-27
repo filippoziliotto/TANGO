@@ -610,6 +610,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     wb: WBConfig = WBConfig()
     task_name: str = "objectnav"
     save_obs: SaveObservations = SaveObservations()
+    episode_max_actions: int = -1
     # samplig point strategy
     sampling_strategy: str = "unreachable"
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()

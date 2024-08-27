@@ -386,3 +386,197 @@ def get_floor_levels(current_height, floor_points):
         'current_floor': [closest_key],
         'down_level': [down_level_key]
     }
+
+
+"""
+Metrics for Open-EQA task
+Maybe this should go into Habitat-main metrics
+"""
+def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
+    """
+    Used only in Open-EQA to save the results in a txt file.
+    These results should then be used to calculate the metrics.
+    """
+    try:
+        txt_name = config.habitat_baselines.wb.run_name + ".txt"
+    except AttributeError:
+        txt_name = "open_eqa_results.txt"
+    
+    file_path = os.path.join("data", "datasets", "open_eqa", txt_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # If epsisode start then clean existent txt
+    if is_first or not os.path.exists(file_path):
+        with open(file_path, "w") as f:
+            f.write("")
+
+    # Write or append to the file
+    with open(file_path, "a") as f:
+        f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']} | {num_steps} | {gt_steps}\n")
+
+"""
+Print on screen episode stats
+"""
+def log_episode_stats(
+        task: str,
+        stats_episodes: dict,
+        eqa_vars: dict,
+        config: dict,
+        logger: object
+    ):
+
+    last_key = list(stats_episodes.keys())[-1]
+    v = stats_episodes[last_key]
+    episode_info = f"Episode {len(stats_episodes)}, {last_key}:"
+
+    # EQA support results prints
+    if task in ['eqa']:
+        formatted_results = (
+            f"num_steps: {v['num_steps']} | "
+            f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+            f"stop_before_end: {v['stop_before_episode_end']} | "
+            f"minimum_actions: {v['minimum_number_of_actions']} | "
+            f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
+            f"Answer accuracy: {v['answer_accuracy']:.2f} | "
+            f"Answer similarity: {v['answer_similarity']:.2f} | "
+            f"Answer: {eqa_vars['pred_answer']} | "
+            f"Original Answer: {eqa_vars['orig_answer']} |"
+        )
+    elif task in ['open_eqa']:
+        formatted_results = (
+            f"num_steps: {v['num_steps']} | "
+            f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+            f"minimum_actions: {v['minimum_number_of_actions']} | "
+            f"stop_before_end: {v['stop_before_episode_end']} | "
+            f"Answer: {eqa_vars['pred_answer']} | "
+        )
+        
+    # Objectnav and Instance Imagenav support results prints
+    else:
+        formatted_results = (
+            f"num_steps: {v['num_steps']} | "
+            f"distante_to_goal: {v['distance_to_goal']:.2f} | "
+            f"success: {v['success']:.2f} | "
+            f"spl: {v['spl']:.2f} | "
+            f"soft_spl: {v['soft_spl']:.2f}"
+        )
+
+    logger.info(f"{episode_info}\n{formatted_results}\n")
+    logger.info('-----------------------')
+
+    # Save the results for Open-EQA task inside a txt file for llm scoring evaluation
+    if task in ['open_eqa']:
+        if len(stats_episodes) == 1: is_first =  True
+        else: is_first = False
+        save_open_eqa_results(is_first, eqa_vars, config, v['num_steps'], v['minimum_number_of_actions'])
+
+    return stats_episodes
+
+def log_final_results(
+        task: str = "objectnav",
+        stats_episodes: dict = None,
+        aggregated_stats: dict = None,
+        all_ks: set = None,
+        step_id: int = 0,
+        writer: object = None,
+        config: dict = None,
+        logger: object = None
+):
+    """
+    Log results to wandb, differentiate results based on task
+    the inputs are all variables of HabitatEvaluator class
+    """
+
+    if task in ['objectnav', 'instance_imagenav']:
+        for stat_key in all_ks:
+            aggregated_stats[stat_key] = np.mean(
+                [v[stat_key] for v in stats_episodes.values() if stat_key in v]
+            )    
+        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
+        for k, v in metrics.items():
+            writer.add_scalar(f"eval_metrics/{k}", v, step_id)        
+                
+        writer.add_scalar(
+                "eval_reward/average_reward", aggregated_stats["reward"], step_id
+            )
+            
+        # Print final results
+        logger.info('-----------------------')
+        logger.info('| EVALUATION FINISHED |')
+        logger.info('-----------------------')
+
+        for k, v in aggregated_stats.items():
+            logger.info(f"Average episode {k}: {v:.4f}")
+        logger.info('-----------------------')      
+
+    elif task in ['eqa']:
+        for stat_key in all_ks:
+            aggregated_stats[stat_key] = np.mean(
+                [v[stat_key] for v in stats_episodes.values() if stat_key in v]
+            )    
+
+        # Remove infinite values and calculate mean
+        aggregated_stats['distance_to_goal'] = np.mean(
+            [v['distance_to_goal'] for v in stats_episodes.values() if v['distance_to_goal'] != float('inf')]
+        )
+        aggregated_stats['smallest_distance_to_target'] = np.mean(
+            [v['smallest_distance_to_target'] for v in stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
+        )
+            
+        # Remove 'minimum_number_of_actions' from metrics
+        del aggregated_stats['minimum_number_of_actions']
+        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
+
+        logger.info('-----------------------')
+        logger.info('| EVALUATION FINISHED |')
+        logger.info('-----------------------')
+
+        for k, v in aggregated_stats.items():
+            logger.info(f"Average episode {k}: {v:.4f}")
+        logger.info('-----------------------')    
+
+    elif task in ['open_eqa']:
+        for stat_key in all_ks:
+            aggregated_stats[stat_key] = np.mean(
+                [v[stat_key] for v in stats_episodes.values() if stat_key in v]
+            )
+        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
+
+        logger.info('-----------------------')
+        logger.info('| EVALUATION FINISHED |')
+        logger.info('-----------------------')
+
+        for k, v in aggregated_stats.items():
+            logger.info(f"Average episode {k}: {v:.4f}")
+        logger.info('-----------------------')    
+
+    if config.habitat_baselines.wb in ['wb']:
+        writer.log_results(aggregated_stats)
+
+    return aggregated_stats, metrics
+
+
+"""
+MP3D-EQA agent spawning utils. This is done for good comparison with 
+paper http://arxiv.org/abs/2405.16559. Type is chosen w.r.t 10/30/50 maximum actions
+from the target goal. In this case "random" is the usual MP3D-EQA dataset, while the others
+are the ones used in the paper.
+"""
+
+def check_spawn_distance(episode, max_dist):
+    # Check if max_dist is valid
+    assert max_dist in [10, 30, 50, -1], "Invalid max_dist value"
+
+    if max_dist == -1:
+        return False, None
+
+    shortest_path = episode.shortest_paths[0]
+    return (True, shortest_path) if max_dist <= len(shortest_path) else (False, None)
+
+
+def set_spawn_state(sim, episode, max_dist = -1):
+    is_valid, shortest_path = check_spawn_distance(episode, max_dist)
+    
+    if is_valid:
+        start_state = shortest_path[len(shortest_path) - max_dist]
+        sim.set_agent_state(start_state.position, start_state.rotation)

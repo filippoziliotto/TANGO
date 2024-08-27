@@ -33,7 +33,7 @@ from habitat_baselines.rl.ppo.code_interpreter.code_generator import CodeGenerat
 from habitat_baselines.rl.ppo.utils.utils import (
     from_xyz_to_polar, from_polar_to_xyz
 )
-from habitat_baselines.rl.ppo.utils.utils import match_images
+from habitat_baselines.rl.ppo.utils.utils import match_images, log_episode_stats, log_final_results
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_token
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
@@ -414,11 +414,12 @@ class HabitatEvaluator(Evaluator):
         # This uses Wandb logger but just prints the results on screen
         # Check tensorboard_utils.py for more details
         if per_episode:
-            self.writer.log_episode_stats(
+            self.stat_episodes = log_episode_stats(
                 self.task_name,
                 self.stats_episodes,
                 self.eqa_vars,
-                self.config
+                self.config,
+                logger,
             )
             return
             
@@ -434,7 +435,16 @@ class HabitatEvaluator(Evaluator):
             self.all_ks.update(ep.keys())
 
         # Log results to Wandb, check tensorboard_utils.py for more details
-        self.aggregated_stats, self.metrics = self.writer.log_final_results(self.task_name, self.stats_episodes, self.aggregated_stats, self.all_ks, self.step_id)
+        self.aggregated_stats, self.metrics = log_final_results(
+            self.task_name, 
+            self.stats_episodes, 
+            self.aggregated_stats, 
+            self.all_ks, 
+            self.step_id, 
+            self.writer, 
+            self.config,
+            logger
+        )
 
     def execute_action(self, coords=None, action=None):
         # TODO: instead of variables make name of action

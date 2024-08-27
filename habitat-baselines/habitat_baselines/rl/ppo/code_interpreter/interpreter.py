@@ -5,6 +5,7 @@ from habitat_baselines.rl.ppo.models.models import (
     ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel,
     ValueMapper
 )
+from habitat_baselines.rl.ppo.utils.utils import set_spawn_state
 from habitat_baselines.rl.ppo.utils.names import eqa_objects, rooms_eqa
 
 def parse_return_statement(line):
@@ -336,6 +337,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
 
+        # In MP3D-EQA set max-actions shortest path
+        self.spawn_target_location(max_dist=self.habitat_env.config.habitat_baselines.episode_max_actions)
+
         # Initial 360° turn for frontiers initialization
         self.turn_around()
 
@@ -432,6 +436,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 # Using "explore" as ITM to select best frontiers for exploration
                 self.map_scene("explore")
 
+    """
+    Utility modules for navigation settings
+    """
+
+    def spawn_target_location(self, max_dist):
+        """
+        Spawn a target location given a max distance, check utils.py 
+        form more details. http://arxiv.org/abs/2405.16559.
+        """
+        if (self.habitat_env.task_name in ['eqa']) and (self.habitat_env.get_current_step() == 0):
+            sim = self.habitat_env.get_habitat_sim()
+            episode = self.habitat_env.get_current_episode_info()
+            set_spawn_state(sim, episode, max_dist)
+                
     def go_downstairs(self):
         """
         Go downstairs primitive, needed

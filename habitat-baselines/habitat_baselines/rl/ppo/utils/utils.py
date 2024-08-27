@@ -550,7 +550,7 @@ def log_final_results(
             logger.info(f"Average episode {k}: {v:.4f}")
         logger.info('-----------------------')    
 
-    if config.habitat_baselines.wb in ['wb']:
+    if config.habitat_baselines.writer_type in ['wb']:
         writer.log_results(aggregated_stats)
 
     return aggregated_stats, metrics

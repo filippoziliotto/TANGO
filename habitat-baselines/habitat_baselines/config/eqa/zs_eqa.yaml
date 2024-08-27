@@ -80,12 +80,12 @@ habitat_baselines:
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/eqa/
-  # writer_type: wb # to deactivate just comment this
+  writer_type: wb # to deactivate just comment this
   episode_max_actions: 10
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_vlfmss
+    run_name: zs_eqa_10_prova
   save_obs:
     save_to_disk: True
   sampling_strategy: "unreachable"

@@ -130,9 +130,19 @@ class Matterport3dDatasetV1(Dataset):
              
             self.episodes[ep_index] = episode
 
-        ##### TYPE: only objects in coco labels
+        ##### TYPE: only  certain type objetcs
         #from habitat_baselines.rl.ppo.utils.names import class_names_coco
-        #self.episodes = [episode for episode in self.episodes if episode.question.eqa_object in list(class_names_coco.values())]
+        # self.episodes = [episode for episode in self.episodes if episode.question.eqa_object in ["bed"]]
+
+        for episode in self.episodes:
+            if (episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb') and (episode.question.eqa_object in ["bed"]):
+                episode.question.answer_text = "white"
+                episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
+
+        # remove episodes where episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb'
+        # self.episodes = [episode for episode in self.episodes if episode.scene_id != 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb']
+
+
 
         ##### TYPE: location "which room" questions
         # self.episodes = [episode for episode in self.episodes if episode.question.question_type in ['location']]

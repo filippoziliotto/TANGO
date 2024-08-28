@@ -16,9 +16,9 @@ defaults:
     - episode_info
     - answer_accuracy
     - answer_similarity
-    - minimum_number_of_actions
+    # - minimum_number_of_actions
     - stop_before_episode_end
-    - smallest_distance_to_target
+    # - smallest_distance_to_target
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
@@ -56,7 +56,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 100
+    max_episode_steps: 518
   simulator:
     # turn_angle: 20
     agents:
@@ -70,7 +70,7 @@ habitat:
             height: 256
             hfov: 90
         radius: 0.18
-        height: 0.88
+        height: 1.4
     habitat_sim_v0:
       gpu_device_id: 0
 
@@ -80,7 +80,7 @@ habitat_baselines:
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/eqa/
-  writer_type: wb # to deactivate just comment this
+  # writer_type: wb # to deactivate just comment this
   episode_max_actions: 10
   wb:
     entity: ziliottofilippodev
@@ -99,9 +99,9 @@ habitat_baselines:
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: False
+    use_additional_detector: True
     additional_type: "detr"
-    additional_size: "resnet50"
+    additional_size: "resnet101"
     additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
@@ -134,7 +134,7 @@ habitat_baselines:
   value_mapper:
     use_value_mapper: True
     type: "blip"
-    size: "large"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"
@@ -142,8 +142,8 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 250
-    pixels_per_meter: 5
+    map_size: 500
+    pixels_per_meter: 10
     save_image_embed: False
 
   LLM:

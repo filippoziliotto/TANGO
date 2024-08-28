@@ -135,7 +135,7 @@ class Matterport3dDatasetV1(Dataset):
         # self.episodes = [episode for episode in self.episodes if episode.question.eqa_object in ["bed"]]
 
         for episode in self.episodes:
-            if (episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb') and (episode.question.eqa_object in ["bed"]):
+            if (episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb') and (episode.question.eqa_object in ["bed"]) and (not episode.question.question_type in ['location']):
                 episode.question.answer_text = "white"
                 episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
 

@@ -432,15 +432,15 @@ def log_episode_stats(
     # EQA support results prints
     if task in ['eqa']:
         formatted_results = (
-            f"num_steps: {v['num_steps']} | "
-            f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-            f"stop_before_end: {v['stop_before_episode_end']} | "
+            f"steps: {v['num_steps']} | "
+            f"d_t: {v['distance_to_goal']:.2f} | "
+            # f"not_force_guess: {v['stop_before_episode_end']} | "
             # f"minimum_actions: {v['minimum_number_of_actions']} | "
-            # f"smallest_dist_to_goal: {v['smallest_distance_to_target']:.2f} | "
-            f"Answer accuracy: {v['answer_accuracy']:.2f} | "
-            f"Answer similarity: {v['answer_similarity']:.2f} | "
-            f"Answer: {eqa_vars['pred_answer']} | "
-            f"Original Answer: {eqa_vars['orig_answer']} |"
+            f"d_delta: {v['smallest_distance_to_target']:.2f} | "
+            f"QA_Acc: {v['answer_accuracy']:.2f} | "
+            f"QA_sim: {v['answer_similarity']:.2f} | "
+            f"Ans: {eqa_vars['pred_answer']} | "
+            f"Orig_Ans: {eqa_vars['orig_answer']} |"
         )
     elif task in ['open_eqa']:
         formatted_results = (
@@ -498,7 +498,7 @@ def log_final_results(
                 
         writer.add_scalar(
                 "eval_reward/average_reward", aggregated_stats["reward"], step_id
-            )
+        )
             
         # Print final results
         logger.info('-----------------------')
@@ -519,9 +519,9 @@ def log_final_results(
         aggregated_stats['distance_to_goal'] = np.mean(
             [v['distance_to_goal'] for v in stats_episodes.values() if v['distance_to_goal'] != float('inf')]
         )
-        # aggregated_stats['smallest_distance_to_target'] = np.mean(
-        #     [v['smallest_distance_to_target'] for v in stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
-        # )
+        aggregated_stats['smallest_distance_to_target'] = np.mean(
+            [v['smallest_distance_to_target'] for v in stats_episodes.values() if v['smallest_distance_to_target'] != float('inf')]
+        )
             
         # Remove 'minimum_number_of_actions' from metrics
         # del aggregated_stats['minimum_number_of_actions']

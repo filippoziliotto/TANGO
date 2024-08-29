@@ -657,7 +657,7 @@ class ValueMapper:
         self.obstacle_map = ObstacleMap(
             agent_radius=self._agent_radius,
             min_height=min_obstacle_height,
-            max_height=self._max_obstacle_height + max_obstacle_height,
+            max_height=max_obstacle_height,
             area_thresh=1.5,
             size = self._map_size,
             pixels_per_meter=self._pixels_per_meter

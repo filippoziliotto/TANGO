@@ -38,9 +38,12 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_to
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
+DEBUG = True
+
 class HabitatEvaluator(Evaluator):
     def __init__(self):
         self.current_step = 0
+        self.eqa_vars = None
         self.debugger = DebugObservation()
         pass
 
@@ -637,11 +640,14 @@ class HabitatEvaluator(Evaluator):
             self.code_interpreter.parse(self.pseudo_code)
 
             # Run the code
-            try:
+            if DEBUG:
                 self.code_interpreter.run()
-            except:
-                # Handle issues and keep the valuation running
-                self.code_interpreter.handle_errors()
+            else:
+                try:
+                    self.code_interpreter.run()
+                except:
+                    # Handle issues and keep the valuation running
+                    self.code_interpreter.handle_errors()
 
         self.display_results()
 

@@ -85,8 +85,8 @@ class FrontierMap:
         """
         for i, frontier in enumerate(frontiers):
             updated_cosines = np.max(value_map[
-                int(frontier.xyz[0]) - self._pixels_per_meter*2 : int(frontier.xyz[0]) + self._pixels_per_meter*2, 
-                int(frontier.xyz[1]) - self._pixels_per_meter*2 : int(frontier.xyz[1]) + self._pixels_per_meter*2
+                int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter, 
+                int(frontier.xyz[1]) - self._pixels_per_meter : int(frontier.xyz[1]) + self._pixels_per_meter
             ])
             self.frontiers[i].cosine = updated_cosines
 

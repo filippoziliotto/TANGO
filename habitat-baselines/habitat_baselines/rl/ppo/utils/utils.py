@@ -330,7 +330,7 @@ class PromptUtils:
         self.answers_path = self.habitat_env.config.habitat_baselines.LLM.llm_answers_path
 
     def get_objectgoal_target(self):
-        return self.habitat_env.get_current_episode_info.goals[0].object_category
+        return self.habitat_env.get_current_episode_info().goals[0].object_category
     
     def get_instanceimagegoal_target(self):
         # TODO: Sistemare

@@ -379,9 +379,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             depth_obs = self.habitat_env.get_current_observation(type='depth')
 
             # Update the navigation ot the object with detection primitive
-            detection_dict = self.detect(target_object['labels'][0])
-            if detection_dict['boxes']:
-                self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
+            if self.habitat_env.task_name in ['eqa']:
+                detection_dict = self.detect(target_object['labels'][0])
+                if detection_dict['boxes']:
+                    self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
 
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
@@ -397,7 +398,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Target reached stopping the navigation
         """
 
-        if output_var is not None:
+        if self.habitat_env.task_name in ['eqa', 'open_eqa'] and output_var is not None:
             # If integer, convert to string
             if not isinstance(output_var, str):
                 output_var = self.var_to_str(output_var)

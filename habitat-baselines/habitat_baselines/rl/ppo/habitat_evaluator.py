@@ -637,11 +637,11 @@ class HabitatEvaluator(Evaluator):
             self.code_interpreter.parse(self.pseudo_code)
 
             # Run the code
-            #try:
-            self.code_interpreter.run()
-            #except:
-            #    # Handle issues and keep the valuation running
-            #    self.code_interpreter.handle_errors()
+            try:
+                self.code_interpreter.run()
+            except:
+                # Handle issues and keep the valuation running
+                self.code_interpreter.handle_errors()
 
         self.display_results()
 

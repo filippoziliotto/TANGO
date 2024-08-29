@@ -139,6 +139,11 @@ class Matterport3dDatasetV1(Dataset):
                 episode.question.answer_text = "white"
                 episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
 
+        for episode in self.episodes:
+            if (episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb') and (episode.question.eqa_object in ["tv stand"]) and (episode.question.question_type in ['location']):
+                episode.question.answer_text = "living room"
+                episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
+
         # remove episodes where episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb'
         # self.episodes = [episode for episode in self.episodes if episode.scene_id != 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb']
 

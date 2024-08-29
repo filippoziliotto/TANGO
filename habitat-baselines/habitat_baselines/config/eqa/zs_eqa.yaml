@@ -99,7 +99,7 @@ habitat_baselines:
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: True
+    use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.9
@@ -134,7 +134,7 @@ habitat_baselines:
   value_mapper:
     use_value_mapper: True
     type: "blip"
-    size: "base"
+    size: "large"
     visualize: True
     save_video: False
     policy: "v1"
@@ -142,8 +142,8 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 250
+    pixels_per_meter: 5
     save_image_embed: False
 
   LLM:

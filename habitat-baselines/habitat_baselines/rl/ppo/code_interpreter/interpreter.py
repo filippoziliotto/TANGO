@@ -233,6 +233,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'is_found': self.is_found,
             'look_up': self.look_up,
             'look_down': self.look_down,
+            'try_iin_target': self.try_iin_target,
         }
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
@@ -555,7 +556,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             else:
                 detection_dict = self.object_detector.detect(obs, target_name)
 
-        elif self.habitat_env.task_name in ['objectnav', 'open_eqa']:
+        elif self.habitat_env.task_name in ['objectnav', 'open_eqa', 'instance_imagenav']:
             # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
             if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
                 detection_dict = self.object_detector_closed.detect(obs, target_name)
@@ -605,11 +606,23 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.save_observation(target, 'iin_target')
             
         tau = self.feature_matcher.match(observation, target)
+        tau = self.try_iin_target(tau, target_name)
 
         if tau >= self.habitat_env.matcher.threshold:
             return True
         else:
             return False
+
+    def try_iin_target(self, tau, target_name):
+        if tau >= 10:
+            detection = self.detect(target_name)
+            if detection['boxes']:
+                self.define_variable('iin_detection', detection)
+                self.navigate_to('iin_detection')
+                observation = self.habitat_env.get_current_observation(type='rgb')
+                target = self.habitat_env.get_current_observation(type='instance_imagegoal')
+                tau = self.feature_matcher.match(observation, target)
+        return tau
 
     def answer(self, question, image=None):
         """

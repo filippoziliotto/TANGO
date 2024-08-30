@@ -37,7 +37,7 @@ habitat:
     split: train
     data_path: data/datasets/instance_imagenav/hm3d/v3/{split}/{split}.json.gz
 
-  seed: 12345
+  seed: 100
   task:
     type: InstanceImageNav-v1
     end_on_success: True
@@ -94,18 +94,18 @@ habitat_baselines:
 
   # Object Detector settings
   object_detector:
-    use_detector: False
+    use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.3
+    thresh: 0.1
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: False
+    use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet101"
-    additional_thresh: 0.9
+    additional_thresh: 0.5
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
@@ -147,14 +147,14 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 1.25
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 800
+    pixels_per_meter: 15
     save_image_embed: False
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.
+  object_distance_threshold: .8
   # To evaluate on all episodes, set this to -1
   test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/imagenav/hm3d-depth/"

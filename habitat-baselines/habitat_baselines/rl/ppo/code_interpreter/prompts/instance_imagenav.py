@@ -11,9 +11,7 @@ def generate_iinav_prompt(prompt_utils: PromptUtils):
     prompt = f"""
 target = answer('What is the object in the image?')
 explore_scene()
-object = detect(target)
-if match(target) and is_found(object):
-    navigate_to(object)
+if match(target):
     stop_navigation()"""
     return prompt
 

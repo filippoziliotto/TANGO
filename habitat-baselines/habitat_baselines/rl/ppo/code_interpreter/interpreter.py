@@ -213,7 +213,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'explore_scene': self.explore_scene,
             'detect': self.detect,
             'navigate_to': self.navigate_to,
-            'feature_match': self.feature_match,
+            'match': self.match,
             'stop_navigation': self.stop_navigation,   
             # Base Vision module functions 
             'answer': self.answer,
@@ -342,6 +342,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # Initial 360° turn for frontiers initialization
         self.turn_around()
+
+        # Assing target name in Instance Image Nav
+        if self.habitat_env.task_name in ["instance_imagenav"]:
+            target_name = self.get_variable('target')
+            self.map_scene(target_name)
 
         self.target.exploration = True
         self.target.get_target_coords()
@@ -587,16 +592,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             
         return  detection_dict[target_name]
 
-    def feature_match(self):
+    def match(self, target_name):
         """
         (Each frame) match target image with the current observation
         The actual class is defined in models.py
         """
         observation = self.habitat_env.get_current_observation(type='rgb')
         target = self.habitat_env.get_current_observation(type='instance_imagegoal')
+
         # For debugging purposes
         if self.habitat_env.save_obs:
-            self.habitat_env.debugger.save_obs(target, 'iin_target', target)
+            self.save_observation(target, 'iin_target')
             
         tau = self.feature_matcher.match(observation, target)
 
@@ -610,6 +616,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         VQA module for answering questions
         The actual class is defined in models.py
         """
+
         img = image if image is not None else self.habitat_env.get_current_observation(type='rgb')
 
         if self.habitat_env.task_name in ['eqa']:
@@ -621,6 +628,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         elif self.habitat_env.task_name in ['open_eqa']:
             answer = self.vqa.answer(question, img)
             self.habitat_env.eqa_vars['pred_answer'] = answer
+
+        # Adding support for ImageGoal Nav with target image goal
+        elif self.habitat_env.task_name in ['instance_imagenav']:
+            img = self.habitat_env.get_current_observation(type='instance_imagegoal')
+            answer = self.vqa.answer(question, img)
             
         else:
             answer = self.vqa.answer(question, img)

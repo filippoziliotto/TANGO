@@ -16,7 +16,8 @@ from transformers import (OwlViTProcessor, AutoTokenizer, set_seed, pipeline,
                           Blip2Processor, Blip2ForConditionalGeneration,
                           AutoModelForCausalLM, MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation,
                           BlipProcessor, ViTForImageClassification, ViTImageProcessor,
-                          CLIPProcessor, CLIPModel, BlipForImageTextRetrieval, GroundingDinoForObjectDetection
+                          CLIPProcessor, CLIPModel, BlipForImageTextRetrieval, GroundingDinoForObjectDetection,
+                          Blip2Model,
                           )
 
 from habitat_baselines.rl.ppo.models.matching_utils.matching import Matching
@@ -261,7 +262,7 @@ def get_roomcls_model(path, device):
     model.eval()
     return model.to(device), processor
 
-def get_value_mapper(device, type, size):
+def get_value_mapper(device, type, size, quantization=8):
     if type in ['clip']:
         if size in ['base']:
             model_name = "openai/clip-vit-base-patch32"
@@ -269,6 +270,7 @@ def get_value_mapper(device, type, size):
             model_name = "openai/clip-vit-large-patch14"
         processor = CLIPProcessor.from_pretrained(model_name)
         model = CLIPModel.from_pretrained(model_name)
+
     elif type in ['blip']:
         if size in ['base']:
             model_name = "Salesforce/blip-itm-base-flickr"
@@ -276,6 +278,26 @@ def get_value_mapper(device, type, size):
             model_name = "Salesforce/blip-itm-large-flickr"
         processor = BlipProcessor.from_pretrained(model_name)
         model = BlipForImageTextRetrieval.from_pretrained(model_name)
+
+    elif type in ['blip2']:
+        if size in ['2.7b']:
+            model_name = "Salesforce/blip2-opt-2.7b"
+        elif size in ['6.7b']:
+            model_name = "Salesforce/blip2-opt-6.7b"
+        processor = Blip2Processor.from_pretrained(model_name)
+
+        if quantization in [32]:
+            model = Blip2Model.from_pretrained(model_name, device_map={"": 0}, torch_dtype=torch.float32)
+        elif quantization in [16]:
+            model = Blip2Model.from_pretrained(model_name, device_map={"": 0}, torch_dtype=torch.float16)
+        elif quantization in [8]:
+            model = Blip2Model.from_pretrained(model_name, load_in_8bit=True, device_map={"": 0}, torch_dtype=torch.float16)
+        else:
+            raise ValueError("Invalid quantization setting!")
+
+        model.eval()
+        return model, processor
+        
     model.eval()
     return model.to(device), processor
 
@@ -334,7 +356,7 @@ class PromptUtils:
     
     def get_instanceimagegoal_target(self):
         # TODO: Sistemare
-        object_name = self.habitat_env.get_current_episode_info.goals[0].object_category
+        object_name = self.habitat_env.get_current_episode_info().goals[0].object_category
         return object_name
     
     def get_eqa_target(self):

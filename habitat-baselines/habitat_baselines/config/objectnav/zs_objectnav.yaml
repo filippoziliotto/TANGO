@@ -55,12 +55,13 @@ habitat:
     iterator_options:
       max_scene_repeat_steps: 50000
   simulator:
-    # forward_step_size: 0.15
+    forward_step_size: 0.25
     turn_angle: 20
     agents:
       main_agent:
         sim_sensors:
           depth_sensor:
+            min_depth: 0.1
             width: 256
             height: 256
             position: [0, 0.88, 0]
@@ -139,11 +140,11 @@ habitat_baselines:
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
-    min_obstacle_height: 0.41
+    min_obstacle_height: 0.3
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 250
-    pixels_per_meter: 5
+    map_size: 1000
+    pixels_per_meter: 20
     save_image_embed: False
 
   # Eval settings

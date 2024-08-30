@@ -322,14 +322,14 @@ class FeatureMatcher:
         image1 = rgb_to_grayscale(Image.fromarray(image1))
         image2 = rgb_to_grayscale(Image.fromarray(image2))
 
-        image1 = self.from_pil_to_tensor(image1).unsqueeze(0) / 255.
-        image2 = self.from_pil_to_tensor(image2).unsqueeze(0) / 255.
+        image1 = self.from_pil_to_tensor(image1).unsqueeze(0)
+        image2 = self.from_pil_to_tensor(image2).unsqueeze(0)
 
         return image1.to(self.device), image2.to(self.device)
 
     def predict_keypoints(self, observation, target):
         
-        img, target_img = self.load_images(observation, target)
+        img , target_img = self.load_images(observation, target)
         pred = self.matching_model({'image0': img, 'image1': target_img})
 
         pred = {k: v[0].detach().cpu().numpy() for k, v in pred.items()}
@@ -679,6 +679,11 @@ class ValueMapper:
             use_feature_map = save_image_embed
         )
 
+        if self.habitat_env.task_name in ["instance_imagenav"]:
+            self.feature_matcher = FeatureMatcher(
+                threshold=25.0
+            )
+
     """
     Map methods
     """
@@ -973,7 +978,7 @@ class ValueMapper:
     Additional methods to get the camera parameters and the current depth
     """
     def _get_cameras_parameters(self, config):
-            # Get camera parameters
+        # Get camera parameters
         self._min_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.min_depth
         self._max_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.max_depth
         self._fov = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.hfov
@@ -996,6 +1001,15 @@ class ValueMapper:
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
 
+    def _get_current_rgb(self):
+        return self.habitat_env.get_current_observation(type='rgb')
 
+    """
+    Instance-image Navigation Tau calculator, the idea is to use
+    the feature Matcher class to calculate the similarity of a frontier
+    given the current image and the image of the instance
+    """
 
-
+    def _get_current_tau(self, current_image):
+        tau = self.feature_matcher.match(current_image, self.target_image)
+        return tau

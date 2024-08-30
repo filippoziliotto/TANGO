@@ -83,12 +83,16 @@ class FrontierMap:
         """
         Method to update the starting frontiers with the new map
         """
-        for i, frontier in enumerate(frontiers):
-            updated_cosines = np.max(value_map[
-                int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter, 
-                int(frontier.xyz[1]) - self._pixels_per_meter : int(frontier.xyz[1]) + self._pixels_per_meter
-            ])
-            self.frontiers[i].cosine = updated_cosines
+        #for i, frontier in enumerate(frontiers):
+        #    updated_cosines = np.max(value_map[
+        #        int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter, 
+        #        int(frontier.xyz[1]) - self._pixels_per_meter : int(frontier.xyz[1]) + self._pixels_per_meter
+        #    ])
+        #    self.frontiers[i].cosine = updated_cosines
+
+        # Sort by cosine similarity
+        self.frontiers = sorted(frontiers, key=lambda obj: obj.cosine, reverse=True)
+        
 
         return self.frontiers
 
@@ -122,7 +126,7 @@ class FrontierMap:
     def process_input(self, type, text, image) -> torch.Tensor:
         if type in ['clip']:
             inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
-        elif type in ['blip']:
+        elif type in ['blip', 'blip2']:
             inputs = self.processor(image, text, return_tensors="pt").to(self.device)
         return inputs
     
@@ -147,6 +151,9 @@ class FrontierMap:
                 image_embed = self.encoder.vision_model(inputs.data["pixel_values"])
                 image_embed = normalize(self.encoder.vision_proj(image_embed.last_hidden_state[:, 0, :]), dim=-1)
                 image_embed = image_embed.squeeze(0).detach().cpu().numpy()
+
+        elif type in ['blip2']:
+            pass
             
         return cosine_sim, image_embed
 

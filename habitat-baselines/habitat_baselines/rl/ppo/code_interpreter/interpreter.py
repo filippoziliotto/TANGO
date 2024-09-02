@@ -513,8 +513,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         
         if self.habitat_env.task_name in ['eqa', 'open_eqa']:
-            self.habitat_env.eqa_vars['pred_answer'] = "none"
-            self.habitat_env.eqa_vars['orig_answer'] = "none"
+            self.answer(self.habitat_env.eqa_vars['question'])
 
         # Call STOP action and finish the episode
         self.habitat_env.execute_action(action='stop')

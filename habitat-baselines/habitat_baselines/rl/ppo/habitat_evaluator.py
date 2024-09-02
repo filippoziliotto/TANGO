@@ -38,7 +38,7 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_to
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
-DEBUG = True
+DEBUG = False
 
 class HabitatEvaluator(Evaluator):
     def __init__(self):

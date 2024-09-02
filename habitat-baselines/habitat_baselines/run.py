@@ -31,9 +31,9 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # config_name="objectnav/zs_objectnav.yaml"
     # config_name="objectnav/ablation/config_1.yaml"
     # IIN
-    config_name="instance_imagenav/zs_instance_imagenav.yaml"
+    # config_name="instance_imagenav/zs_instance_imagenav.yaml"
     # EQA
-    # config_name="eqa/zs_eqa.yaml"
+    config_name="eqa/zs_eqa.yaml"
     # OPEN-EQA
     # config_name="open_eqa/zs_open_eqa_semantic.yaml"
 )

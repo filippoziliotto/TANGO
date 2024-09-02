@@ -144,6 +144,10 @@ class Matterport3dDatasetV1(Dataset):
                 episode.question.answer_text = "living room"
                 episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
 
+        # Debug single scene
+        # scene  = 'data/scene_datasets/mp3d/QUCTc6BB5sX/QUCTc6BB5sX.glb'
+        # self.episodes = [episode for episode in self.episodes if episode.scene_id == scene]
+
         # remove episodes where episode.scene_id == 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb'
         # self.episodes = [episode for episode in self.episodes if episode.scene_id != 'data/scene_datasets/mp3d/EU6Fwq7SyZv/EU6Fwq7SyZv.glb']
 

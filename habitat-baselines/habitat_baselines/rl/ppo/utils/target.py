@@ -9,10 +9,11 @@ class TargetCoordinates:
     Class that defines the target coordinates
     This is NOT a target class, but a class that defines the coordinates
     """
-    def __init__(self):
+    def __init__(self, habitat_env):
         self.polar_coords = [None, None]
         self.cartesian_coords = [None, None, None]
-        self.get_camera_params()
+        self.get_camera_params(habitat_env.config)
+
 
     def from_bbox_to_polar(self, norm_depth, bbox):
         """
@@ -122,15 +123,18 @@ class TargetCoordinates:
         camera_hfov = np.deg2rad(camera_hfov)
         return camera_width / (2 * np.tan(camera_hfov / 2))
 
-    def get_camera_params(self):
+    def get_camera_params(self, config):
         """
         Function that returns the camera parameters
         """
         self.camera_width = 256
         self.camera_height = 256
         self.camera_hfov = 90
+        try:
+            self.min_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.min_depth
+        except:
+            self.min_depth = 0.
         self.max_depth = 10.
-        self.min_depth = 0.
         self.fl = self.get_camera_focal_lenght(self.camera_width, self.camera_hfov)
 
 class Target:
@@ -140,7 +144,7 @@ class Target:
         properties if in exploration or navigation phase
         """
         self.habitat_env = habitat_env
-        self.coordinates = TargetCoordinates()
+        self.coordinates = TargetCoordinates(self.habitat_env)
         self.exploration = True
 
         self.polar_coords = [None, None]

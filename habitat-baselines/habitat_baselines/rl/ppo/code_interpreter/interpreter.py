@@ -253,6 +253,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 nms_thresh=self.habitat_env.object_detector.nms_thresh,
                 store_detections=self.habitat_env.object_detector.store_detections,
                 use_detection_cls=self.habitat_env.object_detector.use_detection_cls,
+                detection_cls_thresh=self.habitat_env.object_detector.detection_cls_thresh,
             )
             print('Object detector loaded')
             if self.habitat_env.object_detector.use_additional_detector:
@@ -263,6 +264,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     nms_thresh=self.habitat_env.object_detector.additional_nms_thresh,
                     store_detections=False,
                     use_detection_cls=self.habitat_env.object_detector.use_detection_cls,
+                    detection_cls_thresh=self.habitat_env.object_detector.detection_cls_thresh,
                 )
                 print('Additional object detector loaded')
 

@@ -36,7 +36,7 @@ from habitat_baselines.rl.ppo.utils.map.geometry_utils import (
 
 
 class ObjectDetector:
-    def __init__(self, type, size, thresh=.3, nms_thresh=.3, store_detections=False, use_detection_cls=False):
+    def __init__(self, type, size, thresh=.3, nms_thresh=.3, store_detections=False, use_detection_cls=False, detection_cls_thresh=.2):
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.type = type
         self.thresh = thresh 
@@ -48,7 +48,7 @@ class ObjectDetector:
 
         # Use classifier to avoid false positives
         if self.use_detection_cls:
-            self.classifier = Classifier()
+            self.classifier = Classifier(detection_cls_thresh)
 
     def normalize_coord(self,bbox,img_size):
         w,h = img_size
@@ -204,12 +204,12 @@ class Classifier:
     So we filter the detection using aopen-set classifier ['target_name', 'other']
     We only Use Clip large, TODO implement also other possibilities
     """
-    def __init__(self):
+    def __init__(self, cls_thresh=0.2):
         self.type = "clip"
         self.size = "large"
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.model, self.processor = get_classifier_model(self.type, self.size, self.device)
-        self.confidence_threshold = 0.2
+        self.confidence_threshold = cls_thresh
         self.cls_nms_thresh = 0.3
 
     def calculate_sim(self,inputs):

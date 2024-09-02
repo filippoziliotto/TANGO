@@ -15,7 +15,7 @@ class_names_coco = {
     "couch": "couch",
     "bed": "bed",
     "chair": "chair",
-    "couch": "sofa",
+    # "couch": "sofa",
     # EQA
     'microwave': 'microwave',
     'refrigerator': 'refrigerator',

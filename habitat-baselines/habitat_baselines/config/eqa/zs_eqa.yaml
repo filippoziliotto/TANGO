@@ -102,7 +102,7 @@ habitat_baselines:
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: False
+    use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.9

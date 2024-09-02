@@ -42,7 +42,7 @@ habitat:
       distance_to_goal:
         distance_to: VIEW_POINTS
       success:
-        success_distance: 0.2
+        success_distance: 0.3
 
   dataset:
     type: ObjectNav-v1
@@ -61,7 +61,7 @@ habitat:
       main_agent:
         sim_sensors:
           depth_sensor:
-            min_depth: 0.1
+            min_depth: 0.5
             width: 256
             height: 256
             position: [0, 0.88, 0]
@@ -99,6 +99,7 @@ habitat_baselines:
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
+    detection_cls_thresh: 0.2
     # Additional object detector settings
     use_additional_detector: True
     additional_type: "detr"
@@ -143,8 +144,8 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 1000
-    pixels_per_meter: 20
+    map_size: 500
+    pixels_per_meter: 10
     save_image_embed: False
 
   # Eval settings

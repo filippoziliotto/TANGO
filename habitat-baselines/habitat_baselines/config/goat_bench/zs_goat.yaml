@@ -4,25 +4,27 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
-    - stop
+    - answer
     - move_forward
     - turn_left
     - turn_right
+    - look_up
+    - look_down
+    - subtask_stop
   - /habitat/task/measurements:
     - num_steps
     - distance_to_goal
-    - success
-    - spl
-    - soft_spl
-    - distance_to_goal_reward
+    - stop_before_episode_end
+    # - goat_distance_to_goal_reward
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - instance_imagegoal_sensor
-    - instance_imagegoal_hfov_sensor
+    - question_sensor
     - compass_sensor
     - gps_sensor
     - heading_sensor
+    - goat_goal_sensor
+    - current_subtask_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
@@ -31,73 +33,82 @@ defaults:
   - _self_
 
 habitat:
-
+  seed: 100
   dataset:
-    type: InstanceImageNav-v1
+    type: Goat-v1
     split: train
-    data_path: data/datasets/instance_imagenav/hm3d/v3/{split}/{split}.json.gz
+    data_path: data/datasets/goat_bench/hm3d/v1/{split}/{split}.json.gz
+    scenes_dir: "data/scene_datasets/"
 
-  seed: 55
   task:
-    type: InstanceImageNav-v1
-    end_on_success: True
-    reward_measure: distance_to_goal_reward
-    success_measure: spl
-    goal_sensor_uuid: instance_imagegoal
+    type: EQA-v0
+    reward_measure: answer_accuracy
+    success_measure: answer_accuracy
     measurements:
       distance_to_goal:
-        distance_to: VIEW_POINTS
-      success:
-        success_distance: 1.
-    success_reward: 2.5
-    slack_reward: -1e-3
+        distance_to: EQA_POINTS
+    # In the case look up/down actions are used
+    actions:
+      look_up:
+        tilt_angle: 20
+      look_down:
+        tilt_angle: 20
 
   environment:
-    max_episode_steps: 500
-    iterator_options:
-      max_scene_repeat_steps: 50000
+    max_episode_steps: 118
+
+  measurements:
+    distance_to_goal:
+      type: GoatDistanceToGoal
+      distance_to: "VIEW_POINTS"
+    spl:
+      type: GoatSPL
+    soft_spl:
+      type: GoatSoftSPL
+    success:
+      type: GoatSuccess
+      success_distance: 0.25 
+
   simulator:
-    forward_step_size: 0.25
-    turn_angle: 20
+    # turn_angle: 20
     agents:
       main_agent:
         sim_sensors:
-          depth_sensor:
-            width: 256
-            height: 256
-            min_depth: 0.5
-            hfov: 90
-            position: [0, 1.25, 0]
           rgb_sensor:
+            position: [0, 1.25, 0]
+            width: 256
+            height: 256
+          depth_sensor:
+            min_depth: 0.
+            position: [0, 1.25, 0]
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.25, 0]
-        height: 1.41
         radius: 0.18
-
+        height: 1.4
     habitat_sim_v0:
       gpu_device_id: 0
 
 habitat_baselines:
   torch_gpu_id: 0
-  task_name: instance_imagenav
+  task_name: eqa
+  # Visualization settings
+  # tensorboard_dir: tb
+  video_dir: video_dir/goat_bench/
   # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_iinav_minival
+    run_name: zs_eqa_10_prova
   save_obs:
-    save_to_disk: True 
+    save_to_disk: True
   sampling_strategy: "unreachable"
-  video_dir: video_dir/instance_imagenav/
-
   # Object Detector settings
   object_detector:
     use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.1
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -105,41 +116,39 @@ habitat_baselines:
     use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet101"
-    additional_thresh: 0.5
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
   feature_matcher:
-    use_matcher: True
+    use_matcher: False
   # Captioner settings
   captioner:
     use_captioner: False
     type: 'git'
     size: 'large'
     quantization: '8'
+  # VQA settings
   vqa:
     use_vqa: True
     type: 'blip'
     size: 'large'
     quantization: 16
     vqa_strategy: 'simple-vqa'
-
   # Segmenter settings
   segmenter:
     use_segmenter: False
-
-  # Room Classifier settings
+  
   room_classifier:
-    use_room_classifier: False
+    use_room_classifier: True
     cls_threshold: 0.7
     use_open_set_cls: True
     open_set_cls_thresh: 0.2
 
-  # Value Mapper settings
   value_mapper:
     use_value_mapper: True
-    type: "blip"
-    size: "large"
+    type: "clip"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"
@@ -151,15 +160,27 @@ habitat_baselines:
     pixels_per_meter: 10
     save_image_embed: False
 
+  LLM:
+    use_LLM: False
+    api_call:
+      use_gpt_api: False
+      model: "gpt-3.5"
+    open_source_call: 
+      use_open_source_llm: False
+      model: "phi3"
+      quantization: "8"
+    llm_answers_path: "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
+    debugging: False
+
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: .8
-  # To evaluate on all episodes, set this to -1
-  test_episode_count: -1
-  eval_ckpt_path_dir: "data/new_checkpoints/imagenav/hm3d-depth/"
+  object_distance_threshold: 1.2
+  
+  test_episode_count: 10
+  eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
-  checkpoint_folder: "data/new_checkpoints/imagenav/hm3d-depth/"
+  checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"
   trainer_name: ddppo
   num_updates: -1
   total_num_steps: 2.5e9
@@ -169,15 +190,14 @@ habitat_baselines:
   # this improves performance considerably
   force_torch_single_threaded: True
   evaluate: True
-  load_resume_state_config: False # added
-  verbose: False # added
-  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "success", "spl"]
+  load_resume_state_config: False
+  verbose: False
+  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy", "answer_similarity"]
 
   eval:
-    # minival: 185, val: 1855
-    split: minival
+    split: val_unseen
     should_load_ckpt: False
-    use_ckpt_config: False # added
+    use_ckpt_config: False
     # video_option: [ "disk" ]
 
   rl:
@@ -186,7 +206,7 @@ habitat_baselines:
         name: PointNavResNetPolicy
         obs_transforms:
           resize_shortest_edge:
-            trans_keys: [rgb, depth, instance_imagegoal]
+            trans_keys: [rgb, depth]
 
     ppo:
       # ppo params

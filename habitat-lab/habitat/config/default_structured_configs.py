@@ -1946,6 +1946,70 @@ class HabitatConfig(HabitatBaseConfig):
     gym: GymConfig = GymConfig()
 
 
+# Configs for GOAT Bench
+@dataclass
+class ClipObjectGoalSensorConfig(LabSensorConfig):
+    type: str = "ClipObjectGoalSensor"
+
+@dataclass
+class ClipImageGoalSensorConfig(LabSensorConfig):
+    type: str = "ClipImageGoalSensor"
+
+@dataclass
+class ClipGoalSelectorSensorConfig(LabSensorConfig):
+    type: str = "ClipGoalSelectorSensor"
+    image_sampling_probability: float = 0.8
+
+@dataclass
+class ImageGoalRotationSensorConfig(LabSensorConfig):
+    type: str = "ImageGoalRotationSensor"
+    sample_angle: bool = True
+
+@dataclass
+class CurrentEpisodeUUIDSensorConfig(LabSensorConfig):
+    type: str = "CurrentEpisodeUUIDSensor"
+
+@dataclass
+class LanguageGoalSensorConfig(LabSensorConfig):
+    type: str = "LanguageGoalSensor"
+    cache: str = "data/clip_embeddings/goat/language_nav_train_bert.pkl"
+    embedding_dim: int = 768
+
+@dataclass
+class CacheImageGoalSensorConfig(LabSensorConfig):
+    type: str = "CacheImageGoalSensor"
+    cache: str = "data/"
+    image_cache_encoder: str = ""
+
+@dataclass
+class GoatCurrentSubtaskSensorConfig(LabSensorConfig):
+    type: str = "GoatCurrentSubtaskSensor"
+    sub_task_type: List[str] = field(
+        default_factory=lambda: ["object", "description", "image"]
+    )
+
+@dataclass
+class GoatGoalSensorConfig(LabSensorConfig):
+    type: str = "GoatGoalSensor"
+    object_cache: str = ""
+    language_cache: str = ""
+    image_cache: str = ""
+    image_cache_encoder: str = ""
+
+@dataclass
+class GoatMultiGoalSensorConfig(LabSensorConfig):
+    type: str = "GoatMultiGoalSensor"
+    object_cache: str = ""
+    language_cache: str = ""
+    image_cache: str = ""
+    image_cache_encoder: str = ""
+
+@dataclass
+class SubtaskStopActionConfig(ActionConfig):
+    type: str = "SubtaskStopAction"
+
+
+
 # -----------------------------------------------------------------------------
 # Register configs in the Hydra ConfigStore
 # -----------------------------------------------------------------------------
@@ -2786,6 +2850,68 @@ cs.store(
     group="habitat/task/measurements",
     name="habitat_perf",
     node=RuntimePerfStatsMeasurementConfig,
+)
+
+# GOAT configs
+cs.store(
+    package="habitat.task.lab_sensors.clip_objectgoal",
+    group="habitat/task/lab_sensors",
+    name="clip_objectgoal",
+    node=ClipObjectGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.clip_imagegoal",
+    group="habitat/task/lab_sensors",
+    name="clip_imagegoal",
+    node=ClipImageGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.clip_goal_selector",
+    group="habitat/task/lab_sensors",
+    name="clip_goal_selector",
+    node=ClipGoalSelectorSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.image_goal_rotation",
+    group="habitat/task/lab_sensors",
+    name="image_goal_rotation",
+    node=ImageGoalRotationSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.current_episode_uuid",
+    group="habitat/task/lab_sensors",
+    name="current_episode_uuid",
+    node=CurrentEpisodeUUIDSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.language_goal",
+    group="habitat/task/lab_sensors",
+    name="language_goal",
+    node=LanguageGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.cache_instance_imagegoal",
+    group="habitat/task/lab_sensors",
+    name="cache_instance_imagegoal",
+    node=CacheImageGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.current_subtas",
+    group="habitat/task/lab_sensors",
+    name="current_subtas",
+    node=GoatCurrentSubtaskSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.goat_subtask_goal",
+    group="habitat/task/lab_sensors",
+    name="goat_subtask_goal",
+    node=GoatGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.goat_subtask_multi_goal",
+    group="habitat/task/lab_sensors",
+    name="goat_subtask_multi_goal",
+    node=GoatMultiGoalSensorConfig,
 )
 
 

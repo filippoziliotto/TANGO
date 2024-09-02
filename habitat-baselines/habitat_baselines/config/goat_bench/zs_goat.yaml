@@ -14,15 +14,15 @@ defaults:
   - /habitat/task/measurements:
     - num_steps
     - distance_to_goal
-    - stop_before_episode_end
-    # - goat_distance_to_goal_reward
+    - spl
+    - soft_spl
+    - goat_distance_to_goal_reward
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - question_sensor
     - compass_sensor
     - gps_sensor
-    - heading_sensor
+    # - heading_sensor
     - goat_goal_sensor
     - current_subtask_sensor
   - /habitat/dataset: dataset_config_schema
@@ -41,21 +41,21 @@ habitat:
     scenes_dir: "data/scene_datasets/"
 
   task:
-    type: EQA-v0
-    reward_measure: answer_accuracy
-    success_measure: answer_accuracy
-    measurements:
-      distance_to_goal:
-        distance_to: EQA_POINTS
+    type: Goat-v1
+    success_measure: success
+    reward_measure: goat_distance_to_goal_reward
+
     # In the case look up/down actions are used
     actions:
       look_up:
         tilt_angle: 20
       look_down:
         tilt_angle: 20
+      subtask_stop:
+        type: SubtaskStopAction
 
   environment:
-    max_episode_steps: 118
+    max_episode_steps: 500 # 5000 for GOAT task
 
   measurements:
     distance_to_goal:
@@ -70,28 +70,29 @@ habitat:
       success_distance: 0.25 
 
   simulator:
-    # turn_angle: 20
+    turn_angle: 20
     agents:
       main_agent:
         sim_sensors:
           rgb_sensor:
-            position: [0, 1.25, 0]
-            width: 256
-            height: 256
-          depth_sensor:
-            min_depth: 0.
-            position: [0, 1.25, 0]
             width: 256
             height: 256
             hfov: 90
-        radius: 0.18
-        height: 1.4
+            position: [0, 1.31, 0]
+          depth_sensor:
+            width: 256
+            height: 256
+            hfov: 90
+            position: [0, 1.31, 0]
+            hfov: 90
+        radius: 0.17
+        height: 1.41
     habitat_sim_v0:
       gpu_device_id: 0
 
 habitat_baselines:
   torch_gpu_id: 0
-  task_name: eqa
+  task_name: goat_bench
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/goat_bench/
@@ -99,7 +100,7 @@ habitat_baselines:
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_eqa_10_prova
+    run_name: zs_goat_bench_prova
   save_obs:
     save_to_disk: True
   sampling_strategy: "unreachable"

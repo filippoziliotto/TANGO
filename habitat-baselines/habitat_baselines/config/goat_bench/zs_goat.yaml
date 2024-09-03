@@ -4,7 +4,6 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
-    - answer
     - move_forward
     - turn_left
     - turn_right
@@ -14,9 +13,9 @@ defaults:
   - /habitat/task/measurements:
     - num_steps
     - goat_distance_to_goal
+    - goat_success
     - goat_spl
     - goat_soft_spl
-    - goat_success
     - goat_distance_to_goal_reward
     # - goat_top_down_map
   - /habitat/task/lab_sensors:
@@ -67,8 +66,15 @@ habitat:
       subtask_stop:
         type: SubtaskStopAction
 
+    lab_sensors:
+      goat_subtask_goal_sensor:
+        object_cache: data/goat-assets/goal_cache/ovon/category_name_clip_embeddings.pkl
+        image_cache: data/goat-assets/goal_cache/iin/train_embeddings/
+        image_cache_encoder: CLIP_goat
+        language_cache: data/goat-assets/goal_cache/language_nav/train_instruction_clip_embeddings.pkl
+
   environment:
-    max_episode_steps: 500 # 5000 for GOAT task
+    max_episode_steps: 100 # 5000 for GOAT task
 
   simulator:
     turn_angle: 20

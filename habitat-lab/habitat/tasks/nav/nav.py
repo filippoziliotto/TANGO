@@ -138,7 +138,7 @@ class PointGoalSensor(Sensor):
         self._sim = sim
 
         self._goal_format = getattr(config, "goal_format", "CARTESIAN")
-        assert self._goal_format in ["CARTESIAN", "POLAR"]
+        assert self._goal_format in ["CARTESIAN", "POLAR", "GOAT"]
 
         self._dimensionality = getattr(config, "dimensionality", 2)
         assert self._dimensionality in [2, 3]
@@ -321,7 +321,12 @@ class IntegratedPointGoalGPSAndCompassSensor(PointGoalSensor):
         agent_state = self._sim.get_agent_state()
         agent_position = agent_state.position
         rotation_world_agent = agent_state.rotation
-        goal_position = np.array(episode.goals[0].position, dtype=np.float32)
+
+        self._goal_format = "GOAT"
+        if self._goal_format in ["GOAT"]:
+            goal_position = np.array([0,0,0])
+        else:
+            goal_position = np.array(episode.goals[0].position, dtype=np.float32)
 
         return self._compute_pointgoal(
             agent_position, rotation_world_agent, goal_position

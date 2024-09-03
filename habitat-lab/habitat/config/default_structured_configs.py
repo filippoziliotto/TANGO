@@ -1972,7 +1972,7 @@ class CurrentEpisodeUUIDSensorConfig(LabSensorConfig):
 @dataclass
 class LanguageGoalSensorConfig(LabSensorConfig):
     type: str = "LanguageGoalSensor"
-    cache: str = "data/clip_embeddings/goat/language_nav_train_bert.pkl"
+    cache: str = "data/goat-assets/goal_cache/language_nav/val_unseen_instruction_clip_embeddings.pkl"
     embedding_dim: int = 768
 
 @dataclass
@@ -1995,6 +1995,11 @@ class GoatGoalSensorConfig(LabSensorConfig):
     language_cache: str = ""
     image_cache: str = ""
     image_cache_encoder: str = ""
+
+@dataclass
+class GoatPointGoalWithGPSCompassSensorConfig(LabSensorConfig):
+    type: str = "GoatPointGoalWithGPSCompassSensor"
+
 
 @dataclass
 class GoatMultiGoalSensorConfig(LabSensorConfig):
@@ -2046,6 +2051,7 @@ class GoatSoftSPLMeasurementConfig(MeasurementConfig):
 class GoatDistanceToGoalRewardMeasurementConfig(MeasurementConfig):
     type: str = "GoatDistanceToGoalReward"
     success_distance: float = 0.25
+
 
 
 # -----------------------------------------------------------------------------
@@ -2938,6 +2944,12 @@ cs.store(
     group="habitat/task/lab_sensors",
     name="current_subtask_sensor",
     node=GoatCurrentSubtaskSensorConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.goat_pointgoal_with_gps_compass_sensor",
+    group="habitat/task/lab_sensors",
+    name="goat_pointgoal_with_gps_compass_sensor",
+    node=GoatPointGoalWithGPSCompassSensorConfig,
 )
 cs.store(
     package="habitat.task.lab_sensors.goat_subtask_goal_sensor",

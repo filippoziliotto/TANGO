@@ -13,17 +13,18 @@ defaults:
     - subtask_stop
   - /habitat/task/measurements:
     - num_steps
-    - distance_to_goal
-    - spl
-    - soft_spl
+    - goat_distance_to_goal
+    - goat_spl
+    - goat_soft_spl
+    - goat_success
     - goat_distance_to_goal_reward
-    # - top_down_map
+    # - goat_top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - compass_sensor
     - gps_sensor
     # - heading_sensor
-    - goat_goal_sensor
+    - goat_subtask_goal_sensor
     - current_subtask_sensor
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
@@ -42,8 +43,20 @@ habitat:
 
   task:
     type: Goat-v1
-    success_measure: success
+    success_measure: goat_success
     reward_measure: goat_distance_to_goal_reward
+
+    measurements:
+      goat_distance_to_goal:
+        type: GoatDistanceToGoal
+        distance_to: "VIEW_POINTS"
+      goat_spl:
+        type: GoatSPL
+      goat_soft_spl:
+        type: GoatSoftSPL
+      goat_success:
+        type: GoatSuccess
+        success_distance: 0.25 
 
     # In the case look up/down actions are used
     actions:
@@ -56,18 +69,6 @@ habitat:
 
   environment:
     max_episode_steps: 500 # 5000 for GOAT task
-
-  measurements:
-    distance_to_goal:
-      type: GoatDistanceToGoal
-      distance_to: "VIEW_POINTS"
-    spl:
-      type: GoatSPL
-    soft_spl:
-      type: GoatSoftSPL
-    success:
-      type: GoatSuccess
-      success_distance: 0.25 
 
   simulator:
     turn_angle: 20
@@ -84,7 +85,6 @@ habitat:
             height: 256
             hfov: 90
             position: [0, 1.31, 0]
-            hfov: 90
         radius: 0.17
         height: 1.41
     habitat_sim_v0:
@@ -106,7 +106,7 @@ habitat_baselines:
   sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
-    use_detector: True
+    use_detector: False
     type: "owl-vit"
     size: "base"
     thresh: 0.3
@@ -114,7 +114,7 @@ habitat_baselines:
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: True
+    use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.9
@@ -131,7 +131,7 @@ habitat_baselines:
     quantization: '8'
   # VQA settings
   vqa:
-    use_vqa: True
+    use_vqa: False
     type: 'blip'
     size: 'large'
     quantization: 16
@@ -147,7 +147,7 @@ habitat_baselines:
     open_set_cls_thresh: 0.2
 
   value_mapper:
-    use_value_mapper: True
+    use_value_mapper: False
     type: "clip"
     size: "base"
     visualize: True

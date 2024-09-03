@@ -2008,6 +2008,44 @@ class GoatMultiGoalSensorConfig(LabSensorConfig):
 class SubtaskStopActionConfig(ActionConfig):
     type: str = "SubtaskStopAction"
 
+@dataclass
+class GoatTopDownMapMeasurementConfig(TopDownMapMeasurementConfig):
+    type: str = "GoatTopDownMap"
+    draw_shortest_path: bool = False
+
+
+@dataclass
+class OVONDistanceToGoalMeasurementConfig(MeasurementConfig):
+    type: str = "OVONDistanceToGoal"
+    distance_to: str = "VIEW_POINTS"
+
+
+@dataclass
+class GoatDistanceToGoalMeasurementConfig(MeasurementConfig):
+    type: str = "GoatDistanceToGoal"
+    distance_to: str = "VIEW_POINTS"
+
+
+@dataclass
+class GoatSuccessMeasurementConfig(MeasurementConfig):
+    type: str = "GoatSuccess"
+    success_distance: float = 0.25
+
+
+@dataclass
+class GoatSPLMeasurementConfig(MeasurementConfig):
+    type: str = "GoatSPL"
+
+
+@dataclass
+class GoatSoftSPLMeasurementConfig(MeasurementConfig):
+    type: str = "GoatSoftSPL"
+
+
+@dataclass
+class GoatDistanceToGoalRewardMeasurementConfig(MeasurementConfig):
+    type: str = "GoatDistanceToGoalReward"
+    success_distance: float = 0.25
 
 
 # -----------------------------------------------------------------------------
@@ -2854,64 +2892,112 @@ cs.store(
 
 # GOAT configs
 cs.store(
-    package="habitat.task.lab_sensors.clip_objectgoal",
+    package="habitat.task.lab_sensors.clip_objectgoal_sensor",
     group="habitat/task/lab_sensors",
-    name="clip_objectgoal",
+    name="clip_objectgoal_sensor",
     node=ClipObjectGoalSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.clip_imagegoal",
+    package="habitat.task.lab_sensors.clip_imagegoal_sensor",
     group="habitat/task/lab_sensors",
-    name="clip_imagegoal",
+    name="clip_imagegoal_sensor",
     node=ClipImageGoalSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.clip_goal_selector",
+    package="habitat.task.lab_sensors.clip_goal_selector_sensor",
     group="habitat/task/lab_sensors",
-    name="clip_goal_selector",
+    name="clip_goal_selector_sensor",
     node=ClipGoalSelectorSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.image_goal_rotation",
+    package="habitat.task.lab_sensors.image_goal_rotation_sensor",
     group="habitat/task/lab_sensors",
-    name="image_goal_rotation",
+    name="image_goal_rotation_sensor",
     node=ImageGoalRotationSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.current_episode_uuid",
+    package="habitat.task.lab_sensors.current_episode_uuid_sensor",
     group="habitat/task/lab_sensors",
-    name="current_episode_uuid",
+    name="current_episode_uuid_sensor",
     node=CurrentEpisodeUUIDSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.language_goal",
+    package="habitat.task.lab_sensors.language_goal_sensor",
     group="habitat/task/lab_sensors",
-    name="language_goal",
+    name="language_goal_sensor",
     node=LanguageGoalSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.cache_instance_imagegoal",
+    package="habitat.task.lab_sensors.cache_instance_imagegoal_sensor",
     group="habitat/task/lab_sensors",
-    name="cache_instance_imagegoal",
+    name="cache_instance_imagegoal_sensor",
     node=CacheImageGoalSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.current_subtas",
+    package="habitat.task.lab_sensors.current_subtask_sensor",
     group="habitat/task/lab_sensors",
-    name="current_subtas",
+    name="current_subtask_sensor",
     node=GoatCurrentSubtaskSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.goat_subtask_goal",
+    package="habitat.task.lab_sensors.goat_subtask_goal_sensor",
     group="habitat/task/lab_sensors",
-    name="goat_subtask_goal",
+    name="goat_subtask_goal_sensor",
     node=GoatGoalSensorConfig,
 )
 cs.store(
-    package="habitat.task.lab_sensors.goat_subtask_multi_goal",
+    package="habitat.task.lab_sensors.goat_subtask_multi_goal_sensor",
     group="habitat/task/lab_sensors",
-    name="goat_subtask_multi_goal",
+    name="goat_subtask_multi_goal_sensor",
     node=GoatMultiGoalSensorConfig,
+)
+cs.store(
+    package="habitat.task.actions.subtask_stop",
+    group="habitat/task/actions",
+    name="subtask_stop",
+    node=SubtaskStopActionConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_distance_to_goal_reward",
+    group="habitat/task/measurements",
+    name="goat_distance_to_goal_reward",
+    node=GoatDistanceToGoalRewardMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_distance_to_goal",
+    group="habitat/task/measurements",
+    name="goat_distance_to_goal",
+    node=GoatDistanceToGoalMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_success",
+    group="habitat/task/measurements",
+    name="goat_success",
+    node=GoatSuccessMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_spl",
+    group="habitat/task/measurements",
+    name="goat_spl",
+    node=GoatSPLMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_soft_spl",
+    group="habitat/task/measurements",
+    name="goat_soft_spl",
+    node=GoatSoftSPLMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.ovon_distance_to_goal",
+    group="habitat/task/measurements",
+    name="ovon_distance_to_goal",
+    node=OVONDistanceToGoalMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.goat_top_down_map",
+    group="habitat/task/measurements",
+    name="goat_top_down_mapr",
+    node=GoatTopDownMapMeasurementConfig,
 )
 
 

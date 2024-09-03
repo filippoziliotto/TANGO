@@ -15,7 +15,7 @@ from habitat.datasets.pointnav.pointnav_dataset import (
 )
 from habitat.tasks.nav.object_nav_task import ObjectGoal, ObjectGoalNavEpisode
 
-from habitat.datasets.goat_bench.dataset.ovon_dataset import OVONObjectViewLocation
+from habitat.datasets.goat_bench.ovon_dataset import OVONObjectViewLocation
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig

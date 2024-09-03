@@ -4,27 +4,34 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
+    - stop
     - move_forward
     - turn_left
     - turn_right
     - look_up
     - look_down
-    - subtask_stop
   - /habitat/task/measurements:
     - num_steps
-    - goat_distance_to_goal
-    - goat_success
-    - goat_spl
-    - goat_soft_spl
-    - goat_distance_to_goal_reward
+    - distance_to_goal
+    - success
+    - spl
+    - soft_spl
+    - distance_to_goal_reward
     # - goat_top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - compass_sensor
     - gps_sensor
-    # - heading_sensor
-    - goat_subtask_goal_sensor
-    - current_subtask_sensor
+    - heading_sensor
+    - instance_imagegoal_sensor
+    - instance_imagegoal_hfov_sensor
+    #- goat_subtask_goal_sensor
+    #- current_subtask_sensor
+    #- image_goal_rotation_sensor
+    #- language_goal_sensor
+    #- goat_subtask_multi_goal_sensor
+    #- current_episode_uuid_sensor
+    
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
@@ -35,7 +42,7 @@ defaults:
 habitat:
   seed: 100
   dataset:
-    type: Goat-v1
+    type: Goat-v1-single
     split: train
     data_path: data/datasets/goat_bench/hm3d/v1/{split}/{split}.json.gz
     scenes_dir: "data/scene_datasets/"
@@ -46,16 +53,19 @@ habitat:
     reward_measure: goat_distance_to_goal_reward
 
     measurements:
-      goat_distance_to_goal:
-        type: GoatDistanceToGoal
+      distance_to_goal:
+        type: DistanceToGoal
         distance_to: "VIEW_POINTS"
-      goat_spl:
-        type: GoatSPL
-      goat_soft_spl:
-        type: GoatSoftSPL
-      goat_success:
-        type: GoatSuccess
+      spl:
+        type: SPL
+      soft_spl:
+        type: SoftSPL
+      success:
+        type: Success
         success_distance: 0.25 
+      #pointgoal_with_gps_compass:
+      #  type: PointGoalWithGPSCompass
+
 
     # In the case look up/down actions are used
     actions:
@@ -63,21 +73,15 @@ habitat:
         tilt_angle: 20
       look_down:
         tilt_angle: 20
-      subtask_stop:
-        type: SubtaskStopAction
-
-    lab_sensors:
-      goat_subtask_goal_sensor:
-        object_cache: data/goat-assets/goal_cache/ovon/category_name_clip_embeddings.pkl
-        image_cache: data/goat-assets/goal_cache/iin/train_embeddings/
-        image_cache_encoder: CLIP_goat
-        language_cache: data/goat-assets/goal_cache/language_nav/train_instruction_clip_embeddings.pkl
 
   environment:
     max_episode_steps: 100 # 5000 for GOAT task
 
   simulator:
+    # type: GOATSim-v0
     turn_angle: 20
+    # tilt_angle: 20
+    # action_space_config: "v2-goat"
     agents:
       main_agent:
         sim_sensors:
@@ -98,29 +102,29 @@ habitat:
 
 habitat_baselines:
   torch_gpu_id: 0
-  task_name: goat_bench
+  task_name: goat
   # Visualization settings
   # tensorboard_dir: tb
-  video_dir: video_dir/goat_bench/
+  video_dir: video_dir/goat/
   # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_goat_bench_prova
+    run_name: zs_goat_prova
   save_obs:
     save_to_disk: True
   sampling_strategy: "unreachable"
   # Object Detector settings
   object_detector:
-    use_detector: False
+    use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.3
+    thresh: 0.4
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
     # Additional object detector settings
-    use_additional_detector: False
+    use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.9
@@ -153,7 +157,7 @@ habitat_baselines:
     open_set_cls_thresh: 0.2
 
   value_mapper:
-    use_value_mapper: False
+    use_value_mapper: True
     type: "clip"
     size: "base"
     visualize: True
@@ -184,7 +188,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.2
   
-  test_episode_count: 10
+  test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

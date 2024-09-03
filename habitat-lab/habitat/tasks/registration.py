@@ -30,3 +30,7 @@ _try_register_vln_task()
 _try_register_rearrange_task()
 _try_register_open_eqa_task()
 _try_register_goat_task()
+
+
+#from habitat.tasks.goat_bench import _try_register_goat_habitat_sim
+#_try_register_goat_habitat_sim()

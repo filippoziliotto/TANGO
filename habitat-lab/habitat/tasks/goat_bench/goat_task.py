@@ -12,6 +12,7 @@ from habitat.utils.geometry_utils import quaternion_from_coeff, quaternion_rotat
 from habitat_sim import bindings as hsim
 from habitat_sim.agent.agent import AgentState, SixDOFPose
 from habitat.tasks.nav.nav import PointGoalSensor
+from habitat.core.utils import not_none_validator
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
@@ -25,6 +26,7 @@ class GoatEpisode(NavigationEpisode):
     """
     object_category: Optional[str] = None
     tasks: List[NavigationEpisode] = []
+
 
     @property
     def goals_keys(self) -> Dict:
@@ -69,6 +71,19 @@ class GoatEpisode(NavigationEpisode):
             goals_keys.append(goal_key)
 
         return goals_keys
+
+
+@attr.s(auto_attribs=True, kw_only=True)
+class GoatEpisodeSingle(NavigationEpisode):
+    r"""Goat Episode
+
+    :param object_category: Category of the obect
+    """
+    object_category: Optional[str] = None
+    tasks: List[NavigationEpisode] = []
+    is_image_goal: bool = False
+    goat_task: Optional[str] = None
+    goal_image_id: Optional[int] = 0
 
 
 @registry.register_task(name="Goat-v1")
@@ -388,7 +403,8 @@ class ImageGoalRotationSensor(Sensor):
         ]
 
     def _get_pointnav_episode_image_goal(self, episode: NavigationEpisode):
-        goal_position = np.array(episode.goals[0].position, dtype=np.float32)
+        #goal_position = np.array(episode.goals[0]position, dtype=np.float32)
+        goal_position = np.array(episode.goals[0][0]['position'], dtype=np.float32)
 
         # Add rotation to episode
         if self.config.sample_angle:
@@ -400,12 +416,18 @@ class ImageGoalRotationSensor(Sensor):
             rng = np.random.RandomState(seed)
             angle = rng.uniform(0, 2 * np.pi)
         source_rotation = [0, np.sin(angle / 2), 0, np.cos(angle / 2)]
-        episode.goals[0].rotation = source_rotation
+        #episode.goals[0].rotation = source_rotation
+        
+        source_rotation = episode.goals[0][0]['view_points'][0]['agent_state']['rotation']
 
         goal_observation = self._sim.get_observations_at(
             position=goal_position.tolist(), rotation=source_rotation
         )
-        return goal_observation[self._rgb_sensor_uuid]
+        goal_image = goal_observation[self._rgb_sensor_uuid]
+
+        #save to disk
+        cv2.imwrite("images/goat_goal_iin.png", goal_image)
+        return goal_image
 
     def get_observation(
         self,

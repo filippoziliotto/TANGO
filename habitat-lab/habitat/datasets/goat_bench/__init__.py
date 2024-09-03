@@ -10,13 +10,13 @@ from habitat.core.registry import registry
 
 def _try_register_goat_dataset():
     try:
-        from habitat.datasets.goat_bench.goat_dataset import (  # noqa: F401 isort:skip
-            GoatDatasetV1,
-        )
+        from habitat.datasets.goat_bench.goat_dataset_single import (  # noqa: F401 isort:skip
+            GoatDatasetV1Single,
+    )
     except ImportError as e:
         goat_dataset_import_error = e
 
-        @registry.register_dataset(name="Goat-v1")
+        @registry.register_dataset(name="Goat-v1-single")
         class GoatDatasetImportError(Dataset):
             def __init__(self, *args, **kwargs):
                 raise goat_dataset_import_error

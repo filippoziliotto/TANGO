@@ -374,6 +374,9 @@ class PromptUtils:
         gt_answer = ep_infos.question.answer_text
         return (id_, question, gt_answer)
 
+    def get_goat_target(self):
+        return self.habitat_env.get_current_episode_info().goals
+
 """
 Utils to sample points from different
 floors since HM3D-sem is not fully annotated

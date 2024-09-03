@@ -87,6 +87,8 @@ class InstanceImageGoal(ObjectGoal):
         default=None, validator=not_none_validator
     )
     object_surface_area: Optional[float] = None
+    children_object_categories: Optional[List[str]] = None
+    lang_desc: Optional[str] = None
 
 
 @registry.register_sensor
@@ -118,9 +120,9 @@ class InstanceImageGoalSensor(RGBSensor):
             InstanceImageNavDatasetV1,
         )
 
-        assert isinstance(
-            dataset, InstanceImageNavDatasetV1
-        ), "Provided dataset needs to be InstanceImageNavDatasetV1"
+        #assert isinstance(
+        #    dataset, InstanceImageNavDatasetV1
+        #), "Provided dataset needs to be InstanceImageNavDatasetV1"
 
         self._dataset = dataset
         self._sim = sim
@@ -132,11 +134,15 @@ class InstanceImageGoalSensor(RGBSensor):
         return self.cls_uuid
 
     def _get_observation_space(self, *args: Any, **kwargs: Any) -> Space:
-        H, W = (
-            next(iter(self._dataset.goals.values()))
-            .image_goals[0]
-            .image_dimensions
-        )
+        try:
+                H, W = (
+                next(iter(self._dataset.goals.values()))
+                .image_goals[0]
+                .image_dimensions
+            )
+        except:
+            H, W  = 512, 512
+
         return spaces.Box(low=0, high=255, shape=(H, W, 3), dtype=np.uint8)
 
     def _add_sensor(

@@ -2,7 +2,7 @@
 
 import json
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 import attr
 from habitat.core.registry import registry
@@ -23,20 +23,32 @@ from habitat.datasets.goat_bench.languagenav_dataset import (
     LanguageNavEpisode,
     OVONObjectViewLocation,
 )
-from habitat.tasks.goat_bench.goat_task import GoatEpisode, GoatEpisodeSingle
+from habitat.tasks.goat_bench.goat_task import GoatEpisodeSingle, GoatEpisode
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
+from habitat.tasks.nav.object_nav_task import (
+    ObjectGoal,
+    ObjectGoalNavEpisode,
+    ObjectViewLocation,
+)
+from habitat.tasks.nav.instance_image_nav_task import (
+    InstanceImageGoal,
+    InstanceImageGoalNavEpisode,
+    InstanceImageParameters,
+)
 
 
-@registry.register_dataset(name="Goat-v1")
-class GoatDatasetV1(PointNavDatasetV1):
+
+@registry.register_dataset(name="Goat-v1-single")
+class GoatDatasetV1Single(PointNavDatasetV1):
     r"""
     Class inherited from PointNavDataset that loads GOAT dataset.
     """
-    episodes: List[LanguageNavEpisode] = []  # type: ignore
+    episodes: List[GoatEpisodeSingle] = []
     content_scenes_path: str = "{data_path}/content/{scene}.json.gz"
-    goals: Dict[str, Sequence[ObjectGoal]]
+    goals: Dict[str, Sequence[InstanceImageGoal]]
+
 
     @staticmethod
     def dedup_goals(dataset: Dict[str, Any]) -> Dict[str, Any]:
@@ -71,9 +83,10 @@ class GoatDatasetV1(PointNavDatasetV1):
 
         return result
 
-    def __init__(self, config: Optional["DictConfig"] = None) -> None:
+    def __init__(self, config: Optional["DictConfig"] = None, **kwargs) -> None:
         self.goals = {}
         super().__init__(config)
+
         self.episodes = list(self.episodes)
 
     @staticmethod
@@ -109,7 +122,8 @@ class GoatDatasetV1(PointNavDatasetV1):
     def __deserialize_imagenav_goal(
         serialized_goal: Dict[str, Any]
     ) -> InstanceImageGoal:
-        g = InstanceImageGoal(**serialized_goal)
+        tmp = serialized_goal.copy()
+        g = InstanceImageGoal(**tmp)
 
         for vidx, view in enumerate(g.view_points):
             view_location = ObjectViewLocation(**view)  # type: ignore[arg-type]
@@ -135,6 +149,7 @@ class GoatDatasetV1(PointNavDatasetV1):
             deserialized = self.dedup_goals(deserialized)
 
         self.goals = deserialized["goals"]
+
         num_filtered_eps = 0
 
         for i, composite_episode in enumerate(deserialized["episodes"]):
@@ -219,3 +234,49 @@ class GoatDatasetV1(PointNavDatasetV1):
                     composite_episode.goals.append(goal_inst)
 
             self.episodes.append(composite_episode)  # type: ignore [attr-defined]
+
+        episode_list = []
+        k = 0
+        for i, goat_ep in enumerate(self.episodes):
+            for j, subtask in enumerate(goat_ep.tasks):
+                single_episode = {}
+                single_episode['episode_id'] = k
+                k += 1
+                single_episode['scene_id'] = goat_ep.scene_id
+                tmp = goat_ep.goals[j].copy()
+                single_episode['goals'] = tmp
+                single_episode['object_category'] = subtask[0]
+                single_episode['goat_task'] = subtask[1]
+
+                if j == 0:
+                    single_episode['start_position'] = goat_ep.start_position
+                    single_episode['start_rotation'] = goat_ep.start_rotation
+                else:
+                    try:
+                        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['position']
+                        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['rotation']
+                    except:
+                        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.position
+                        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.rotation
+
+                # check rotation is horizontal, check if useful
+                single_episode['start_rotation'][0] = 0
+                single_episode['start_rotation'][2] = 0
+                for w, img_goals in enumerate(tmp):
+                    tmp2 = img_goals.copy()
+                    try:
+                        single_episode['goals'][w] = self.__deserialize_imagenav_goal(tmp2)
+                    except:
+                        single_episode['goals'][w] = InstanceImageGoal(**tmp2)
+
+                if subtask[1] in ['object', 'description']:
+                    single_episode['is_image_goal'] = False
+                else:
+                    single_episode['is_image_goal'] = True
+
+                episode_list.append(GoatEpisodeSingle(**single_episode))
+
+        self.episodes = episode_list
+
+
+

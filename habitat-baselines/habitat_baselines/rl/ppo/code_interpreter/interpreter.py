@@ -557,7 +557,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             else:
                 detection_dict = self.object_detector.detect(obs, target_name)
 
-        elif self.habitat_env.task_name in ['objectnav', 'open_eqa', 'instance_imagenav']:
+        elif self.habitat_env.task_name in ['objectnav', 'open_eqa', 'instance_imagenav', 'goat']:
             # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
             if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
                 detection_dict = self.object_detector_closed.detect(obs, target_name)

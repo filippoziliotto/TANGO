@@ -5,6 +5,7 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.objectnav import generate
 from habitat_baselines.rl.ppo.code_interpreter.prompts.instance_imagenav import generate_iinav_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import generate_eqa_prompt
 from habitat_baselines.rl.ppo.code_interpreter.prompts.open_eqa import generate_open_eqa_prompt
+from habitat_baselines.rl.ppo.code_interpreter.prompts.goat import generate_goat_prompt
 from habitat_baselines.rl.ppo.utils.utils import PromptUtils
 
 def base_prompt(examples, question):
@@ -97,7 +98,8 @@ class CodeGenerator(object):
             elif self.task_name == 'open_eqa':
                 prompt = generate_open_eqa_prompt(self.prompt_utils)
                 self.habitat_env.eqa_vars = self.get_open_eqa_vars()
-
+            elif self.task_name == 'goat':
+                prompt = generate_goat_prompt(self.prompt_utils)
         else:
             prompt = self.generate_with_llm(examples, question)
         return prompt

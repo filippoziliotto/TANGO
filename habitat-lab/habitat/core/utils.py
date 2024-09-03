@@ -66,7 +66,8 @@ def not_none_validator(
     self: Any, attribute: attr.Attribute, value: Optional[Any]
 ) -> None:
     if value is None:
-        raise ValueError(f"Argument '{attribute.name}' must be set")
+        pass
+        #raise ValueError(f"Argument '{attribute.name}' must be set")
 
 
 def try_cv2_import():

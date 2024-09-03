@@ -321,12 +321,7 @@ class IntegratedPointGoalGPSAndCompassSensor(PointGoalSensor):
         agent_state = self._sim.get_agent_state()
         agent_position = agent_state.position
         rotation_world_agent = agent_state.rotation
-
-        self._goal_format = "GOAT"
-        if self._goal_format in ["GOAT"]:
-            goal_position = np.array([0,0,0])
-        else:
-            goal_position = np.array(episode.goals[0].position, dtype=np.float32)
+        goal_position = np.array(episode.goals[0].position, dtype=np.float32)
 
         return self._compute_pointgoal(
             agent_position, rotation_world_agent, goal_position
@@ -705,6 +700,7 @@ class SPL(Measure):
                 self._start_end_episode_distance, self._agent_episode_distance
             )
         )
+
 
 
 @registry.register_measure

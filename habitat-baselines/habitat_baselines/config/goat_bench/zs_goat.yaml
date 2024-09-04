@@ -75,7 +75,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 518 # 5000 for GOAT task
+    max_episode_steps: 20 # 5000 for GOAT task
     iterator_options:
       cycle: False
       shuffle: False
@@ -193,7 +193,7 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.1
+  object_distance_threshold: .8
   
   test_episode_count: 1000
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"

@@ -341,6 +341,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         # In MP3D-EQA set max-actions shortest path
+        # Also useful in GOAT episodes
         self.spawn_target_location(max_dist=self.habitat_env.config.habitat_baselines.episode_max_actions)
 
         # Initial 360° turn for frontiers initialization
@@ -353,7 +354,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # Specific for GOAT this is a mess
         if self.habitat_env.task_name in ['goat']:
-            self.save_last_position_and_teleport()
             try:
                 target_name = self.get_variable('target')
                 self.map_scene(target_name)            
@@ -463,8 +463,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Save the last position of the agent in the episode
         """
         if self.habitat_env.get_current_step() == 0 and self.habitat_env.last_agent_pos is not None:
-            sim = self.habitat_env.get_habitat_sim()
-            sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
+            if not self.habitat_env.check_scene_change():
+                sim = self.habitat_env.get_habitat_sim()
+                sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
+            else:
+                pass
 
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
@@ -482,6 +485,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             sim = self.habitat_env.get_habitat_sim()
             episode = self.habitat_env.get_current_episode_info()
             set_spawn_state(sim, episode, max_dist)
+
+        if self.habitat_env.task_name in ['goat']:
+            self.save_last_position_and_teleport()
+        
                 
     def go_downstairs(self):
         """

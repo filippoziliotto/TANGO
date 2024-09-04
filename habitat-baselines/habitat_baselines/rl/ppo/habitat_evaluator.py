@@ -164,6 +164,7 @@ class HabitatEvaluator(Evaluator):
 
         self.pbar = tqdm.tqdm(total=self.number_of_eval_episodes * self.evals_per_ep)
         self.agent.eval()
+        self.current_scene = self.get_current_episode_info().scene_id
 
     def predict_action(self, coords):
         """
@@ -616,6 +617,16 @@ class HabitatEvaluator(Evaluator):
             'states': np.array(states)
         }
         return views
+
+    def check_scene_change(self):
+        """
+        Check if the scene has changed
+        """
+        current_scene = self.get_current_episode_info().scene_id
+        if self.current_scene != current_scene:
+            self.current_scene = current_scene
+            return True
+        return False
 
     def evaluate_agent(
         self,

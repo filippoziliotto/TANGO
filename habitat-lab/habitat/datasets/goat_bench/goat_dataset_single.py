@@ -272,7 +272,7 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 #    ]
                 episode_list.append(GoatEpisodeSingle(**single_episode))
 
-                if k >= 5:
+                if (k - len(self.episodes)) >= 5:
                     break
 
         self.episodes.extend(episode_list)

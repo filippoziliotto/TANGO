@@ -45,6 +45,7 @@ class HabitatEvaluator(Evaluator):
         self.current_step = 0
         self.eqa_vars = None
         self.debugger = DebugObservation()
+        self.last_agent_pos = None
         pass
 
     """
@@ -629,7 +630,7 @@ class HabitatEvaluator(Evaluator):
 
         sim = self.get_habitat_sim()
         ep = self.get_current_episode_info()
-        ep_tasks = ep.tasks
+        ep1 = self.envs.call(['habitat_env'])[0]
 
         code_generator = CodeGenerator(self, debug=True)
         self.code_interpreter = PseudoCodeExecuter(self)

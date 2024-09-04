@@ -28,7 +28,7 @@ from habitat_sim.agent.agent import AgentState, SixDOFPose
 try:
     from habitat.datasets.image_nav.instance_image_nav_dataset import (
         InstanceImageNavDatasetV1,
-    )
+)
 except ImportError:
     pass
 
@@ -116,13 +116,11 @@ class InstanceImageGoalSensor(RGBSensor):
         *args: Any,
         **kwargs: Any,
     ):
-        from habitat.datasets.image_nav.instance_image_nav_dataset import (
-            InstanceImageNavDatasetV1,
-        )
 
-        #assert isinstance(
-        #    dataset, InstanceImageNavDatasetV1
-        #), "Provided dataset needs to be InstanceImageNavDatasetV1"
+        # TODO: Remove comments wihout circular imports
+        # assert isinstance(
+        #     dataset, (InstanceImageNavDatasetV1, GoatDatasetV1Single)
+        # ), "Provided dataset needs to be InstanceImageNavDatasetV1 or GoatDatasetV1Single"
 
         self._dataset = dataset
         self._sim = sim
@@ -134,13 +132,15 @@ class InstanceImageGoalSensor(RGBSensor):
         return self.cls_uuid
 
     def _get_observation_space(self, *args: Any, **kwargs: Any) -> Space:
-        try:
-                H, W = (
+
+        # if isinstance(self._dataset, InstanceImageNavDatasetV1):
+        if False:
+            H, W = (
                 next(iter(self._dataset.goals.values()))
                 .image_goals[0]
                 .image_dimensions
             )
-        except:
+        else:
             H, W  = 512, 512
 
         return spaces.Box(low=0, high=255, shape=(H, W, 3), dtype=np.uint8)

@@ -425,8 +425,6 @@ class ImageGoalRotationSensor(Sensor):
         )
         goal_image = goal_observation[self._rgb_sensor_uuid]
 
-        #save to disk
-        cv2.imwrite("images/goat_goal_iin.png", goal_image)
         return goal_image
 
     def get_observation(

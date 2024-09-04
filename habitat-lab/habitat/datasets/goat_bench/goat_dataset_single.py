@@ -27,18 +27,6 @@ from habitat.tasks.goat_bench.goat_task import GoatEpisodeSingle, GoatEpisode
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
-from habitat.tasks.nav.object_nav_task import (
-    ObjectGoal,
-    ObjectGoalNavEpisode,
-    ObjectViewLocation,
-)
-from habitat.tasks.nav.instance_image_nav_task import (
-    InstanceImageGoal,
-    InstanceImageGoalNavEpisode,
-    InstanceImageParameters,
-)
-
-
 
 @registry.register_dataset(name="Goat-v1-single")
 class GoatDatasetV1Single(PointNavDatasetV1):
@@ -48,6 +36,7 @@ class GoatDatasetV1Single(PointNavDatasetV1):
     episodes: List[GoatEpisodeSingle] = []
     content_scenes_path: str = "{data_path}/content/{scene}.json.gz"
     goals: Dict[str, Sequence[InstanceImageGoal]]
+    current_scene_episodes: List[GoatEpisode] = []
 
 
     @staticmethod
@@ -233,11 +222,11 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                     ]
                     composite_episode.goals.append(goal_inst)
 
-            self.episodes.append(composite_episode)  # type: ignore [attr-defined]
+            self.current_scene_episodes.append(composite_episode)  # type: ignore [attr-defined]
 
         episode_list = []
-        k = 0
-        for i, goat_ep in enumerate(self.episodes):
+        k = 0 + len(self.episodes) + 1
+        for i, goat_ep in enumerate(self.current_scene_episodes):
             for j, subtask in enumerate(goat_ep.tasks):
                 single_episode = {}
                 single_episode['episode_id'] = k
@@ -248,20 +237,21 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 single_episode['object_category'] = subtask[0]
                 single_episode['goat_task'] = subtask[1]
 
-                if j == 0:
-                    single_episode['start_position'] = goat_ep.start_position
-                    single_episode['start_rotation'] = goat_ep.start_rotation
-                else:
-                    try:
-                        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['position']
-                        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['rotation']
-                    except:
-                        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.position
-                        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.rotation
+                #if j == 0:
+                single_episode['start_position'] = goat_ep.start_position
+                single_episode['start_rotation'] = goat_ep.start_rotation
+                #else:
+                #    try:
+                #        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['position']
+                #        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['rotation']
+                #    except:
+                #        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.position
+                #        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.rotation
 
                 # check rotation is horizontal, check if useful
                 single_episode['start_rotation'][0] = 0
                 single_episode['start_rotation'][2] = 0
+
                 for w, img_goals in enumerate(tmp):
                     tmp2 = img_goals.copy()
                     try:
@@ -274,9 +264,22 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 else:
                     single_episode['is_image_goal'] = True
 
+                #if self.check_final_is_not_start(single_episode['start_position'], goat_ep.goals[j][0]['view_points'][0].agent_state.position):
+                #    # We move the agent 1m 
+                #    single_episode['start_position'] = [
+                #        x + 1 if en in [0, 2] else x
+                #        for en, x in enumerate(single_episode['start_position'])
+                #    ]
                 episode_list.append(GoatEpisodeSingle(**single_episode))
 
-        self.episodes = episode_list
+                if k >= 5:
+                    break
 
+        self.episodes.extend(episode_list)
 
+    def check_final_is_not_start(self, start_pos, final_pos):
+        if start_pos == final_pos:
+            return False
+        return True
+        
 

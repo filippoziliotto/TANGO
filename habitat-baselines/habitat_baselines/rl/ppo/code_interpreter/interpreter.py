@@ -351,6 +351,15 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             target_name = self.get_variable('target')
             self.map_scene(target_name)
 
+        # Specific for GOAT this is a mess
+        if self.habitat_env.task_name in ['goat']:
+            self.save_last_position_and_teleport()
+            try:
+                target_name = self.get_variable('target')
+                self.map_scene(target_name)            
+            except:
+                pass 
+
         self.target.exploration = True
         self.target.get_target_coords()
 
@@ -416,13 +425,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # Needed for Open-EQA
             self.habitat_env.eqa_vars['pred_answer'] = output_var
 
-        # Call STOP action and finish the episode
-        self.habitat_env.execute_action(action='stop')
-        self.habitat_env.update_episode_stats()
-
         # Exit all the loops in the pseudo-code
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
+
+        # For GOAT dataset
+        if self.habitat_env.task_name in ['goat']:
+            self.save_last_position_and_teleport()
+
+        # Call STOP action and finish the episode
+        self.habitat_env.execute_action(action='stop')
+        self.habitat_env.update_episode_stats()
 
         # Reset deteciton dict
         if self.habitat_env.object_detector.store_detections:   
@@ -431,7 +444,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # Reset value mapper
         if self.habitat_env.value_mapper.use_value_mapper:
             self.value_mapper.reset_map()
-    
+
     def turn_around(self):
         """
         Make a complete turn at the beginning of the episode
@@ -445,6 +458,17 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 # Using "explore" as ITM to select best frontiers for exploration
                 self.map_scene("explore")
 
+    def save_last_position_and_teleport(self):
+        """
+        Save the last position of the agent in the episode
+        """
+        if self.habitat_env.get_current_step() == 0 and self.habitat_env.last_agent_pos is not None:
+            sim = self.habitat_env.get_habitat_sim()
+            sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
+
+        if self.loop_exit_flag:
+            self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
+            
     """
     Utility modules for navigation settings
     """

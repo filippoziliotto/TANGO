@@ -43,14 +43,14 @@ habitat:
   seed: 100
   dataset:
     type: Goat-v1-single
-    split: train
+    split: val_unseen
     data_path: data/datasets/goat_bench/hm3d/v1/{split}/{split}.json.gz
     scenes_dir: "data/scene_datasets/"
 
   task:
     type: Goat-v1
-    success_measure: goat_success
-    reward_measure: goat_distance_to_goal_reward
+    success_measure: success
+    reward_measure: distance_to_goal_reward
 
     measurements:
       distance_to_goal:
@@ -62,7 +62,7 @@ habitat:
         type: SoftSPL
       success:
         type: Success
-        success_distance: 0.25 
+        success_distance: 0.3
       #pointgoal_with_gps_compass:
       #  type: PointGoalWithGPSCompass
 
@@ -75,7 +75,13 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 100 # 5000 for GOAT task
+    max_episode_steps: 518 # 5000 for GOAT task
+    iterator_options:
+      cycle: False
+      shuffle: False
+      group_by_scene: True
+      num_episode_sample: -1
+      max_scene_repeat_episodes: -1
 
   simulator:
     # type: GOATSim-v0
@@ -89,13 +95,13 @@ habitat:
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.31, 0]
+            position: [0, 1.2, 0]
           depth_sensor:
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.31, 0]
-        radius: 0.17
+            position: [0, 1.2, 0]
+        radius: 0.18
         height: 1.41
     habitat_sim_v0:
       gpu_device_id: 0
@@ -117,9 +123,9 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit"
+    type: "owl-vit2"
     size: "base"
-    thresh: 0.4
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -132,7 +138,8 @@ habitat_baselines:
 
   # Feature Matcher settings
   feature_matcher:
-    use_matcher: False
+    use_matcher: True
+    threshold: 35
   # Captioner settings
   captioner:
     use_captioner: False
@@ -186,9 +193,9 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.2
+  object_distance_threshold: 1.1
   
-  test_episode_count: -1
+  test_episode_count: 1000
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"
@@ -203,7 +210,7 @@ habitat_baselines:
   evaluate: True
   load_resume_state_config: False
   verbose: False
-  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal", "answer_accuracy", "answer_similarity"]
+  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal"]
 
   eval:
     split: val_unseen

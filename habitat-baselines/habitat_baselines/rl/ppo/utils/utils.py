@@ -375,7 +375,11 @@ class PromptUtils:
         return (id_, question, gt_answer)
 
     def get_goat_target(self):
-        return self.habitat_env.get_current_episode_info().goals
+        episode = self.habitat_env.get_current_episode_info()
+        goal_task = episode.goat_task
+        object_category = episode.object_category
+        object_description = episode.goals[0].lang_desc
+        return (goal_task, object_category, object_description)
 
 """
 Utils to sample points from different

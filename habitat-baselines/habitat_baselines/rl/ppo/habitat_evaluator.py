@@ -639,10 +639,6 @@ class HabitatEvaluator(Evaluator):
         self.get_env_variables(**kwargs)
         self.init_env()
 
-        sim = self.get_habitat_sim()
-        ep = self.get_current_episode_info()
-        ep1 = self.envs.call(['habitat_env'])[0]
-
         code_generator = CodeGenerator(self, debug=True)
         self.code_interpreter = PseudoCodeExecuter(self)
 

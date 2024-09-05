@@ -1908,6 +1908,7 @@ class DatasetConfig(HabitatBaseConfig):
         "data/datasets/pointnav/"
         "habitat-test-scenes/v1/{split}/{split}.json.gz"
     )
+    eqa_mapping: Optional[str] = 'default'
 
 
 @dataclass

@@ -396,7 +396,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             depth_obs = self.habitat_env.get_current_observation(type='depth')
 
             # Update the navigation ot the object with detection primitive
-            if self.habitat_env.task_name in ['eqa']:
+            if self.habitat_env.task_name in ['eqa', 'objectnav']:
                 detection_dict = self.detect(target_object['labels'][0])
                 if detection_dict['boxes']:
                     self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])

@@ -115,11 +115,11 @@ class HabitatVectorEnvFactory(VectorEnvFactory):
             workers_ignore_signals=workers_ignore_signals,
         )
 
-        # envs = vector_env_cls(
+        #envs = vector_env_cls(
         #     make_env_fn=make_gym_from_config,
         #     env_fn_args=tuple((c,) for c in configs),
         #     workers_ignore_signals=workers_ignore_signals,
-        # )
+        #)
 
         if config.habitat.simulator.renderer.enable_batch_renderer:
             envs.initialize_batch_renderer(config)

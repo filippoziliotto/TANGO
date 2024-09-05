@@ -351,3 +351,42 @@ class AnswerAction(Action):
                 )
             }
         )
+    
+
+stoi_eqa_map = {
+'<unk>':'<unk>',
+'black':'black',
+'brown':'brown',
+'off-white':'white',
+'white':'white',
+'blue':'blue',
+'tan':'white',
+'grey':'grey',
+'slate grey':'grey',
+'silver':'silver',
+'green':'green',
+'yellow green':'green',
+'red brown':'brown',
+'yellow pink':'pink',
+'orange yellow':'orange',
+'bathroom':'bathroom',
+'kitchen':'kitchen',
+'lounge':'living room',
+'spa':'spa',
+'bedroom':'bedroom',
+'living room':'living room',
+'family room':'living room',
+'light blue':'blue',
+'tv room':'living room',
+'closet':'closet',
+'laundry room':'laundry room',
+'olive green':'green',
+'foyer':'hallway',
+'hallway':'hallway',
+'dining room':'dining room',
+'purple pink':'pink',
+'red':'red',
+'purple':'purple',
+'yellow':'yellow',
+'office':'office',
+}

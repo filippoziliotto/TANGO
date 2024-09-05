@@ -164,6 +164,9 @@ class HabitatEvaluator(Evaluator):
 
         self.pbar = tqdm.tqdm(total=self.number_of_eval_episodes * self.evals_per_ep)
         self.agent.eval()
+
+        # If num_envs is > 1, then we need to call the environment for each env
+        self.env_call_list = ['habitat_env' for i in range(self.envs.num_envs)]
         self.current_scene = self.get_current_episode_info().scene_id
 
     def predict_action(self, coords):
@@ -468,17 +471,17 @@ class HabitatEvaluator(Evaluator):
         else:
             return False
 
-    def get_habitat_sim(self):
+    def get_habitat_sim(self, env=0):
         """
         Call habitat simulator for the current environment
         """
-        return self.envs.call(['habitat_env'])[0].sim
+        return self.envs.call(self.env_call_list)[env].sim
 
-    def get_current_episode_info(self):
+    def get_current_episode_info(self, env=0):
         """
         Get the current episode information
         """
-        return self.envs.call(['habitat_env'])[0].current_episode
+        return self.envs.call(self.env_call_list)[env].current_episode
 
     def get_current_position(self):
         """

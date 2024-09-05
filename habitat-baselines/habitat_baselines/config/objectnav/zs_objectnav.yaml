@@ -61,7 +61,7 @@ habitat:
       main_agent:
         sim_sensors:
           depth_sensor:
-            min_depth: 0.5
+            min_depth: 0.
             width: 256
             height: 256
             position: [0, 0.88, 0]
@@ -93,7 +93,7 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit"
+    type: "owl-vit2"
     size: "base"
     thresh: 0.3
     nms_thresh: 0.5
@@ -135,7 +135,7 @@ habitat_baselines:
   # Value Mapper settings
   value_mapper:
     use_value_mapper: True
-    type: "blip"
+    type: "clip"
     size: "large"
     visualize: True
     save_video: False

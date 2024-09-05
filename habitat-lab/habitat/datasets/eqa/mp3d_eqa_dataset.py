@@ -16,7 +16,7 @@ from habitat.core.dataset import Dataset
 from habitat.core.registry import registry
 from habitat.core.simulator import AgentState
 from habitat.datasets.utils import VocabDict
-from habitat.tasks.eqa.eqa import EQAEpisode, QuestionData
+from habitat.tasks.eqa.eqa import EQAEpisode, QuestionData, stoi_eqa_map
 from habitat.tasks.nav.nav import ShortestPathPoint
 from habitat.tasks.nav.object_nav_task import ObjectGoal
 
@@ -61,6 +61,8 @@ class Matterport3dDatasetV1(Dataset):
 
         if config is None:
             return
+        
+        self.eqa_mapping = config.eqa_mapping
 
         with gzip.open(config.data_path.format(split=config.split), "rt") as f:
             self.from_json(f.read(), scenes_dir=config.scenes_dir)
@@ -95,8 +97,16 @@ class Matterport3dDatasetV1(Dataset):
 
             # Support EQA dictionary format additions
             episode.question.answer_token_orig = episode.question.answer_token
-            try: episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
-            except: episode.question.answer_token = self.answer_vocab.stoi['<unk>']
+
+            try: 
+                # Support for EQA in Navprog with simplified answer space
+                if self.eqa_mapping not in ["default"]:
+                    episode.question.answer_text = stoi_eqa_map[episode.question.answer_text]
+
+                episode.question.answer_token = self.answer_vocab.stoi[episode.question.answer_text]
+                
+            except: 
+                episode.question.answer_token = self.answer_vocab.stoi['<unk>']
             
             for g_index, goal in enumerate(episode.goals):
                 episode.goals[g_index] = ObjectGoal(**goal)

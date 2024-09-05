@@ -40,6 +40,7 @@ habitat:
     split: train
     data_path: data/datasets/eqa/mp3d/v1/{split}/{split}.json.gz
     scenes_dir: "data/scene_datasets/"
+    eqa_mapping: "simplified"
 
   task:
     type: EQA-v0

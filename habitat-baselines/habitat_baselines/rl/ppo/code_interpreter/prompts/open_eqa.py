@@ -3,7 +3,7 @@ from habitat_baselines.rl.ppo.utils.names import roomcls_labels
 import json
 import os
 import numpy as np
-DEBUG = fALSE
+DEBUG = False
 
 """
 Prompt examples and utils for OPEN-EQA task
@@ -22,6 +22,8 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     gt_answer = episode_utils[2]
     print(f'{question} {gt_answer}.')
 
+    if not DEBUG:
+        return retrieve_open_eqa_prompts(prompt_utils)
     # read data/datasets/open_eqa/20_prompts_open_eqa.txt and append to list lines in between ## and ##
     episodes = []
     with open('data/datasets/open_eqa/20_prompts_open_eqa.txt', 'r') as file:
@@ -150,7 +152,7 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     # Extract only the questions
     for key, value in episodes.items():
         ep_question = value['question']
-        if ep_question.strip() == question.split(':')[1].strip():
+        if ep_question.strip() == question:
             prompt = value['prompt']
             return prompt
 

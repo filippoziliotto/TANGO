@@ -352,7 +352,8 @@ class AnswerAction(Action):
             }
         )
     
-
+# 14 colors
+# 10 rooms
 stoi_eqa_map = {
 '<unk>':'<unk>',
 'black':'black',

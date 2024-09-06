@@ -11,20 +11,20 @@ if is_found(laptop):
     navigate_to(laptop)
     return
 
-Question: search for the toilet
+Question: search for the toilet seat
 Program:
 # search for the bathroom
 explore_scene()
 bathroom = detect("bathroom")
 
 if is_found(bathroom):
-    # search for the toilet
+    # search for the toilet seat
     explore_scene()
-    toilet = detect("toilet")
+    toilet_seat = detect("toilet seat")
 
-    if is_found(toilet):
+    if is_found(toilet_seat):
         # navigate to it and stop
-        navigate_to(toilet)
+        navigate_to(toilet_seat)
         return
 
 Question: navigate to the given image
@@ -107,7 +107,7 @@ sink = detect("sink")
 
 if is_found(sink):
     # answer the question
-    navigate_to(remote)
+    navigate_to(sink)
     ans = answer("which room is the sink located in?")
     return ans
 

@@ -16,8 +16,8 @@ def read_questions(file_name, task):
     with open(file_name, 'r') as file:
         for line in file:
             if line.startswith("Question: "):
-                if task == "open-eqa":
-                    line = line.split("|")[0]
+                if task == "open_eqa":
+                    line = line.split("|")[0].rstrip()
                 questions.append(line)
     return questions
 
@@ -31,11 +31,11 @@ def main(
         path: str = "habitat_baselines/rl/ppo/code_interpreter/prompts/examples/", 
         questions_file: str = "open_eqa_questions.txt", 
         example_file: str = "generic_examples.txt", 
-        task: str = "open-eqa",
+        task: str = "open_eqa",
         debug_api: bool = False,
         ):
 
-    assert task in ["objectnav", "iin", "mp3d_eqa", "open_eqa"], "Invalid task name."
+    assert task in ["objectnav", "iin", "mp3d_eqa", "open_eqa", "goat"], "Invalid task name."
     assert debug_api or "client" in globals(), "OpenAI library not imported."
 
     # Define the path to the files
@@ -90,9 +90,9 @@ def main(
 
 if __name__ == "__main__":
     path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/"
-    questions_file = "mp3d_eqa_questions.txt"
+    questions_file = "open_eqa_questions.txt"
     example_file = "generic_examples.txt"
-    task = "mp3d_eqa"
+    task = "open_eqa"
 
     main(path, questions_file, example_file, task, DEBUG)
     print("API call finished.")

@@ -4,7 +4,7 @@ defaults:
   - /habitat: habitat_config_base
   - /habitat/task: task_config_base
   - /habitat/task/actions:
-    - answer
+    - open_eqa_answer
     - move_forward
     - turn_left
     - turn_right
@@ -14,15 +14,15 @@ defaults:
     - num_steps
     - distance_to_goal
     # - episode_info
-    - answer_accuracy
+    - open_eqa_answer_accuracy
     # - answer_similarity
-    - minimum_number_of_actions
+    # - minimum_number_of_actions
     - stop_before_episode_end
-    - smallest_distance_to_target
+    # - smallest_distance_to_target
     # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
-    - openeqa_question_sensor
+    - open_eqa_question_sensor
     - compass_sensor
     - gps_sensor
     - heading_sensor
@@ -44,8 +44,8 @@ habitat:
 
   task:
     type: OPENEQA-v0
-    reward_measure: answer_accuracy
-    success_measure: answer_accuracy
+    reward_measure: open_eqa_answer_accuracy
+    success_measure: open_eqa_answer_accuracy
     measurements:
       distance_to_goal:
         distance_to: POINT
@@ -67,6 +67,7 @@ habitat:
             width: 256
             height: 256
           depth_sensor:
+            min_depth: 0.
             width: 256
             height: 256
           semantic_sensor:

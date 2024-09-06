@@ -235,6 +235,7 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'look_down': self.look_down,
             'try_iin_target': self.try_iin_target,
         }
+
 class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Primitive functions interactive with habitat

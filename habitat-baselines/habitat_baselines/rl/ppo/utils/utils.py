@@ -421,7 +421,7 @@ def get_floor_levels(current_height, floor_points):
 Metrics for Open-EQA task
 Maybe this should go into Habitat-main metrics
 """
-def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
+def save_open_eqa_results(is_first, vars, config):
     """
     Used only in Open-EQA to save the results in a txt file.
     These results should then be used to calculate the metrics.
@@ -441,7 +441,7 @@ def save_open_eqa_results(is_first, vars, config, num_steps, gt_steps):
 
     # Write or append to the file
     with open(file_path, "a") as f:
-        f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']} | {num_steps} | {gt_steps}\n")
+        f.write(f"{vars['question']} | {vars['gt_answer']} | {vars['pred_answer']}\n")
 
 """
 Print on screen episode stats
@@ -475,7 +475,7 @@ def log_episode_stats(
         formatted_results = (
             f"num_steps: {v['num_steps']} | "
             f"distante_to_goal: {v['distance_to_goal']:.2f} | "
-            f"minimum_actions: {v['minimum_number_of_actions']} | "
+            # f"minimum_actions: {v['minimum_number_of_actions']} | "
             f"stop_before_end: {v['stop_before_episode_end']} | "
             f"Answer: {eqa_vars['pred_answer']} | "
         )
@@ -497,7 +497,7 @@ def log_episode_stats(
     if task in ['open_eqa']:
         if len(stats_episodes) == 1: is_first =  True
         else: is_first = False
-        save_open_eqa_results(is_first, eqa_vars, config, v['num_steps'], v['minimum_number_of_actions'])
+        save_open_eqa_results(is_first, eqa_vars, config)
 
     return stats_episodes
 

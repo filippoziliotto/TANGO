@@ -75,7 +75,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 20 # 5000 for GOAT task
+    max_episode_steps: 30 # 5000 for GOAT task
     iterator_options:
       cycle: False
       shuffle: False
@@ -195,7 +195,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: .8
   
-  test_episode_count: 3
+  test_episode_count: 1000
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

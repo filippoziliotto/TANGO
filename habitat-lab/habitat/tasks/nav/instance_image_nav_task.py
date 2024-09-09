@@ -221,7 +221,14 @@ class InstanceImageGoalSensor(RGBSensor):
         if episode_uniq_id == self._current_episode_id:
             return self._current_image_goal
 
-        img_params = episode.goals[0].image_goals[episode.goal_image_id]
+        # Needed for Goat Episode Dataset Bugs
+        if episode.goals[0].image_goals is not None:
+            img_params = episode.goals[0].image_goals[episode.goal_image_id]
+        else:
+            for goal in episode.goals:
+                if goal.image_goals is not None:
+                    img_params = goal.image_goals[episode.goal_image_id]
+                    break
         self._current_image_goal = self._get_instance_image_goal(img_params)
         self._current_episode_id = episode_uniq_id
 
@@ -259,7 +266,14 @@ class InstanceImageGoalHFOVSensor(Sensor):
             )
             return None
 
-        img_params = episode.goals[0].image_goals[episode.goal_image_id]
+        # Needed for Goat Episode Dataset Bugs
+        if episode.goals[0].image_goals is not None:
+            img_params = episode.goals[0].image_goals[episode.goal_image_id]
+        else:
+            for goal in episode.goals:
+                if goal.image_goals is not None:
+                    img_params = goal.image_goals[episode.goal_image_id]
+                    break
         return np.array([img_params.hfov], dtype=np.float32)
 
 

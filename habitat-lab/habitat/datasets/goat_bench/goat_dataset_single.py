@@ -277,6 +277,9 @@ class GoatDatasetV1Single(PointNavDatasetV1):
 
         self.episodes.extend(episode_list)
 
+        # Debugging InstnaceImageNav Nonetype object error
+        self.episodes = [ep for ep in self.episodes if ep.scene_id == 'data/scene_datasets/hm3d/val//00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb']
+
     def check_final_is_not_start(self, start_pos, final_pos):
         if start_pos == final_pos:
             return False

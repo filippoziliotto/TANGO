@@ -509,7 +509,8 @@ def log_final_results(
         step_id: int = 0,
         writer: object = None,
         config: dict = None,
-        logger: object = None
+        logger: object = None,
+        eqa_errors_count: int = 0
 ):
     """
     Log results to wandb, differentiate results based on task
@@ -575,6 +576,12 @@ def log_final_results(
         logger.info('| EVALUATION FINISHED |')
         logger.info('-----------------------')
 
+        # Count how many episode have code generation errors
+        logger.info('-----------------------')
+        logger.info('Code Generation Errors: ' +  str(eqa_errors_count))
+        logger.info('-----------------------')
+
+        # Display final results
         for k, v in aggregated_stats.items():
             logger.info(f"Average episode {k}: {v:.4f}")
         logger.info('-----------------------')    

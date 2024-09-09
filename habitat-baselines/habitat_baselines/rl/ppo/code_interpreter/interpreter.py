@@ -61,6 +61,10 @@ class PseudoCodeInterpreter:
         self.lines = [line for line in self.lines if not line[0].startswith("#") and line[0] != ""]
         # Change return statement to stop_navigation()
         self.lines = [(parse_return_statement(line), line[1]) if "return" in line[0] else line for line in self.lines]
+
+        # Check if ``` are present (in Open-EQA),  if yes delete the element
+        self.lines = [line for line in self.lines if not line[0].startswith("```")]
+
         # Add to explore_scene a while loop
         self.lines = parse_while_statement(self.lines)
         # Initialiaze other variables
@@ -233,6 +237,8 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'is_found': self.is_found,
             'look_up': self.look_up,
             'look_down': self.look_down,
+            'look_right': self.look_right,
+            'look_left': self.look_left,
             'try_iin_target': self.try_iin_target,
         }
 
@@ -564,6 +570,28 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # Reset value mapper
         if self.habitat_env.value_mapper.use_value_mapper:
             self.value_mapper.reset_map()
+
+        # Count how many errors in GPT code
+        if self.habitat_env.task_name in ['open_eqa']:
+            self.habitat_env.gpt_errors += 1
+
+    def look_right(self):
+        """
+        Look right primitive
+        """
+        # Look right action
+        self.habitat_env.execute_action(action='turn_right')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def look_left(self):
+        """
+        Look left primitive
+        """
+        # Look left action
+        self.habitat_env.execute_action(action='turn_left')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
     """
     Computer Vision modules

@@ -57,7 +57,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 518
+    max_episode_steps: 118
   simulator:
     turn_angle: 20
     agents:
@@ -143,9 +143,9 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 800
-    pixels_per_meter: 20
-    save_image_embed: True
+    map_size: 500
+    pixels_per_meter: 10
+    save_image_embed: False
 
   LLM:
     use_LLM: False
@@ -162,7 +162,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 1.
   
-  test_episode_count: 50
+  test_episode_count: 10
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

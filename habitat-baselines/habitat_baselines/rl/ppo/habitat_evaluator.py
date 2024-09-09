@@ -38,7 +38,7 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_to
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
-DEBUG = True
+DEBUG = False
 
 class HabitatEvaluator(Evaluator):
     def __init__(self):
@@ -46,6 +46,7 @@ class HabitatEvaluator(Evaluator):
         self.eqa_vars = None
         self.debugger = DebugObservation()
         self.last_agent_pos = None
+        self.gpt_errors = 0
         pass
 
     """
@@ -451,7 +452,8 @@ class HabitatEvaluator(Evaluator):
             self.step_id, 
             self.writer, 
             self.config,
-            logger
+            logger,
+            self.gpt_errors
         )
 
     def execute_action(self, coords=None, action=None):

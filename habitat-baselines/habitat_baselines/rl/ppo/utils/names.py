@@ -22,7 +22,7 @@ class_names_coco = {
     'oven': 'oven',
     'toaster': 'toaster',
     'sink': 'sink',
-    'refrigerator': 'fridge',
+    # 'refrigerator': 'fridge',
     'door': 'door',
     'plant': 'plant',
     # OPEN-EQA

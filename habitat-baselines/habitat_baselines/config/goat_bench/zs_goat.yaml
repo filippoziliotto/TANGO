@@ -75,7 +75,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 30 # 5000 for GOAT task
+    max_episode_steps: 500 # 5000 for GOAT task
     iterator_options:
       cycle: False
       shuffle: False
@@ -139,7 +139,7 @@ habitat_baselines:
   # Feature Matcher settings
   feature_matcher:
     use_matcher: True
-    threshold: 35
+    threshold: 25
   # Captioner settings
   captioner:
     use_captioner: False

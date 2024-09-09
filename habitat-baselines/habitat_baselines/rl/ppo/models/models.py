@@ -872,7 +872,13 @@ class ValueMapper:
 
         # If no frontier is found, sample random point
         if not self.frontiers_found(frontiers):
-            return None
+            try:
+                frontier_regions = self._get_highest_memory_value(self.value_map._value_map)
+                self.best_frontier_polar = get_polar_from_frontier(self.value_map, robot_xy, heading, frontier_regions[0])
+                return self.best_frontier_polar
+            except:
+                # If there is no frontier found, then just sample a random point
+                return None
 
         # If there is a last point pursued, then we consider sticking to pursuing it
         # if it is still in the list of frontiers and its current value is not much
@@ -1013,3 +1019,26 @@ class ValueMapper:
     def _get_current_tau(self, current_image):
         tau = self.feature_matcher.match(current_image, self.target_image)
         return tau
+    
+    def _get_highest_memory_value(self, value_map, threshold=0.5):
+        from sklearn.cluster import DBSCAN
+
+        important_pixels = np.argwhere(value_map > 0.1)
+        db = DBSCAN(eps=5, min_samples=10).fit(important_pixels)
+
+        # Step 3: Extract cluster labels and find centers
+        labels = db.labels_
+        unique_labels = set(labels)
+        centers = []
+
+        for label in unique_labels:
+            if label == -1:  # -1 means noise in DBSCAN, ignore it
+                continue
+            cluster_points = important_pixels[labels == label]
+            center = cluster_points.mean(axis=0)
+            centers.append(center)
+        
+        # convert to list of arrays
+        centers = [np.array(center[:-1]) for center in centers]
+
+        return centers

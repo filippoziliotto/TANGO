@@ -143,7 +143,6 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     episode_id = episode_utils[0]
     question = episode_utils[1]
     gt_answer = episode_utils[2]
-    print(f'{question} {gt_answer}.')
 
     # File path is always the same
     file_path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/open_eqa_api_answers.json"
@@ -153,7 +152,7 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     for key, value in episodes.items():
         ep_question = value['question']
         if ep_question.strip() == question:
-            prompt = value['prompt']
+            prompt = value['generated_code']
             return prompt
 
 class PromptEQA:

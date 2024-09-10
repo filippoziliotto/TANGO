@@ -51,7 +51,7 @@ def clean_promt(prompt):
     lines = [(parse_return_statement(line), line[1]) if "return" in line[0] else line for line in lines]
     # Check if ``` are present (in Open-EQA),  if yes delete the element
     lines = [line for line in lines if not line[0].startswith("```")]
-    lines = parse_while_statement(lines)
+    #lines = parse_while_statement(lines)
     return lines
 
 for episode in data:

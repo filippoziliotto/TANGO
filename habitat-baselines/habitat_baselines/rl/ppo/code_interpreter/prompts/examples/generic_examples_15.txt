@@ -1,0 +1,228 @@
+I will provide examples of Pseudo-code program in response to given questions. For each new question, generate ONLY the related Pseudo-code program, given the examples you saw. Use only the functions that you have previously encountered.
+
+Question: search for the laptop
+Program:
+# search for the laptop
+explore_scene()
+laptop = detect("laptop")
+
+if is_found(laptop):
+    # navigate to it and stop
+    navigate_to(laptop)
+    return
+
+Question: search for the toilet seat
+Program:
+# search for the bathroom
+explore_scene()
+bathroom = detect("bathroom")
+
+if is_found(bathroom):
+    # search for the toilet seat
+    explore_scene()
+    toilet_seat = detect("toilet seat")
+
+    if is_found(toilet_seat):
+        # navigate to it and stop
+        navigate_to(toilet_seat)
+        return
+
+Question: navigate to the given image
+Program:
+# first look at which instance is presented in the image
+instance = classify(image)
+
+# search for the object
+explore_scene()
+object = detect(instance)
+
+if is_found(object):
+    # navigate to it and stop
+    navigate_to(object)
+    return
+
+Question: what color is the couch?
+Program:
+# search for the couch
+explore_scene()
+couch = detect("couch")
+
+if is_found(couch):
+    # answer the question
+    navigate_to(couch)
+    ans = answer("what color is the couch?")
+    return ans
+
+Question: which room is the dining table located in?
+Program:
+# search for the dining table
+explore_scene()
+dining_table = detect("dining table")
+
+if is_found(dining_table):
+    # answer the question
+    navigate_to(dining_table)
+    ans = answer("which room is the dining table located in?")
+    return ans
+
+Question: what color is the sink in the kitchen?
+Program:
+# search for the kitchen
+explore_scene()
+kitchen = detect("kitchen")
+
+if is_found(kitchen):
+    # search for the sink
+    explore_scene()
+    sink = detect("sink")
+
+    if is_found(sink):
+        # answer the question
+        navigate_to(sink)
+        ans = answer("what color is the sink?")
+        return ans
+
+Question: is the table in the bedroom made out of wood?
+Program:
+# search for the bedroom
+explore_scene()
+bedroom = detect("bedroom")
+
+if is_found(bedroom):
+    # search for the table
+    explore_scene()
+    table = detect("table")
+
+    if is_found(table):
+        # answer the question
+        navigate_to(table)
+        ans = answer("is the table made out of wood?")
+        return ans
+
+Question: Where can I wash my hands?
+Program:
+# search for a sink
+explore_scene()
+sink = detect("sink")
+
+if is_found(sink):
+    # answer the question
+    navigate_to(sink)
+    ans = answer("which room is the sink located in?")
+    return ans
+
+Question: How many lights are above the bathroom mirror?
+# search for the bedroom
+explore_scene() 
+bathroom = detect("bathroom") 
+
+if is_found(bathroom): 
+    # search for the mirror in the bathroom
+    explore_scene(bathroom) 
+    mirror = detect("mirror") 
+
+    if is_found(mirror): 
+        # navigate to it and count how many lights
+        navigate_to(mirror) 
+
+        # look up above the mirror
+        look_up()
+        lights = detect("light") 
+        n_lights = count(lights)
+        ans = eval(" '{n_lights}' if {n_lights} > 0 else '0' ") 
+        return ans
+
+Question: Find my laptop and check if there is free space on the table to put it,  if not leave try to check the couch
+Program: 
+# search for the laptop
+explore_scene() 
+laptop = detect("laptop")  
+
+if is_found(laptop): 
+	# search for the table
+    explore_scene() 
+    table = detect("table") 
+
+    if is_found(table):
+        # answer the question
+        navigate_to(table) 
+        ans = answer(“is the table free?”)
+
+        # If yes return answer
+        if eval(“True if ‘yes’ in {ans} else False”): 
+            return ans
+
+		# if no search for the couch
+        explore_scene() 
+        couch = detect("couch") 
+        if is_found(couch):
+            # navigate to it and terminate episode
+            navigate_to(couch) 
+            return 
+
+Question: what is the black object near the sink
+Program: 
+# search for the sink
+explore_scene() 
+sink = detect("sink")  
+
+if is_found(sink): 
+    navigate_to(sink)
+	# answer the question
+    explore_scene() 
+    ans = answer(“what is the dark object?”) 
+    return
+
+Question: What is to the right of the umbrella in the hallway?
+Program:
+# search for the hallway
+explore_scene()
+hallway = detect("hallway")
+if is_found(hallway):
+    explore_scene()
+    umbrella = detect("umbrella")
+    if is_found(umbrella):
+        navigate_to(umbrella)
+        look_right()
+        # answer the question
+        ans = answer("what is to the right of the umbrella?")
+        return 
+
+Question: How can I open the can in the kitchen?
+Program:
+# search for the kitchen
+explore_scene()
+kitchen = detect("kitchen")
+if is_found(kitchen):
+    explore_scene()
+    can = detect("can")
+    if is_found(can):
+        navigate_to(can)
+        look_around()
+        # answer the question
+        ans = answer("How can I open the can in the kitchen?")
+        return 
+
+Question: Where is the map of the Italy?
+Program:
+# search for a map
+explore_scene()
+map = detect("map")
+ans = answer("is this a map of italy")
+if eval(ans):
+    navigate_to(map)
+    # answer the question
+    ans = answer("where is the map located")
+    return
+
+Question: Where is the light purple flower painting?
+Program:
+# search for a flower painting, we assume is the light purple one
+explore_scene()
+painting = detect("flower painting")
+if is_found(painting):
+    navigate_to(painting)
+    # answer the question
+    ans = answer("where is this painting located?")
+
+Now, respond to the new question, ONLY with the related Pseudo-code.

@@ -65,7 +65,7 @@ class LLMScorer:
 
     def generate_llm_benchmark_prompt(self, question, gt_answer, model_answer):
         # load txt file as string
-        with open("habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/mmbench.txt", "r") as f:
+        with open("habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mmbench.txt", "r") as f:
             prompt = f.read()
         final_prompt = prompt + f"\nQuestion: {question}\nAnswer: {gt_answer}\nResponse: {model_answer}\n Your mark: " 
 
@@ -80,11 +80,9 @@ class LLMScorer:
         return output[0]['generated_text']
 
     def score(self, file_path):
-        questions, gt_answers, model_answers, num_steps, gt_steps = self.read_outputs(file_path)
-        num_steps = [float(step) for step in num_steps]
-        gt_steps = [float(step) for step in gt_steps]
+        questions, gt_answers, model_answers = self.read_outputs(file_path)
 
-        assert len(questions) == len(gt_answers) == len(model_answers) == len(num_steps) == len(gt_steps)
+        assert len(questions) == len(gt_answers) == len(model_answers)
         assert isinstance(questions, list) and isinstance(gt_answers, list) and isinstance(model_answers, list)
 
         scores = []
@@ -107,7 +105,9 @@ class LLMScorer:
 
         results = {}
         results['correctness'] = calculate_correctness(scores)
-        results['efficiency'] = calculate_efficiency(scores, num_steps, gt_steps)
+        
+        # TODO: Implement efficiency calculation, no dat given by Open-EQA paper
+        # results['efficiency'] = calculate_efficiency(scores, num_steps, gt_steps)
 
         self.print_(results)
         return scores

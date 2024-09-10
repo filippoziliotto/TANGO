@@ -77,21 +77,21 @@ def main(
         question = question.split(": ")[-1].rstrip('\n')
         results[f"question_{i}"] = {"question": question, "generated_code": f"{gpt_output}"}
         
-        # Wait for .5 second before the next iteration
+        # Wait for .1 second before the next iteration
         time.sleep(.1)
 
         if i % 10 == 0:
             print(f"First {i} questions processed.")
 
     # Save the results to a JSON file
-    json_file = path + f"{task}_api_answers.json"
+    json_file = path + f"{task}_api_answers_15.json"
     with open(json_file, "w") as json_file:
         json.dump(results, json_file, indent=4)
 
 if __name__ == "__main__":
     path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/"
     questions_file = "open_eqa_questions.txt"
-    example_file = "generic_examples.txt"
+    example_file = "generic_examples_15.txt"
     task = "open_eqa"
 
     main(path, questions_file, example_file, task, DEBUG)

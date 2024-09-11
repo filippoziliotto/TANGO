@@ -35,7 +35,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # EQA
     # config_name="eqa/zs_eqa.yaml"
     # OPEN-EQA
-    config_name="open_eqa/zs_open_eqa_semantic.yaml"
+    config_name="open_eqa/test/zs_open_eqa_10.yaml"
     # GOAT
     # config_name="goat_bench/zs_goat.yaml"
 )

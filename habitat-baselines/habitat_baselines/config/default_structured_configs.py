@@ -614,6 +614,7 @@ class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):
     episode_max_actions: int = -1
     # samplig point strategy
     sampling_strategy: str = "unreachable"
+    number_in_context_examples: int = 10
     object_detector: ObjectDetectorConfig = ObjectDetectorConfig()
     object_distance_threshold: float = 0.5
     feature_matcher: FeatureMatchingConfig = FeatureMatchingConfig()

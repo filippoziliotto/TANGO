@@ -381,6 +381,13 @@ class PromptUtils:
         object_description = episode.goals[0].lang_desc
         return (goal_task, object_category, object_description)
 
+    def get_open_eqa_prompt_filename(self):
+        num = self.habitat_env.config.habitat_baselines.number_in_context_examples
+
+        file_path = file_path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/"
+        file_name = f"open_eqa_api_answers_{num}.json"
+        return os.path.join(file_path, file_name)
+
 """
 Utils to sample points from different
 floors since HM3D-sem is not fully annotated

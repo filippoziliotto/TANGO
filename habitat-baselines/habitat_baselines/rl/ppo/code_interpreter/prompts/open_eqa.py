@@ -145,14 +145,27 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     gt_answer = episode_utils[2]
 
     # File path is always the same
-    file_path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/open_eqa_api_answers.json"
+    file_path = prompt_utils.get_open_eqa_prompt_filename()
     episodes = read_json_file_prompts(file_path)
 
+    episode_floors = open_eqa_prompt_example()        
+    # if "episode_id" key is equal to episode_id, then get the objects/rooms
+    for episode_floor in episode_floors:
+        if episode_floor["question"] == question:
+            try: floor = episode_floor["floor"]
+            except: floor = None
+         
     # Extract only the questions
     for key, value in episodes.items():
         ep_question = value['question']
         if ep_question.strip() == question:
             prompt = value['generated_code']
+
+            if floor is not None:
+                if floor == 1:
+                    prompt =  "go_upstairs()\n " + prompt
+                elif floor == -1:
+                        prompt =  "go_downstairs()\n " + prompt
             return prompt
 
 class PromptEQA:

@@ -56,7 +56,7 @@
         "generated_code": "# search for the stairs\nexplore_scene() \nstairs = detect(\"stairs\") \n\nif is_found(stairs): \n    # navigate to the stairs\n    navigate_to(stairs) \n\n    # look across from the stairs\n    look_across()\n    object_across = detect(\"object\") \n    ans = identify(object_across)\n\n    return ans"
     },
     "question_15": {
-        "question": "Does the bathroom door open \"into\" or \"out\" of the bathroom",
+        "question": "Does the bathroom door open 'into' or 'out' of the bathroom",
         "generated_code": "# search for the bathroom\nexplore_scene()\nbathroom = detect(\"bathroom\")\n\nif is_found(bathroom):\n    # search for the door\n    explore_scene()\n    door = detect(\"bathroom door\")\n\n    if is_found(door):\n        # answer the question\n        navigate_to(door)\n        ans = answer(\"does the bathroom door open into or out of the bathroom?\")\n        return ans"
     },
     "question_16": {
@@ -320,7 +320,7 @@
         "generated_code": "# search for the downstairs\nexplore_scene() \ndownstairs = detect(\"downstairs\") \n\nif is_found(downstairs): \n    # search for the bed\n    explore_scene() \n    bed = detect(\"bed\") \n\n    if is_found(bed):\n        # navigate to the bed\n        navigate_to(bed) \n\n        # look left of the bed\n        look_left() \n        blue_object = detect(\"blue object\") \n\n        if is_found(blue_object):\n            # answer the question\n            ans = answer(\"what is the blue object left of the downstairs bed?\")\n            return ans"
     },
     "question_81": {
-        "question": "Where is \"Bless this home\" written?",
+        "question": "Where is 'Bless this home' written?",
         "generated_code": "# search for the object Bless this home\nexplore_scene()\nobject = detect('frame')\n\nif is_found(object):\n    # navigate to it and stop\n    navigate_to(object)\n    return"
     },
     "question_82": {
@@ -328,8 +328,8 @@
         "generated_code": "# search for the plaid blanket\nexplore_scene()\nplaid_blanket = detect(\"plaid blanket\")\n\nif is_found(plaid_blanket):\n    # navigate to it and stop\n    navigate_to(plaid_blanket)\n    return"
     },
     "question_83": {
-        "question": "Where is the \"Be Thankful\" poster?",
-        "generated_code": "# search for the \"Be Thankful\" poster\nexplore_scene()\nposter = detect(\"Be Thankful poster\")\n\nif is_found(poster):\n    # navigate to it and stop\n    navigate_to(poster)\n    return"
+        "question": "Where is the 'Be Thankful' poster?",
+        "generated_code": "# search for the poster\nexplore_scene()\nposter = detect(\"Be Thankful poster\")\n\nif is_found(poster):\n    # navigate to it and stop\n    navigate_to(poster)\n    return"
     },
     "question_84": {
         "question": "Where is the black cross?",

@@ -56,7 +56,7 @@
         "generated_code": "``` \n# search for the stairs\nexplore_scene()\nstairs = detect(\"stairs\")\nif is_found(stairs):\n    navigate_to(stairs)\n    look_across()\n    # answer the question\n    ans = answer(\"what is across from the stairs?\")\n    return \n```"
     },
     "question_15": {
-        "question": "Does the bathroom door open \"into\" or \"out\" of the bathroom",
+        "question": "Does the bathroom door open 'into' or 'out' of the bathroom",
         "generated_code": "# search for the bathroom\nexplore_scene()\nbathroom = detect(\"bathroom\")\n\nif is_found(bathroom):\n    # search for the bathroom door\n    explore_scene()\n    door = detect(\"bathroom door\")\n\n    if is_found(door):\n        navigate_to(door)\n        # answer the question\n        ans = answer(\"does the bathroom door open into or out of the bathroom?\")\n        return ans"
     },
     "question_16": {
@@ -320,8 +320,8 @@
         "generated_code": "# search for the downstairs\nexplore_scene()  \ndownstairs = detect(\"downstairs\")  \n\nif is_found(downstairs): \n    explore_scene()  \n    bed = detect(\"bed\")  \n\n    if is_found(bed): \n        navigate_to(bed)\n        look_left()\n        # answer the question\n        ans = answer(\"what is the blue object?\")\n        return"
     },
     "question_81": {
-        "question": "Where is \"Bless this home\" written?",
-        "generated_code": "# search for the \"Bless this home\" sign\nexplore_scene()\nsign = detect(\"Bless this home\")\nif is_found(sign):\n    navigate_to(sign)\n    # answer the question\n    ans = answer(\"where is 'Bless this home' written?\")\n    return ans"
+        "question": "Where is 'Bless this home' written?",
+        "generated_code": "# search for the Bless this home sign\nexplore_scene()\nsign = detect('poster')\nif is_found(sign):\n    navigate_to(sign)\n    # answer the question\n    ans = answer(\"where is the sign written?\")\n    return ans"
     },
     "question_82": {
         "question": "Where is the plaid blanket?",

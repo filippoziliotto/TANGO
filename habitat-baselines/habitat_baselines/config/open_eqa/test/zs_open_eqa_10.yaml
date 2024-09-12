@@ -58,7 +58,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 30
+    max_episode_steps: 21
   simulator:
     turn_angle: 20
     agents:

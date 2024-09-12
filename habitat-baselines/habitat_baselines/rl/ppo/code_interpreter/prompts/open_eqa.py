@@ -151,10 +151,11 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     episode_floors = open_eqa_prompt_example()        
     # if "episode_id" key is equal to episode_id, then get the objects/rooms
     for episode_floor in episode_floors:
-        if episode_floor["question"] == question:
+        if episode_floor["episode_id"] == episode_id:
             try: floor = episode_floor["floor"]
             except: floor = None
-         
+            break
+
     # Extract only the questions
     for key, value in episodes.items():
         ep_question = value['question']
@@ -165,7 +166,7 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
                 if floor == 1:
                     prompt =  "go_upstairs()\n " + prompt
                 elif floor == -1:
-                        prompt =  "go_downstairs()\n " + prompt
+                    prompt =  "go_downstairs()\n " + prompt
             return prompt
 
 class PromptEQA:

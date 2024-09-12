@@ -25,12 +25,6 @@ defaults:
     - heading_sensor
     - instance_imagegoal_sensor
     - instance_imagegoal_hfov_sensor
-    #- goat_subtask_goal_sensor
-    #- current_subtask_sensor
-    #- image_goal_rotation_sensor
-    #- language_goal_sensor
-    #- goat_subtask_multi_goal_sensor
-    #- current_episode_uuid_sensor
     
   - /habitat/dataset: dataset_config_schema
   - /habitat_baselines: habitat_baselines_rl_config_base
@@ -63,9 +57,6 @@ habitat:
       success:
         type: Success
         success_distance: 0.3
-      #pointgoal_with_gps_compass:
-      #  type: PointGoalWithGPSCompass
-
 
     # In the case look up/down actions are used
     actions:
@@ -75,7 +66,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 500 # 5000 for GOAT task
+    max_episode_steps: 500 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -166,7 +157,7 @@ habitat_baselines:
   value_mapper:
     use_value_mapper: True
     type: "clip"
-    size: "large"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"
@@ -193,9 +184,9 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: .8
+  object_distance_threshold: .7
   
-  test_episode_count: 1000
+  test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

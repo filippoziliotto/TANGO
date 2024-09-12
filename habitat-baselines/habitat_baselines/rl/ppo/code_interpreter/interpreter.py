@@ -471,7 +471,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Save the last position of the agent in the episode
         """
-        if self.habitat_env.get_current_step() == 0 and self.habitat_env.last_agent_pos is not None:
+        if (self.habitat_env.get_current_step() == 0) and \
+            (self.habitat_env.get_current_episode_info().is_first_task is False) and \
+                (self.habitat_env.last_agent_pos is not None):
             if not self.habitat_env.check_scene_change():
                 sim = self.habitat_env.get_habitat_sim()
                 sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)

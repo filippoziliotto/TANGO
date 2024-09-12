@@ -38,7 +38,6 @@ class GoatDatasetV1Single(PointNavDatasetV1):
     goals: Dict[str, Sequence[InstanceImageGoal]]
     current_scene_episodes: List[GoatEpisode] = []
 
-
     @staticmethod
     def dedup_goals(dataset: Dict[str, Any]) -> Dict[str, Any]:
         if len(dataset["episodes"]) == 0:
@@ -137,8 +136,8 @@ class GoatDatasetV1Single(PointNavDatasetV1):
         if "goals" not in deserialized:
             deserialized = self.dedup_goals(deserialized)
 
+        self.current_scene_episodes = []
         self.goals = deserialized["goals"]
-
         num_filtered_eps = 0
 
         for i, composite_episode in enumerate(deserialized["episodes"]):
@@ -232,21 +231,21 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 single_episode['episode_id'] = k
                 k += 1
                 single_episode['scene_id'] = goat_ep.scene_id
+
+                if j == 0:
+                    single_episode['is_first_task'] = True
+                else:
+                    single_episode['is_first_task'] = False
+
                 tmp = goat_ep.goals[j].copy()
                 single_episode['goals'] = tmp
                 single_episode['object_category'] = subtask[0]
                 single_episode['goat_task'] = subtask[1]
 
-                #if j == 0:
                 single_episode['start_position'] = goat_ep.start_position
                 single_episode['start_rotation'] = goat_ep.start_rotation
-                #else:
-                #    try:
-                #        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['position']
-                #        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0]['agent_state']['rotation']
-                #    except:
-                #        single_episode['start_position'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.position
-                #        single_episode['start_rotation'] = goat_ep.goals[j-1][0]['view_points'][0].agent_state.rotation
+
+                
 
                 # check rotation is horizontal, check if useful
                 single_episode['start_rotation'][0] = 0
@@ -264,21 +263,12 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 else:
                     single_episode['is_image_goal'] = True
 
-                #if self.check_final_is_not_start(single_episode['start_position'], goat_ep.goals[j][0]['view_points'][0].agent_state.position):
-                #    # We move the agent 1m 
-                #    single_episode['start_position'] = [
-                #        x + 1 if en in [0, 2] else x
-                #        for en, x in enumerate(single_episode['start_position'])
-                #    ]
                 episode_list.append(GoatEpisodeSingle(**single_episode))
-
-                if (k - len(self.episodes)) >= 5:
-                    break
 
         self.episodes.extend(episode_list)
 
         # Debugging InstnaceImageNav Nonetype object error
-        self.episodes = [ep for ep in self.episodes if ep.scene_id == 'data/scene_datasets/hm3d/val//00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb']
+        # self.episodes = [ep for ep in self.episodes if ep.scene_id == 'data/scene_datasets/hm3d/val//00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb']
 
     def check_final_is_not_start(self, start_pos, final_pos):
         if start_pos == final_pos:

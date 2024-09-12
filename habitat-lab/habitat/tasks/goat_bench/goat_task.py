@@ -84,6 +84,7 @@ class GoatEpisodeSingle(NavigationEpisode):
     is_image_goal: bool = False
     goat_task: Optional[str] = None
     goal_image_id: Optional[int] = 0
+    is_first_task: Optional[bool] = False
 
 
 @registry.register_task(name="Goat-v1")

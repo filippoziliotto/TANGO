@@ -5,7 +5,11 @@ import re
 import numpy as np
 from tqdm import tqdm
 from habitat_baselines.rl.ppo.utils.utils import get_llm_model
+from openai import Client
+import os
 warnings.filterwarnings("ignore")
+
+DEBUG_API =False
 
 def extract_valid_integers(s):
     # Find all integers in the string
@@ -42,26 +46,32 @@ see https://github.com/facebookresearch/open-eqa/blob/main/prompts/mmbench.txt
 class LLMScorer:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.pipeline = get_llm_model('phi3', 8, self.device)
-        self.generation_args = {
-            "max_new_tokens": 500,
-            "return_full_text": False,
-            "temperature": 0.0,
-            "do_sample": False,
-        }
+        if DEBUG_API:
+            self.pipeline = get_llm_model('phi3', 8, self.device)
+            self.generation_args = {
+                "max_new_tokens": 500,
+                "return_full_text": False,
+                "temperature": 0.0,
+                "do_sample": False,
+            }
+            self.pipeline = None
+            self.generation_args = None
+        else:
+            OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+            if OPENAI_API_KEY is None:
+                raise ValueError("OPENAI_API_KEY environment variable is not set.")
+            self.client = Client(api_key=OPENAI_API_KEY)
 
     def read_outputs(self, file_path):
         with open(file_path, "r") as f:
             lines = f.readlines()
-        questions, gt_answers, model_answers, num_steps, gt_steps = [], [], [], [], []
+        questions, gt_answers, model_answers = [], [], []
         for i in range(len(lines)):
             lines[i] = lines[i].split('|')
             questions.append(lines[i][0].strip())
             gt_answers.append(lines[i][1].strip())
             model_answers.append(lines[i][2].strip())
-            num_steps.append(lines[i][3].strip())
-            gt_steps.append(lines[i][4].strip())
-        return questions, gt_answers, model_answers, num_steps, gt_steps
+        return questions, gt_answers, model_answers
 
     def generate_llm_benchmark_prompt(self, question, gt_answer, model_answer):
         # load txt file as string
@@ -73,6 +83,26 @@ class LLMScorer:
             {"role": "user", "content": final_prompt}
         ]
         return messages
+
+    def read_prompt_example_gpt(self):
+        file_path = "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mmbench.txt"
+        with open(file_path, "r") as file_txt:
+            lines = file_txt.readlines()
+        return lines
+
+    def api_score(self, examples, question, gt_answer, model_answer):
+        examples = ' '.join(examples)
+        content = f"{examples}\n Question: {question}\n Answer: {gt_answer}\n Response: {model_answer}\n Your mark: "
+                
+        # Send the request to GPT
+        response = self.client.chat.completions.create(
+        model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": content},
+            ]
+        )
+        return response.choices[0].message.content
 
     def score_single(self, question, gt_answer, model_answer):
         self.prompt = self.generate_llm_benchmark_prompt(question, gt_answer, model_answer)
@@ -86,36 +116,50 @@ class LLMScorer:
         assert isinstance(questions, list) and isinstance(gt_answers, list) and isinstance(model_answers, list)
 
         scores = []
-        for i in tqdm(range(len(questions))):
-            score_ = self.score_single(questions[i], gt_answers[i], model_answers[i])
-            score_ = score_.strip()
-            scores.append(score_)
 
-        assert len(scores) == len(questions)
-        # Delete non relevant character only take the ones in [1,2,3,4,5]
-        processed_scores = []
-        for item in scores:
-            processed_scores.extend(extract_valid_integers(item))
+        if DEBUG_API:
+            for i in tqdm(range(len(questions))):
+                score_ = self.score_single(questions[i], gt_answers[i], model_answers[i])
+                score_ = score_.strip()
+                scores.append(score_)
 
-        scores = processed_scores
-        if len(scores) > len(questions):
-            diff = len(scores) - len(questions)
-        for i in range(diff):
-            scores.remove(1)
+            assert len(scores) == len(questions)
+            # Delete non relevant character only take the ones in [1,2,3,4,5]
+            processed_scores = []
+            for item in scores:
+                processed_scores.extend(extract_valid_integers(item))
+
+            scores = processed_scores
+            if len(scores) > len(questions):
+                diff = len(scores) - len(questions)
+            for i in range(diff):
+                scores.remove(1)
+
+        else:
+            scores = []
+            examples = self.read_prompt_example_gpt()
+            for i in tqdm(range(len(questions))):
+                response = self.api_score(examples, questions[i], gt_answers[i], model_answers[i])
+                scores.append(response)
+
+                if i % 20 == 0:
+                    print('Evaluated {i} examples')
+
+            # Delete non relevant character only take the ones in [1,2,3,4,5]
+            processed_scores = []
+            for item in scores:
+                processed_scores.extend(extract_valid_integers(item))
+            scores = processed_scores
 
         results = {}
         results['correctness'] = calculate_correctness(scores)
         
-        # TODO: Implement efficiency calculation, no dat given by Open-EQA paper
-        # results['efficiency'] = calculate_efficiency(scores, num_steps, gt_steps)
-
         self.print_(results)
         return scores
     
     def print_(self, results):
         print('------------------------')
         print(f"Correctness: {results['correctness']}")
-        print(f"Efficiency: {results['efficiency']}")
         print('------------------------')
     
 

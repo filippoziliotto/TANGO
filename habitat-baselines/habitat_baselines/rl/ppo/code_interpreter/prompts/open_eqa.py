@@ -159,7 +159,7 @@ def retrieve_open_eqa_prompts(prompt_utils: PromptUtils):
     # Extract only the questions
     for key, value in episodes.items():
         ep_question = value['question']
-        if ep_question.strip() == question:
+        if (ep_question.strip() == question.strip()) or (ep_question.strip() == episode_floor["question"].strip()):
             prompt = value['generated_code']
 
             if floor is not None:

@@ -577,6 +577,12 @@ def log_final_results(
             aggregated_stats[stat_key] = np.mean(
                 [v[stat_key] for v in stats_episodes.values() if stat_key in v]
             )
+            
+        # Remove infinite values and calculate mean
+        aggregated_stats['distance_to_goal'] = np.mean(
+            [v['distance_to_goal'] for v in stats_episodes.values() if v['distance_to_goal'] != float('inf')]
+        )
+
         metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
 
         logger.info('-----------------------')

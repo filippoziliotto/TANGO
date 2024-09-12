@@ -74,7 +74,9 @@ class PseudoCodeInterpreter:
 
         # Count exploration targets is equal to the length of self.exploration_targets
         # We have False for each target not yet explored
-        self.exploration_targets = [(False, eval(line[0].split("(")[1].split(")")[0]) ) for line in self.lines if 'detect' in line[0]]
+        # TODO: this does not work always for Open-EQA Prompt generation problems
+        try: self.exploration_targets = [(False, eval(line[0].split("(")[1].split(")")[0]) ) for line in self.lines if 'detect' in line[0]]
+        except: self.exploration_targets = []
 
     def run(self):
         stack = []

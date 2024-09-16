@@ -37,7 +37,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # OPEN-EQA
     # config_name="open_eqa/test/zs_open_eqa_10.yaml"
     # GOAT
-    config_name="goat_bench/zs_goat.yaml"
+    # config_name="goat_bench/zs_goat.yaml"
+    config_name="goat_bench/zs_goat_settings.yaml"
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

@@ -5,7 +5,7 @@ from habitat_baselines.rl.ppo.models.models import (
     ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel,
     ValueMapper
 )
-from habitat_baselines.rl.ppo.utils.utils import set_spawn_state
+from habitat_baselines.rl.ppo.utils.utils import set_spawn_state, sample_random_points, get_floor_levels
 from habitat_baselines.rl.ppo.utils.names import eqa_objects, rooms_eqa
 
 def parse_return_statement(line):
@@ -351,6 +351,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # In MP3D-EQA set max-actions shortest path
         # Also useful in GOAT episodes
+
+        # self.check_episode_floor()
+
         self.spawn_target_location(max_dist=self.habitat_env.config.habitat_baselines.episode_max_actions)
 
         # Initial 360° turn for frontiers initialization
@@ -596,6 +599,22 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.execute_action(action='turn_left')
         self.habitat_env.update_episode_stats()
         self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def check_episode_floor(self):
+        """
+        Check the floor of the episode
+        """
+        if self.habitat_env.task_name in ['goat'] and self.habitat_env.get_current_step() == 0:
+            env_call = self.habitat_env.envs.call(['habitat_env'])[0]
+            sim = env_call.sim
+            curr_ep = env_call.current_episode
+            scene_id = curr_ep.scene_id
+            ep_id = curr_ep.episode_id
+            start_pos = curr_ep.start_position
+            floor_points = sample_random_points(sim)
+            level = get_floor_levels(start_pos[1], floor_points)
+
+            self.habitat_env.goat_episode_levels.append((ep_id, scene_id, level))
 
     """
     Computer Vision modules

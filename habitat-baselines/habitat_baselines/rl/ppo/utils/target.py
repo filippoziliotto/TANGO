@@ -127,14 +127,20 @@ class TargetCoordinates:
         """
         Function that returns the camera parameters
         """
-        self.camera_width = 256
-        self.camera_height = 256
-        self.camera_hfov = 90
         try:
+            # Camera Parameters
+            self.camera_hfov = config.habitat.simulator.agents.main_agent.sim_sensors.rgb_sensor.hfov
+            self.camera_width = config.habitat.simulator.agents.main_agent.sim_sensors.rgb_sensor.width
+            self.camera_height = config.habitat.simulator.agents.main_agent.sim_sensors.rgb_sensor.height
+            # Depth 
             self.min_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.min_depth
+            self.max_depth = config.habitat.simulator.agents.main_agent.sim_sensors.depth_sensor.max_depth
         except:
+            self.camera_width = 256
+            self.camera_height = 256
+            self.camera_hfov = 90
             self.min_depth = 0.
-        self.max_depth = 10.
+            self.max_depth = 10.
         self.fl = self.get_camera_focal_lenght(self.camera_width, self.camera_hfov)
 
 class Target:

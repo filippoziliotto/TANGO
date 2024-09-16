@@ -629,3 +629,33 @@ def set_spawn_state(sim, episode, max_dist = -1):
     if is_valid:
         start_state = shortest_path[len(shortest_path) - max_dist]
         sim.set_agent_state(start_state.position, start_state.rotation)
+
+"""
+Save the house embeddings for HM3D-Scene Val Unseen in Goat-Bench
+"""
+def save_tensor_to_npy(tensor, path="data/datasets/goat_bench/hm3d/v1/val_unseen/scene_embeddings", scene="4ok3usBNeis"):
+    """
+    Saves a 3D tensor to a .npy file.
+
+    Parameters:
+    tensor (numpy.ndarray): The tensor to save.
+    path (str): The directory path where the tensor should be saved. Default is set to a specific dataset path.
+    scene (str): The scene name (used as the filename). Default is "4ok3usBNeis".
+    """
+    filename = os.path.join(path, f"{scene}.npy")
+    np.save(filename, tensor)
+
+def load_tensor_from_npy(path="data/datasets/goat_bench/hm3d/v1/val_unseen/scene_embeddings", scene="4ok3usBNeis"):
+    """
+    Loads a 3D tensor from a .npy file.
+
+    Parameters:
+    path (str): The directory path where the tensor is saved. Default is set to a specific dataset path.
+    scene (str): The scene name (used as the filename). Default is "4ok3usBNeis".
+
+    Returns:
+    numpy.ndarray: The loaded tensor.
+    """
+    filename = os.path.join(path, f"{scene}.npy")
+    tensor = np.load(filename)
+    return tensor

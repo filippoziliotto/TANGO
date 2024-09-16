@@ -56,17 +56,17 @@ habitat:
         type: SoftSPL
       success:
         type: Success
-        success_distance: 0.3
+        success_distance: 0.25
 
     # In the case look up/down actions are used
     actions:
       look_up:
-        tilt_angle: 20
+        tilt_angle: 30
       look_down:
-        tilt_angle: 20
+        tilt_angle: 30
 
   environment:
-    max_episode_steps: 22 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 500 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -75,24 +75,21 @@ habitat:
       max_scene_repeat_episodes: -1
 
   simulator:
-    # type: GOATSim-v0
-    turn_angle: 20
-    # tilt_angle: 20
-    # action_space_config: "v2-goat"
+    turn_angle: 30
     agents:
       main_agent:
         sim_sensors:
           rgb_sensor:
-            width: 256
-            height: 256
-            hfov: 90
-            position: [0, 1.2, 0]
+            width: 360
+            height: 640
+            hfov: 42
+            position: [0, 1.31, 0]
           depth_sensor:
             width: 256
             height: 256
-            hfov: 90
-            position: [0, 1.2, 0]
-        radius: 0.18
+            #  hfov: 42
+            position: [0, 1.31, 0]
+        radius: 0.17
         height: 1.41
     habitat_sim_v0:
       gpu_device_id: 0
@@ -101,7 +98,6 @@ habitat_baselines:
   torch_gpu_id: 0
   task_name: goat
   # Visualization settings
-  # tensorboard_dir: tb
   video_dir: video_dir/goat/
   # writer_type: wb # to deactivate just comment this
   wb:
@@ -111,12 +107,13 @@ habitat_baselines:
   save_obs:
     save_to_disk: True
   sampling_strategy: "unreachable"
+
   # Object Detector settings
   object_detector:
     use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.99
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -124,13 +121,14 @@ habitat_baselines:
     use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet50"
-    additional_thresh: 0.9999
+    additional_thresh: 0.8
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
   feature_matcher:
     use_matcher: True
-    threshold: 100
+    threshold: 30
+
   # Captioner settings
   captioner:
     use_captioner: False
@@ -167,7 +165,7 @@ habitat_baselines:
     use_max_confidence: False
     map_size: 500
     pixels_per_meter: 10
-    save_image_embed: True
+    save_image_embed: False
 
   LLM:
     use_LLM: False

@@ -38,8 +38,7 @@ from habitat_baselines.rl.ppo.code_interpreter.prompts.eqa import eqa_text_to_to
 from habitat_baselines.rl.ppo.utils.names import stoi_eqa
 from habitat.sims.habitat_simulator.debug_visualizer import DebugObservation
 
-DEBUG = False
-
+DEBUG = True
 class HabitatEvaluator(Evaluator):
     def __init__(self):
         self.current_step = 0
@@ -47,6 +46,7 @@ class HabitatEvaluator(Evaluator):
         self.debugger = DebugObservation()
         self.last_agent_pos = None
         self.gpt_errors = 0
+        self.goat_episode_levels = []
         pass
 
     """

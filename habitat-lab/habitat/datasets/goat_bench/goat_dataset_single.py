@@ -245,8 +245,6 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 single_episode['start_position'] = goat_ep.start_position
                 single_episode['start_rotation'] = goat_ep.start_rotation
 
-                
-
                 # check rotation is horizontal, check if useful
                 single_episode['start_rotation'][0] = 0
                 single_episode['start_rotation'][2] = 0
@@ -264,6 +262,10 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                     single_episode['is_image_goal'] = True
 
                 episode_list.append(GoatEpisodeSingle(**single_episode))
+
+                if single_episode['is_first_task']:
+                    break
+                    
 
         self.episodes.extend(episode_list)
 

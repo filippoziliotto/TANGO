@@ -20,7 +20,7 @@ from .geometry_utils import (
     place_img_in_img,
     rotate_image,
 )
-
+from habitat_baselines.rl.ppo.utils.utils import save_tensor_to_npy, load_tensor_from_npy
 DEBUG = True
 SAVE_VISUALIZATIONS = False
 RECORDING = False
@@ -448,6 +448,9 @@ class ValueMap(BaseMap):
             new_emap[new_map_mask] = 0
             higher_new_map_mask = new_emap > emap
             self._embed_map[higher_new_map_mask] = image_embed
+            
+            # Save to .npy file
+            save_tensor_to_npy(self._embed_map)
 
         if self._use_max_confidence:
             # For every pixel that has a higher new_map in the new map than the

@@ -142,9 +142,6 @@ class LLMScorer:
                 response = self.api_score(examples, questions[i], gt_answers[i], model_answers[i])
                 scores.append(response)
 
-                if i % 20 == 0:
-                    print('Evaluated {i} examples')
-
             # Delete non relevant character only take the ones in [1,2,3,4,5]
             processed_scores = []
             for item in scores:
@@ -170,3 +167,6 @@ if __name__ == "__main__":
 
     llm_scorer = LLMScorer()
     scores = llm_scorer.score(args.file_path)
+
+
+# 10 iin 32.62

@@ -354,6 +354,9 @@ class PromptUtils:
     def get_objectgoal_target(self):
         return self.habitat_env.get_current_episode_info().goals[0].object_category
     
+    def get_ovon_objectgoal_target(self):
+        return self.habitat_env.get_current_episode_info().goals[0].object_category
+    
     def get_instanceimagegoal_target(self):
         # TODO: Sistemare
         object_name = self.habitat_env.get_current_episode_info().goals[0].object_category

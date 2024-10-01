@@ -26,6 +26,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(
     version_base=None,
     config_path="config",
+    # ONLY FOR DEBUGGING
     # config_name="pointnav/ppo_pointnav_example",
     # OBJECTNAV
     # config_name="objectnav/zs_objectnav.yaml"
@@ -38,7 +39,10 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # config_name="open_eqa/test/zs_open_eqa_10.yaml"
     # GOAT
     # config_name="goat_bench/zs_goat.yaml"
-    config_name="goat_bench/zs_goat_settings.yaml"
+    #config_name="goat_bench/zs_goat_settings.yaml"
+    # OVON
+    config_name="ovon/zs_ovon.yaml"
+
 )
 def main(cfg: "DictConfig"):
     cfg = patch_config(cfg)

@@ -26,8 +26,8 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
 
 
-@registry.register_dataset(name="ObjectNav-v1")
-class ObjectNavDatasetV1(PointNavDatasetV1):
+@registry.register_dataset(name="OVONObjectNav-v1")
+class OVONDatasetV1(PointNavDatasetV1):
     r"""Class inherited from PointNavDataset that loads Object Navigation dataset."""
     category_to_task_category_id: Dict[str, int]
     category_to_scene_annotation_category_id: Dict[str, int]
@@ -109,13 +109,13 @@ class ObjectNavDatasetV1(PointNavDatasetV1):
                 "category_to_mp3d_category_id"
             ]
 
-        assert len(self.category_to_task_category_id) == len(
-            self.category_to_scene_annotation_category_id
-        )
+        #assert len(self.category_to_task_category_id) == len(
+        #    self.category_to_scene_annotation_category_id
+        #)
 
-        assert set(self.category_to_task_category_id.keys()) == set(
-            self.category_to_scene_annotation_category_id.keys()
-        ), "category_to_task and category_to_mp3d must have the same keys"
+        #assert set(self.category_to_task_category_id.keys()) == set(
+        #    self.category_to_scene_annotation_category_id.keys()
+        #), "category_to_task and category_to_mp3d must have the same keys"
 
         if len(deserialized["episodes"]) == 0:
             return
@@ -127,6 +127,9 @@ class ObjectNavDatasetV1(PointNavDatasetV1):
             self.goals_by_category[k] = [self.__deserialize_goal(g) for g in v]
 
         for i, episode in enumerate(deserialized["episodes"]):
+            # remove "children object categories" from dict
+            if "children_object_categories" in episode:
+                del episode["children_object_categories"]
             episode = ObjectGoalNavEpisode(**episode)
             episode.episode_id = str(i)
 

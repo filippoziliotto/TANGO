@@ -408,7 +408,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             depth_obs = self.habitat_env.get_current_observation(type='depth')
 
             # Update the navigation ot the object with detection primitive
-            if self.habitat_env.task_name in ['eqa', 'objectnav']:
+            if self.habitat_env.task_name in ['eqa', 'objectnav', 'ovon_objectnav']:
                 detection_dict = self.detect(target_object['labels'][0])
                 if detection_dict['boxes']:
                     self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
@@ -640,7 +640,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             else:
                 detection_dict = self.object_detector.detect(obs, target_name)
 
-        elif self.habitat_env.task_name in ['objectnav', 'open_eqa', 'instance_imagenav', 'goat']:
+        elif self.habitat_env.task_name in ['objectnav', 'ovon_objectnav', 'open_eqa', 'instance_imagenav', 'goat']:
             # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
             if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
                 detection_dict = self.object_detector_closed.detect(obs, target_name)

@@ -51,12 +51,12 @@ habitat:
     data_path: data/datasets/ovon/{split}/{split}.json.gz
 
   environment:
-    max_episode_steps: 500
+    max_episode_steps: 250
     iterator_options:
       max_scene_repeat_steps: 50000
   simulator:
     forward_step_size: 0.25
-    turn_angle: 20
+    #turn_angle: 20
     agents:
       main_agent:
         sim_sensors:
@@ -64,12 +64,12 @@ habitat:
             min_depth: 0.
             width: 256
             height: 256
-            position: [0, 0.88, 0]
+            position: [0, 1.2, 0]
           rgb_sensor:
             width: 256
             height: 256
-            position: [0, 0.88, 0]
-        height: 0.88
+            position: [0, 1.2, 0]
+        height: 1.2
         radius: 0.18
 
     habitat_sim_v0:
@@ -81,11 +81,11 @@ habitat_baselines:
   task_name: ovon_objectnav
   # Visualization settings
   video_dir: "video_dir/objectgoal/"
-  # writer_type: wb # to deactivate just comment this
+  writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: onva_vlfm
+    run_name: ovon_prova
   save_obs:
     save_to_disk: True 
   sampling_strategy: "unreachable"
@@ -136,7 +136,7 @@ habitat_baselines:
   value_mapper:
     use_value_mapper: True
     type: "clip"
-    size: "large"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"
@@ -153,7 +153,7 @@ habitat_baselines:
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 0.8
   # To evaluate on all episodes, set this to -1
-  test_episode_count: -1 # n° of evaluation episodes
+  test_episode_count: 10 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

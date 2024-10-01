@@ -527,7 +527,7 @@ def log_final_results(
     the inputs are all variables of HabitatEvaluator class
     """
 
-    if task in ['objectnav', 'instance_imagenav', 'goat']:
+    if task in ['objectnav', 'ovon_objectnav', 'instance_imagenav', 'goat']:
         for stat_key in all_ks:
             aggregated_stats[stat_key] = np.mean(
                 [v[stat_key] for v in stats_episodes.values() if stat_key in v]

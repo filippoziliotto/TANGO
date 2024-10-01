@@ -1,0 +1,557 @@
+Where is the grey bed? | In the bedroom across the first one. | The grey bed is in the bedroom.
+Is the bathroom shower curtain open or closed? | Open | closed
+What is to the right of the light switch in the bathroom? | A hand towel | a mirror
+What is hanging on the wall near the bottom of the stairs? | A smoke detector | A picture or framed artwork
+What is above the mirror in the bathroom? | Lights | a light fixture
+Is the kitchen on the same floor as the bedroom? | No. | Yes
+Where did I put my pink shirt? | In the bedroom closet | In the closet.
+What animal is shown in the picture in the bedroom? | A bird | a dog
+After washing my hands in the sink, what should I use to dry my hands? | Use the hand towel | A towel
+Is the bathroom furnished? | Yes. | Yes
+How can I turn off the lamp in the bedroom? | Use the pull cords | You can turn off the lamp in the bedroom by using the switch on the lamp itself, which is often located near the base or on the cord. Some lamps also have a touch mechanism, so you can turn it off by touching the lamp's base or body. Alternatively, if the lamp is connected to a wall switch, you can turn it off by flipping the wall switch.
+Is there space on the dining table to work on my laptop? | Yes | Yes
+Is the bathroom door open? | Partially | open
+When coming down the stairs, you exit near a couch. What's across from the stairs? | The bathroom | A television
+Does the bathroom door open 'into' or 'out' of the bathroom | Out | The bathroom door typically opens "into" the bathroom.
+Where is the robed statue | By the stairs in the back of the first level | The living room.
+Where is the entryway couch | Under the stairs by the main entrance | In the hallway or foyer
+What's to the left of the toilet? | Radiator | toilet paper holder
+What's to the right of the toilet? | A bathtub | a sink
+is the table in the living room completely clean? | no | No
+what color are the numbers written on the wall clock? | white | black
+what color are the chairs? | brown | brown
+where is the clock? | in the living room hallway next to the television | On the wall
+how can I clean my hands? | there is a sink in the kitchen | You can clean your hands by washing them with soap and water at a sink. If a sink is not available, you can use hand sanitizer.
+is the television on or off? | off | off
+where is the paper roll? | In the kitchen counter right next to the gas stove | In the bathroom.
+where can I keep a new knife I got? | there is a knife holder in the kitchen counter next to the gas stove. | In a kitchen drawer or a knife block.
+what is between the fruit bowl and knife set? | a container of spices | a cutting board
+is the fan on or off? | off | off
+what is kept on the tray in the kitchen counter? | banana | A bowl of fruit
+where can I keep a couple of apples? | on the fruit basket in the kitchen counter. | In the refrigerator or on the kitchen counter.
+where can I keep a photo frame? | on the counter below the television with other frames | On a shelf or a nightstand
+what color is the poof in the living room? | Grey | blue
+Where is the white poof? | the room with the glass table | on the floor
+Where can I clean fruit while facing the dining room table? | the island | The kitchen sink
+Where is the painting of a feather? | Living room | on the living room wall
+What material is the stool base in the kitchen? | metal | Metal
+What can I do to decrease CO2 when cooking? | use range hood | Use an electric cooktop or induction stove.
+What can I use for practicing pullups? | The stairs | A pull-up bar.
+What is in the basket by the front door? | an umbrella | Shoes
+Can you fit a large pizza on the table next to the downstairs couch? | Yes | Yes
+What is the first appliance left of the sink? | coffee machine | A dishwasher
+How many coat hooks are available? | 5 | four
+Is the AC vent on the stairs open or closed? | open | open
+What can I do to increase the speed of the ceiling fan? | Turn the dial on the switch panel next to the front door | You can increase the speed of the ceiling fan by using the fan's control switch or remote control. Most ceiling fans have pull chains, a wall switch, or a remote that allows you to adjust the speed in several settings (typically low, medium, high).
+What is in between the two picture frames on the blue wall in the living room? | The TV | a clock
+What is the white object on the wall above the TV? | Air conditioning unit | A picture frame
+What type of ceiling is in the living room? | A vaulted ceiling | A flat ceiling
+What color is the staircase railing? | Brown | white
+What should I do to cool down? | Turn on the AC unit | Turn on the air conditioning or a fan.
+Is there room on the dining table to eat? | Yes | Yes
+What material is the ceiling in the living room? | Wood panel | Drywall
+Is the front door open? | No | closed
+Is the dining table set with table mats? | Yes. | Yes
+What color are the patio chairs? | Brown | blue
+Where are the paper towels? | Above the dishwasher | In the kitchen
+What appliance is below the hanging cabinets on the left side of the kitchen? | A toaster oven | the dishwasher
+Where can I get a drink of water? | From the water dispenser in the fridge | The kitchen
+Are the blinds in the living room all open or all closed? | Neither, some are open some are closed | closed
+If the lights suddenly go out, where should I go to fix it? | The circuit breaker box to the left of the laundry room | You should go to the electrical panel or circuit breaker box.
+What white object can be partially seen in the room across the bedroom? | A laundry machine | a refrigerator
+Are the drapes in the bedroom open or closed? | Open | closed
+Where would the garbage disposal switch be located? | The switches to the right of the sink | The garbage disposal switch is most commonly located on the wall adjacent to the kitchen sink.
+Where is the umbrella? | On the balcony outside | In the closet.
+What is above the light switch? | A circuit breaker box | a wall
+What kind of staircase does this home have? | A spiral staircase | a standard straight staircase
+What color is the bed frame? | White | brown
+What is across the dishwasher? | A fridge | The sink
+Where is the full length mirror? | upstairs bedroom | The closet door
+What's below the window of the front door? | mailslot | a doormat
+What is the black and red object in the upstairs bedroom? | a workout bench | a gaming chair
+What is on the opposite wall of the bed? | TV | a dresser
+Where can I workout? | upstairs bedroom | In the gym.
+What type of heating does this house have? | radiator | Forced air heating
+Where is the sweatshirt | coat rack | In the closet.
+what color are the dining room walls? | brown | white
+Is there clutter on the kitchen island? | no | Yes
+What color is the front door? | white | red
+Is the refrigerator modern? | no | Yes
+What is the blue object left of the downstairs bed? | a humidifier | a nightstand
+Where is 'Bless this home' written? | Above the dinner room entrance | on a wall
+Where is the plaid blanket? | On the back of the couch | The plaid blanket is on the bed.
+Where is the 'Be Thankful' poster? | Above the stairs | on the wall
+Where is the black cross? | Above the front door | On the wall
+Does poster above stairs show English letters? | Yes | Yes
+What decorations is on the bathroom counter? | A plant | A vase with flowers
+Where should I sit to watch tv? | Couch | On the couch
+Are the blinds closed? | No | Yes
+What color is the tray on the coffee table? | Silver | brown
+Is the dining room table set? | No | Yes
+Do frames near microwave show English letters? | No | Yes
+how do I go down from the above floor to the below floor? | use the staircase | Use the stairs.
+what color is the flower in the bottom floor? | pink | red
+is the door of the above room infront of the staircase open or closed? | open | closed
+what color is the chair? | black | blue
+is the table in the above room infront of the staircase clean ? | yes | The table is clean.
+is the chair in the above floor pushed in or placed out? | pushed in | pushed in
+Is the television turned on or off? | On | off
+What material are the stools in the kitchen made out of? | Leather | wood
+What is the grey item on the bed? | A blanket | a blanket
+Where is the ceiling fan? | Above the bed in the second bedroom | In the center of the ceiling
+Where do I reach for laundry detergent? | For the shelf above the washing machine. | In the laundry room, you typically reach for laundry detergent either from a shelf above the washer and dryer or from a cabinet nearby.
+Is the toilet seat open or closed? | Closed. | closed
+I want to check my outfit for a dinner party, how can I do this? | Using the large mirror outside the first bedroom. | You can check your outfit in a mirror.
+I want to host a dinner party on a summer evening, where should I set the table? | On the table on the porch. | On the patio or in the dining room.
+What color is the countertop on the porch? | Black | Since countertops on the porch can come in various colors and no specific details are provided, I will make a reasonable guess that it is white.
+Where is the round mirror? | On the wall above the head of the bed in the first bedroom. | On the wall
+what does the outside weather look like? | bright and sunny | sunny
+what is behind the monitor screen? | window | a wall
+what can be seen in the mirror on top of staircase? | a tripod | The reflection of the staircase and potentially other parts of the hallway.
+what is the object seen in the mirror used for? | to take photos and videos | The object seen in the mirror is likely used for personal grooming or checking one's appearance.
+are the blinds in the workroom shut or not? | not shut | not
+is the brown dresser in the bedroom empty? | no | No, it is not empty.
+where can I keep a flower vase in the bedroom? | on the bedside board | On a bedside table
+where can I keep the keyboard | on the table in the workroom | On the desk
+what room is the white table lamp in? | bedroom | The living room
+is the lamp in the bedroom on or off? | on | off
+what color is the tripod? | black | black
+where is the black chair? | infront of the monitor in the work room | In the living room
+Where is the abstract painting with blue circles? | In the dining room | In the living room.
+Where can I put my jacket? | On the cloth hanger rack | You can put your jacket in the closet.
+Where are the clothes? | On the hangars next to the stairway | In the closet
+What is on the dining table? | Wine glasses | A centerpiece
+What kind of material is the wall on the right side of the staircase? | Exposed stone | drywall
+Is there any natural light in this building? | No. | Yes
+What are the objects on the bench around the dining table? | Pillows | Plates and utensils
+Is the cloth hanger rack full? | No. | Yes
+Where can I wipe my shoes? | On the black floor mat | The doormat.
+What color is the jacket on the clothes hangar? | Maroon or red | blue
+What is to the left of the dining table? | A wine cabinet | a chair
+What kind of staircase is in this building? | A spiral staircase | a straight staircase
+What is on the bed with the blue sheet | Construction insulation | A pillow
+Is this house safe to live in? | No, the house is in disrepair | It is difficult to determine the safety of the house without more information about its condition, structure, and other safety factors. If I had to guess, I would say the house is safe to live in, assuming no specific mention of hazards.
+How do I turn on the lights? | I do not see any lights in the house | Use the light switch on the wall.
+What size mattresses are in the house | Full | various sizes
+Where can I use the bathroom? | I did not see a bathroom | In the restroom.
+What is between the bed and the chair? | A nightstand | a nightstand
+Are the doors open or closed? | Open | closed
+What can I use to heat up some leftovers? | This house has no kitchen or microwave with which to reheat leftovers | The microwave
+Is the door of the restroom open or closed? | Open | closed
+Is the TV on or off | Off | off
+In which room is the frame about the minesota twins? | In the restroom | In the living room.
+I go to the TV room, which object can I use to exercise? | The Stationary Bike | The treadmill
+What material are most of the cabinets of the kitchen made of? | Wood | Wood
+If you go to the restroom there are ornaments and frames about one sport, which sport is it? | Baseball | Basketball
+Which color is the clock on the wall of the kitchen? | White | white
+In which room is the stationary bike? | In the TV room | The gym or workout room
+What is the flue object on the floor near the toilet? | A trash can | a bath mat
+What is the object in the TV room, at the right of the couch? | An stationary bike | A side table
+About which baseball team is the frame on the restroom? | The Minnesota Twins | The New York Yankees
+If you were to go down the stairs, then straight into the tv room, turn left in the door and go straight until you enter the last room, which room would it be? | The restroom | Based on the description provided, the last room you would enter could be the bedroom.
+What is the object between the Stationary Bike and the Table with the Lamp? | An armchair | A magazine rack
+There is an object to tell the time in this scene, in which room is it? | In the kitchen | the living room
+what is above the right bed | a window | A lamp
+I can't open the windows, how can I cool down the bedroom | turn on ceiling fan | You can use a fan or air conditioner to cool down the bedroom. Additionally, you could also use cooling methods such as taking a cool shower, using cool bedding, or keeping the lights off to reduce heat.
+what color is the sofa | blue | brown
+How can I cool down the bedroom | turn on ceiling fan |  Use an Air Conditioner: If you have a window or portable air conditioning unit, you can use it to lower the temperature in the room.
+I don't have a news paper, how can I check the news | use the tv | You can check the news using a variety of digital devices such as a smartphone, tablet, computer, or smart TV. You can visit news websites, use news apps, or listen to news podcasts and broadcasts.
+what is the object to the right of the TV | a clock | a TV stand
+Where can I place a glass of water in the living room | on the drawer next to the sofa | on the coffee table
+Is the lamp in the living room on or off | on | off
+what color are the bed covers | blue | blue
+what is the the grey object below the TV | a box | a TV stand
+what room has a picture of several airplanes | the bedroom | a living room
+what room has a plant | the living room | the living room
+is the bed made | yes | No
+Go to the living room, step close in front of the TV, turn to the left and enter the room, which room is it? | The studio | The kitchen
+There's something on the wall between the pet cage and the chimney, what is it? | A window | a painting
+Which room is the TV in? | Living room | The living room
+There are ornaments about a festivity near the chimney, about which festivity are they? | Halloween | Christmas
+Is there a room to work? If so which room is it? | Yes, a studio | Yes, there is likely a room to work. It is probably a home office or study.
+Theres a frame about a video game above the brown couch on the top floor, which video game is it? | Super Mario | Super Mario Bros.
+Is the TV on or off? | Off | off
+Which color is the wall behind the desk with the computer? | Blue | white
+Which color is the dinning table? | Brown | brown
+Which room is the pet cage closest to? | Living room | The living room
+Is there a place where I can leave my pet? If so where is it? | Yes, a pet cage in the living room | Yes, you can leave your pet in a designated area such as a pet bed, crate, or a specific room like a laundry room or a kitchen, which often have pet-friendly spaces.
+Theres something on the ceiling of the living room, what is it? | A ceiling fan | A ceiling fan
+Is the light on the staircase on or off? | On | on
+What is the object inside the pet cage? | A teddy bear | a pet
+Where can I get recipes for what to cook? | The open cookbook on the kitchen counter top | a cookbook
+What is hanging from the oven handle? | A towel | A kitchen towel
+Where can I get drinking water in the kitchen? | From water dispenser in the fridge | From the sink or the refrigerator
+What is to the left of the frontdoor? | A storage closet | a coat rack
+Is the light above the sink turned on? | Yes | Yes
+Where can I warm up? | Next to the fireplace | In front of the fireplace.
+What is shown on the painting above the couch? | Horses | A landscape
+What is above the wooden table in the living room? | A blue, white, and orange painting | a light fixture
+What color is the front door? | Brown | Red
+What color are the pillows in the kitchen? | Blue | white
+Where is the microwave? | Above the stovetop | In the kitchen.
+How many staircases are there? | At least two | one
+Where was the cardboard box? | In the kitchen | In the storage room
+What type of floor is in the kitchen? | linoleum tiles | Tile floor
+Is there anything on top of the cardboard box | no | No
+What is between the kitchen and the stairway up? | A stairway down to the outside | A hallway
+Where could i wash my hands | In the kitchen sink | In the sink
+Is there a light switch on the stairs? | Yes | No
+What is between the kitchen and the open closet? | An empty room | The dining area
+Is the door to the closet open or closed | open | closed
+What is happening in this house today? | Someone is moving | It could be anything, but a common activity might be cooking dinner.
+What is in the corner of the dining room? | a plant | a cabinet
+Where can I put my scarf? | Coat hanger | On a coat rack
+Is the downstairs closet door open or closed? | closed | closed
+Are both the dining room table and kitchen counter set? | Yes | Yes
+What color are the livingroom curtains? | white | blue
+Is there space for another beanbag chair against the far wall downstairs? | Yes | Yes
+Where is the mortar and pestle? | kitchen alcove | In the kitchen
+Where is Yahtzee? | downstairs | on the game shelf
+What material are the chairs at the downstairs table? | leather | wood
+Where can I find the time? | Oven clock | on a clock
+Is there space for another pillow on the back of the bench with the coat hangers? | No | Yes
+What is above the entry way shelf? | a mirror | a mirror
+is the door to the washroom open or closed? | open | open
+what is above the markers on the whiteboard? | eraser | An eraser
+what color are the mittens? | grey | red
+is there anything on the bed besides pillows? | no | a blanket
+what is the object hanging below the picture frame in the kitchen? | spatula | a calendar
+where precisely are the markers in the study room? | on the whiteboard bottom-right corner | The markers are on the desk.
+what is the red object next to the mirror? | lamp | a hairbrush
+how can I clean the whiteboard? | using the eraser attached to the whiteboard | You can clean the whiteboard by using a dry erase marker or whiteboard cleaner and a cloth. First, erase any existing marks with a dry eraser. Then, spray the whiteboard cleaner onto the surface and wipe it down with a clean cloth to remove any remaining residue.
+what room is the surface cleaner in? | the room with the whiteboard | The kitchen.
+Where should I store fruits that I want to last long? | In the fridge | The refrigerator
+What is at the center of the breakfast table? | A large fruit bowl | A bowl of fruit
+Is the kitchen countertop clean? | Yes. | clean
+Where is the breakfast table? | To the left of the kitchen | The breakfast table is in the kitchen.
+What is the shape of the panels on the floor? | Square | Rectangular
+What is above the red couch? | Paintings | A painting
+What is in the center of the room with the stairs? | A red couch | a table
+Is the front door open or closed? | Open | closed
+Is this home in the suburbs? | No. | Yes
+Where are the light switches? | To the right of the front door | The light switches are typically located on the wall near the entrance of the room.
+Where can I wash my hands? | In the sink in the kitchen | In the bathroom or kitchen
+What is at the back of the living room, behind the couches? | A piano | a bookshelf
+What is in between the two couches? | A coffee table | A coffee table
+Is the piano keyboard cover open or closed? | Open | open
+Is the person who lives here an avid reader? | Yes. | Yes
+Is there natural light in the room? | No. | Yes
+Where can I lay down and read a book? | The couch | on the couch
+Can this home be used for a large dinner party? | Yes. | Possibly
+What is above the piano? | A painting | A painting
+What color are the air vents below the window? | Gold | white
+What is above the coffee table? | A chandelier | A chandelier or a ceiling fan
+Where is the pillow with the face on it? | On the couch | on the bed
+What can I use to entertain my guests with music? | The piano | You can use a stereo system or a Bluetooth speaker.
+Is there space under the kitchen bar area? | No. | Yes
+What can I use to cool down the living room? | The thermostat | A fan or an air conditioner
+What color is the smoke detector? | Yellow or off-white | White
+Is this home on the first floor? | No | Based on the information provided, it's not clear whether the home is on the first floor.
+Does this house have pull lever door handles or knobs? | Pull lever | knobs
+Is the coat closet in the living room open? | No. | closed
+What is hanging from the ceiling in the bedroom? | A dome light | A ceiling light
+What material is the dining table? | Glass | wood
+Is the bedroom window open? | No. | open
+What is the gold object on the nightstand? | A nightlamp | A lamp
+What is in between the two white cabinets in the kitchen? | The microwave | a countertop
+Where can I sit and eat if I don't want to use the dining table? | Use the kitchen bar counter | The kitchen counter
+Which room should I go to see the car? | The bedroom | The garage
+Where are the orange flowers? | Outside the bedroom in a vase on the ground | On the dining table
+How can I cool myself off? | Turn on the ceiling fan | You can use a fan or air conditioner.
+Where can I put my shoes? | On the hanging shoe rack in the closet | In the closet
+Are both doors in the bedroom open? | No. | Yes
+Are the closet lights turned on? | Yes | Yes.
+What is above the painting with the red flowers? | An air vent | a light fixture
+What is hanging from the ceiling in the bedroom? | A ceiling fan | A ceiling fan
+What does the painting in the bathroom depict? | A pier | A landscape
+What is the color of the walls in the bedroom? | Light blue | white
+Where is the full body mirror? | In the bedroom by the door | In the bedroom.
+Is there room for a desk in the bedroom? | No | Yes
+What is depicted on the painting above the bed? | White flowers | A landscape
+What is above the bed? | Two paintings | a ceiling light
+What is to the left of the staircase? | A storage closet | A living room
+Is the bedroom door open? | Yes | open
+Are the cabinets below the mirror closed? | Yes. | closed
+What type of flooring does this house feature? | Wood panels | hardwood flooring
+What is the large, round, and black object on the wall? | A clock | a clock
+Where is the mirror? | Next to the staircase above the dark brown cabinet | The bathroom.
+What shape are the door knobs? | Round or spherical | Round
+What is to the left of the mirror? | A plant in a tall vase | A dresser
+Can two adults fit on the bed? | no | Yes
+Where is the checkers board? | Entryway table | On the coffee table.
+How can I heat the house without wood? | Thermostat in the living room | You can use a central heating system or space heaters to heat the house without wood.
+Where can I store the house key? | The lockbox on the front door | In a drawer
+What is above the bed that's not in the nook? | A clock | A ceiling light or a ceiling fan
+Is the backdoor open or closed? | open | closed
+What color is the bedroom poof? | blue | blue
+Can another cookie jar fit on the cookie jar shelf? | yes | Yes
+Does this house have forced air heating? | no | Yes, the house has forced air heating.
+Where can I access the attic? | door at the top of the stairs | The attic can usually be accessed through a hatch or pull-down ladder in the ceiling, often found in a hallway, closet, or garage.
+What colors is the kitchen backsplash | black | white and grey
+Is the microwave door propped open? | no | yes
+Where is the yellow pillow? | The kitchen window | On the bed.
+Is the china cabinet full? | Yes. | Yes
+Where should I look if I want to research a topic? | The bookshelf in the office room downstairs | In the study or office.
+Does this house have a backyard? | Yes | Yes
+What is in the right corner of the room downstairs? | A bookshelf | A table
+Are the dining table chairs pushed in? | Yes. | Yes
+Where is the drawing of the airpline? | In the picture frame along the stairway | On the refrigerator
+what color is the drawer in the bedroom | light brown | white
+how many devices can be plugged in on the kitchen counter | two | Three devices
+can I clean the floor with a mop? | yes | Yes.
+what color is the bed runner | yellow | Blue
+is the lamp in the bedroom on or off | on | on
+is the door to the balcony open or closed | open | open
+where are chairs to sit | on the balcony | In the living room around the coffee table and in the dining room around the dining table.
+how can I increase airflow in the bedroom | turn on the ceiling fan | Opening windows to allow fresh air to circulate.
+what is on top of the drawer in the bedroom | a TV | a lamp
+what is the pink object on the bed | a pillow | a pillow
+how can I warm up dinner? | in the microwave | You can warm up dinner by using the microwave.
+is there an area between the beds to place a glass of water | yes | Yes, there is an area.
+where is the bench | by the bed | In the living room.
+Are the lights turned on in the bedroom? | Yes. | Yes
+What is above the sink? | A mirror | A mirror or a cabinet
+What shape is the mirror? | An oval | rectangular
+Is there space under the bed for storage? | Yes | Yes
+Where is the cartoon cat? | Its drawn on the pink photo frame | On the television
+Does the bedroom have a lot of furniture? | No | The bedroom has a moderate amount of furniture.
+Is the patio door open? | No. | open
+Where is the orange painting? | Above the bed | The living room
+What style of paintings are put up in the bedrrom? | Abstract | landscape paintings
+Where can I take a nap? | On the bed in the bedroom | On the couch
+What color is the bed comforter? | Brown | blue
+What is the object to the left of the bed? | A radiator | A nightstand
+Where is the microwave? | On top of the refrigerator | The microwave is on top of the stove.
+Where is the pillow with a hexagonal pattern? | On the bed in the second bedroom. | The pillow with a hexagonal pattern is on the bed.
+what shapes are drawn on the  black board | star and moon | circles
+where is the star drawn? | on the blackboard | on the wall
+what is infront of the blackboard on the wall? | a small kids table and chair set | A teacher's desk.
+is the bed in the second room completely empty? | no | No
+what is between the lamp and the side table in the bedroom? | electric switch | The nightstand
+what shape are the decorations above the bed? | triangle | Star-shaped
+where is the brown basket? | next to the small table-chair set infront of the black board | The brown basket is in the living room.
+where can I keep a small container with chalks? | on the table infront of the blackboard | In a drawer or on a shelf in the study room or office.
+are the lamps in the second room on or off? | on | on
+Where is the white sofa? | In the living room | The living room
+Is the front door open? | No | open
+What's happening in the picture above the stairs by the gray couches? | People are jumping into the water | A family photo
+Where can I relax and watch TV | On the gray couches upstairs from the kitchen | On the couch in the living room.
+What color is the chest surrounded by sofas? | Red | brown
+Could I put something on the chair by the front door? | Yes | Yes
+Is the upstairs TV on? | No | Yes
+Is the kitchen an open floor plan? | Yes | Most likely, yes.
+I like to drink my coffee outside, what can I do? | Go out the glass door by the kitchen and onto the porch | You can take your coffee to the patio or balcony and enjoy it there.
+Where is the red chest? | in the room with the gray sofas | In the living room.
+What is hanging on the bannister? | A straw hat | a towel
+Are all the bedroom doors upstairs open? | Yes | Some of the bedroom doors upstairs are open.
+Where should I put my jackets and shoes? | In the storage closet | In the closet or on a coat rack by the entrance.
+What color is the staircase railing? | White | brown
+What is to the left of the mirror downstairs? | Light switch | a table
+What is directly across the staircase? | A mirror | A hallway
+Where is the blue cabinet? | In the upstairs bedroom | In the kitchen
+What is underneath the four paintings upstairs? | A radiator | a couch
+What is on the center of the ceiling in the living room? | A smoke detector | a light fixture
+How many stories does this house have? | Three | two
+Is my backyard safe to let me dog out in? | Yes, its fenced. | The backyard
+Are the ceiling lights in the living room turned on? | Yes | Yes
+How can I get to the backyard? | Through the patio doors in the living room on the first floor | Through the backdoor
+where are the books | in the office | on the bookshelf
+is the office table clean | yes | clean
+what color are the doors | white | white
+what is the black object on the table on the top floor | Monitor | a laptop
+where are model houses displayed | in the hallway by the stairs | On shelves.
+what objects are displayed above the little houses | model sail boats | decorations
+is the chair in the office occupied | no | no
+do I need to install curtains to reduce the day light? | no | Yes
+what color are the steps of the stairs | red | brown
+can I use a mop to clean the stairs? | no | Yes
+is there room to work from the table in the office | yes | Yes
+What is the picture seen from the kitchen depict? | A man and a child, looking at something, standing in between trees | A fruit bowl.
+What color are the kitchen cabinets? | Grey | white
+What is the blue object above the glass doors? | A clock | a curtain
+What is the yellow object hanging on the wall? | A painting depicting a man | a painting or artwork
+Where is the microwave? | Above the oven | in the kitchen
+What can I use to check my appearance? | The mirror above the wooden table near the kitchen. | a mirror
+Is the backyard fenced? | Yes | Yes.
+Is there room for more furniture near the kitchen? | Yes | Yes, there is room for more furniture near the kitchen.
+What kind of numbering does the blue clock use? | Roman numerals | Arabic numerals
+Where is the red and white checkered rug? | Underneath the wooden dining table | In the kitchen
+Where can I put my apples? | Use the basket on the kitchen counter | In the fruit bowl on the kitchen counter.
+What color is the trim around the mirror? | Gold | white
+Are the kitchen bar chairs tucked in? | Yes. | Yes
+How many basins does the sink have? | Two | one or two
+Are the blackout curtains behind the bed opened or closed? | Opened | closed
+What is to the left of the black office chair? | A recumbent exercise bicycle | a desk
+What is written on the wall above the sink between the two cupboards? | We may not have it all together, but together we have it all. | Home Sweet Home
+Where is the large green plant? | In the entryway. | In the living room.
+What is next to the posters on the wall in the staircase? | A calendar. | A handrail
+Are all of the bulbs in the ceiling fan over the dining room table lit? | No | Guess: yes
+What color are the walls in the bedroom? | Powder blue | white
+If I sit at the dining room table, will the back two legs of my chair be touch wood or carpet? | Wood | touch wood
+I want to do a quick workout, where can I do this? | Using the exercise bike in the basement. | In the living room.
+Where is the picture with the red flowers? | Next to the stairway | on the living room wall
+Is the sliding door open or closed? | Closed | closed
+Where can I store books if the shelf gets full? | The woven baskets underneath | You can store books in a closet.
+Where are the brown woven baskets? | Below the books in the black cubby shelf | In the living room.
+What is in between the two bedroom doorways? | A light switch | a hallway
+Are the walls painted? | No | Yes
+What color is the chair in the bedroom? | Black | blue
+What objects are in the black cubby shelf? | Books | books
+Is the bedroom furnished and ready to live in? | No. | Yes
+Is the chandelier turned on? | Yes. | Yes
+What can be seen outside the bedroom window? | A pond | A garden
+Where is the toy car? | To the left of the television in the first bedroom. | On the floor
+What can I use to clean up a spill on the bathroom counter? | The hand towel | A towel or a washcloth
+Where does the dog sleep at night? | In the crate under the staircase. | In the living room.
+What cartoon character is portrayed in the painting to the right of the television in the first bedroom? | Donald Duck | Mickey Mouse
+Where can I hang my towel so I don't have to leave the shower to dry off? | On the glass wall of the shower. | on a towel rack inside the shower or within arm's reach
+What is the painting to the right of the television in the first bedroom made out of? | Dollar bills | canvas
+Would you place a drink on your right or left side while watching tv from the lefthand chair in the living room? | The right | on your left side
+What color are the window frames? | Black | white
+What is the chandelier hanging over? | The staircase. | The dining table
+What is the gold object on top of the bureau? | A lamp. | a jewelry box
+Is the fireplace lit? | No | No
+Is the television on? | No | Yes
+What is above the table on the wall you see when exiting the bedroom? | A mirror. | A clock
+I need to blow my nose while taking a bath, what can I use? | There is toilet paper next to the tub. | A tissue
+What room is the orchid in? | The bathroom. | The living room
+Where can I wash my hands on the second story of the house? | The bathroom sink | In the bathroom
+What is underneath the television? | A fireplace | a TV stand
+What material are the blue pillow's pillowcases made out of? | Velvet | cotton
+on which floor is the washing machine | on the second floor | the basement
+can you clean all the floors on the top level with a mop | no | Yes
+are there objects on top of the blue drawer | no | Yes
+where can I store clothes | in the drawer on the second floor | In a closet
+what color is the picture frame | black | black
+What is the blue object on the top floor | a drawer | a lamp
+what floor is the laundry room on | the 2nd floor | the basement
+on which floor do you see plants | on the first floor | the first floor
+is this a good home for someone in a wheelchair | no | It is difficult to determine without more specific information. A good home for someone in a wheelchair typically needs to have features such as wide doorways, low countertops, accessible bathrooms, and no stairs, among other considerations.
+what color are the doors | white | white
+is the entrance door to the house open or closed | closed | closed
+where can I store books | on the shelf on the second floor | A bookshelf
+What color is the trim of the mirror? | Grey | white
+What is the circular object on the wall next to the staircase? | A smoke detector | A clock
+What type of furniture is used to display items behind glass doors? | The china cabinet | A display cabinet
+What color is the staircase railing? | Dark brown | white
+What can be used to provide privacy in the dining room? | Curtains | curtains or blinds
+What is the yellow object on top of the ouch? | A blanket | a pillow
+What is hung along the walls of the staircase? | Photos of people | Family photos or artwork
+Is the dining room light turned on? | Yes. | Yes
+Where is the china cabinet? | To the left of the dining table | In the dining room
+Where can I dry my shoes when I come into the house? | On the grey rug behind the front door | In the mudroom or near the entryway.
+Is the bedroom door open? | Yes | open
+What is at the center of the dining table? | A vase with flowers | A centerpiece
+Where is the printer? | Next to the sofa | On a desk
+Where is the octagonal mirror? | In the first bedroom | In the hallway
+What color is the curtain over the sink? | Green | blue
+It's too bright in the living room, how can I make it darker? | Lower the shades over the porch door. | You can close the curtains or blinds, or turn off any lights that are on.
+What kind of pants is the man in the mirror wearing? | Jeans | jeans
+Is the coffee pot full or empty? | Full | full
+If I sit in the armchair in the living room, what animal can I touch with my right hand? | An elephant | A cat
+where can I sit in the living room? | on the sofa | On a sofa or an armchair
+what is right next to the chair? | a small side table | A side table
+what is on the chair? | a soft pillow | a cushion
+is the outside door open or closed? | open | closed
+is the table in the living room clean? | yes | clean
+is the outside door open or closed? | open | closed
+where is the standing lamp? | next to the bed in the bedroom | Next to the sofa
+what is special about the wall in the living room? | it seems to be made of stone | There might be a large piece of decor, such as a painting, a television mounted on it, or it could have a special texture or color.
+where is the fan? | in the dining room besides the kitchen | On the ceiling
+where is the word friendship written? | above the door in the living room | on a decorative item
+Where is the baby high chair? | Next to the entrance to the TV room | In the dining area
+Where are the stairs to the basement? | In the hallway by the bedrooms | They are likely to be in the hallway.
+Where is the four blade fan? | In the living room | on the ceiling
+Where is the three blade fan? | Above the stairs | On the ceiling.
+where can I keep a new ironed shirt? | in the closet with other shirts. | In the closet
+are the electric lamps near the staircase on or off? | on | on
+what is the green thing seen from the window as we walk down the staircase? | leaves of a tree | a tree
+where is artwork? | above the white table on the top floor | on the walls
+what does the art in the hallway show? | a caricature of human face | a landscape painting
+what color is the door of the bedroom? | white | white
+what is between the closet and the bedroom? | a mirror | a hallway
+what color are the electric switches in the above floor | white | white
+is the closet door open or closed? | open | closed
+where is the brown table? | in the bedroom right next to the bed | In the living room
+what is on the wall infront of the staircase | lamps | A painting or a family photo
+Where is the doll | On top of the light brown wooden cabinet | on the bed
+What color is the comforter? | Pink | blue
+Is the front door open? | No | open
+Where can I take notes? | On the desk in the bedroom | At a desk or table
+What is the large white brick fixture? | A fireplace | a refrigerator
+Where can I check my appearance? | In the mirror which is above the white drawer in the bedroom | In the mirror
+Does the bedroom have any clutter on the floor? | No | No
+Where can I set if I want to warmup? | By the fireplace | By the fireplace
+Where can I brush my teeth? | In the bathroom sink | In the bathroom
+Is the window in the bedroom open? | Yes | The window is closed.
+What type of door design is featured prominently in this home? | Cross hatch glass door | French doors
+What is on top of the washing machine? | The dryer | a laundry basket
+What room is the potted cactus in? | The bathroom | the living room
+How can I reach the wine glasses if I'm too short? | Using the step-stool in the laundry room. | You can use a step stool.
+What shape is the multicolored chair in the living room? | Circular | round
+What is the black object next to the black chair? | A filing cabinet | a black table
+What shape is the couch in the living room? | It is a c shape. | L-shaped
+Is my study desk free from clutter? | No | No
+How can I dry my towel? | By hanging it on the towel warmer. | By hanging it up in a well-ventilated area or using a dryer.
+Is the printer plugged in? | No | Yes
+Where did I leave my water bottle? | On the table next to the desk in the study. | on the kitchen counter
+Could I have a conversation with someone cooking dinner in the kitchen while I sit in the dining room? | Yes | Yes
+Where is the black and grey speaker? | On the first shelf of the wooden cabinet | The living room
+What is leaning in the corner by the coat rack? | An umbrella | an umbrella
+Are the curtains to the patio door open? | Yes | open
+Where can I put my hat? | On the hat rack | On the hat rack
+Is this home in the city? | No. | Yes
+Is the blue lamp by the couch turned on? | No | Yes
+Where is the bongo? | On top of the brown shelf | The living room
+Where can I take a nap? | On the black couch | A bed
+What color pattern is on the pillow on the black couch? | A leopard skin color pattern | striped
+What is draped on top of the black couch? | A striped blue blanket | a blanket
+is the outside home door open or closed? | closed | closed
+what is on top of the cabinet in the above floor? | vase | a box
+what color is the lamp light in the room next to the kitchen? | yellow | yellow
+where is the lamp that is switched on? | in the bedroom on the above floor` | on the bedside table
+where is the black bowl? | on the table outside the kitchen | In the kitchen
+is the lamp in the living room on or off? | off | on
+how can I clean up smoke from kitchen? | use the chimney | Open all windows and doors to let fresh air circulate and help dissipate the smoke.
+what color is the cushion in the study room in the above floor? | yellow | Blue
+Where are the pillows? | On the sofa in the bedroom. | on the bed
+What colors are the stripes on the wall with the books? | Blue, Green, and Red | The stripes on the wall with the books could be any color, but a common combination might be white and blue.
+Who is the room with the books meant for? | A child | The room with the books is meant for someone who enjoys reading.
+What color are the flowers on the black table downstairs? | White | yellow
+What color are the sheets in the bedroom? | White and grey | white
+Are the doors downstairs closed? | Yes. | closed
+What is on the ceiling in front of the upstairs bedroom? | An air vent | a light fixture
+What cartoon animal is painted on the wall? | An owl | Mickey Mouse
+Where are the books? | On the shelves hanging on the wall | On a bookshelf or a desk
+Where can my kids go to read? | The small yellow table upstairs | the reading nook or the living room
+What is on top of the cabinet in the same room as the sofa, aside from a picture frame? | Books | A vase.
+where can i find something to drink | In the fridge below the picture frame | You can find something to drink in the kitchen.
+Where can i relax a bit | on the red couch | on the couch
+What room is the plant in? | The room with the stairs | the living room
+What room is the picture in? | The one with the red sofa | the living room
+Is the lamp on or off | on | off
+What material is the floor? | concrete | wood
+Which bin should I put paper in? | The bin with the yellow lid. | The recycling bin
+What color is the car? | Blue | red
+Where is the broom? | Below the garage door opener | In the closet
+Is the garbage bin open? | Yes. | closed
+What is the green object in the left of the garage? | A hose | a lawn mower
+Is the house doorway open or closed?q | Open | closed
+What is the bin with the yellow lid? | A recycling bin | The recycling bin
+What is on the top shelf to the right side of the garage? | An ice cooler | Tools
+What can I use to water my plants? | The green hose | a watering can
+What type of car is in the garage? | A sedan | A sedan
+Where is the garage opener? | To the left of the house doorway | On a keychain or mounted on the wall.
+What can I use to keep drinks cold at a picnic? | The blue cooler | A cooler
+What is behind the armchair in the living room? | A dog bed | a lamp
+What is hanging on the wall in the living room? | A clock | A piece of artwork
+What type of numbers are on the clock? | Roman numerals | Arabic numerals
+Where is the wreath? | Hanging on the front door. | On the front door
+Where is the teddy bear? | In the dog bed in the living room. | On the bed
+How many rooms have vehicle wallpaper? | 2 | One room
+Where is the fireplace? | In the living room, to the right of the radiator and window | In the living room.
+What can be seen through the window in the living room? | Trees and hills | Trees or a garden
+Where is the picture of the flowers? | Above the wooden nightstand | On the wall
+Where is the closet with the mirror? | In the bedroom downstairs | In the bedroom.
+Where is the map of the united states? | Above the black couch | On the wall
+Where is the light purple flower painting? | Above the toilet in the bathroom upstairs | On the wall of the living room.

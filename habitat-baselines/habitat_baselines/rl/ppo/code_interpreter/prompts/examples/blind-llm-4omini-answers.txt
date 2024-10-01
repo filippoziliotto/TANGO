@@ -12,7 +12,7 @@ How can I turn off the lamp in the bedroom? | Use the pull cords | By using the 
 Is there space on the dining table to work on my laptop? | Yes | Yes
 Is the bathroom door open? | Partially | closed
 When coming down the stairs, you exit near a couch. What's across from the stairs? | The bathroom | a coffee table
-Does the bathroom door open "into" or "out" of the bathroom | Out | into
+Does the bathroom door open 'into' or 'out' of the bathroom | Out | into
 Where is the robed statue | By the stairs in the back of the first level | In the corner of the living room.
 Where is the entryway couch | Under the stairs by the main entrance | against the wall
 What's to the left of the toilet? | Radiator | a sink
@@ -78,9 +78,9 @@ Is there clutter on the kitchen island? | no | Yes, there is clutter on the kitc
 What color is the front door? | white | Red
 Is the refrigerator modern? | no | Yes, it's modern.
 What is the blue object left of the downstairs bed? | a humidifier | a chair
-Where is "Bless this home" written? | Above the dinner room entrance | On a decorative sign or wall hanging.
+Where is 'Bless this home' written? | Above the dinner room entrance | On a decorative sign or wall hanging.
 Where is the plaid blanket? | On the back of the couch | On the couch
-Where is the "Be Thankful" poster? | Above the stairs | On the wall
+Where is the 'Be Thankful' poster? | Above the stairs | On the wall
 Where is the black cross? | Above the front door | On the wall
 Does poster above stairs show English letters? | Yes | Yes
 What decorations is on the bathroom counter? | A plant | a decorative soap dispenser

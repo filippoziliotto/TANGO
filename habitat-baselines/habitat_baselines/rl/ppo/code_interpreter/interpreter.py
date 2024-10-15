@@ -67,12 +67,6 @@ class PseudoCodeInterpreter:
         self.variables = {'episode_is_over': False}
         self.loop_exit_flag = False
 
-        # Count exploration targets is equal to the length of self.exploration_targets
-        # We have False for each target not yet explored
-        # TODO: this does not work always for Open-EQA Prompt generation problems
-        try: self.exploration_targets = [(False, eval(line[0].split("(")[1].split(")")[0]) ) for line in self.lines if 'detect' in line[0]]
-        except: self.exploration_targets = []
-
     def run(self):
         stack = []
         while not self.loop_exit_flag and self.current_line < len(self.lines):
@@ -279,7 +273,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             )
             print('Value mapper loaded')
 
-
     """
     Habitat environment modules to define actions
     """
@@ -289,11 +282,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
 
+        current_goal = self.habitat_env.get_current_goat_target()
+
         # If the subtask is over, start new subtask by the last agent position
         self.save_last_position_and_teleport()
 
-        # Initial 360° turn for frontiers initialization
-        self.turn_around()
+        # Update current value map with feature map memory
+        self.use_target_memory(
+            target_name = current_goal
+        )
+
+        # Initial 360° turn for frontiers initialization, given a target
+        self.turn_around(
+            target_name = current_goal
+        )
 
         # Specific for GOAT this is a mess
         try:
@@ -360,18 +362,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # Reset value mapper
         if self.habitat_env.value_mapper.use_value_mapper:
-            # Save maps to file
-            # if not self.habitat_env.check_scene_change():
-            #     self.value_mapper.save_maps(
-            #         frontier_map = self.value_mapper.frontier_map, 
-            #         obstacle_map = self.value_mapper.obstacle_map, 
-            #         value_map = self.value_mapper.value_map
-            #     )
-                
+
             if self.habitat_env.check_scene_change():
                 self.value_mapper.reset_map()
 
-    def turn_around(self):
+    def turn_around(self, target_name):
         """
         Make a complete turn at the beginning of the episode
         to initialize the frontiers to have as many as possible
@@ -381,7 +376,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.get_current_step() == 0:
             for _ in range(num_turns):
                 self.habitat_env.execute_action(action='turn_left')
-                self.map_scene("explore")
+                self.map_scene(target_name)
 
     def save_last_position_and_teleport(self):
         """
@@ -398,7 +393,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
-        
+    
+    def use_target_memory(self, target_name):
+        """
+        Use the target memory to navigate to the target
+        """
+        if self.value_mapper.save_image_embed:
+            # If first step, >= second subtask, and last agent position is not None
+            if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None):
+                self.value_mapper.update_starting_map(text=target_name)
+
     """
     Computer Vision modules
     """
@@ -500,22 +504,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         target = self.check_variable_type(target)
         is_found_target = len(target['boxes']) > 0
-
-
-        # If target is found we update the self.exploration_targets variable
-        # Needed if we want to update the value with the stored feature map
-        if is_found_target and self.value_mapper.save_image_embed:
-            for i, (found, target_name) in enumerate(self.exploration_targets):
-                if target['boxes'] and not found:
-                    self.exploration_targets[i] = (True, target_name)
-                    break     
-
-            # Update the starting map with the new target
-            for found, target_name in self.exploration_targets:
-                if not found:
-                    self.value_mapper.update_starting_map(text=target_name)
-                    break
-
 
         return is_found_target
     

@@ -440,17 +440,20 @@ class ValueMap(BaseMap):
 
         # Using max confidence for feature map
         if self.use_feature_map:
+
+            # Copy the existing map and new map to prevent modifying the original
             emap = self._map.copy()
             new_emap = new_map.copy()
+
+            # Use equal weighting
             emap[emap > 0] = 1
             new_emap[new_emap > 0] = 1
-            new_map_mask = np.logical_and(new_emap < self._decision_threshold, new_emap < emap)
-            new_emap[new_map_mask] = 0
+            new_emap_mask = np.logical_and(new_emap < self._decision_threshold, new_emap < emap)
+            new_emap[new_emap_mask] = 0
+
+            # Use Max confidence
             higher_new_map_mask = new_emap > emap
             self._embed_map[higher_new_map_mask] = image_embed
-            
-            # Save to .npy file
-            save_tensor_to_npy(self._embed_map)
 
         if self._use_max_confidence:
             # For every pixel that has a higher new_map in the new map than the

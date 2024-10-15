@@ -477,13 +477,13 @@ class HabitatEvaluator(Evaluator):
         """
         Call habitat simulator for the current environment
         """
-        return self.envs.call(self.env_call_list)[env].sim
+        return self.envs.call(['habitat_env'])[0].sim
 
     def get_current_episode_info(self, env=0):
         """
         Get the current episode information
         """
-        return self.envs.call(self.env_call_list)[env].current_episode
+        return self.envs.call(['habitat_env'])[0].current_episode
 
     def get_current_position(self):
         """
@@ -632,6 +632,13 @@ class HabitatEvaluator(Evaluator):
             self.current_scene = current_scene
             return True
         return False
+
+    def get_current_goat_target(self):
+        """
+        Get the current target for the GOAT task
+        """
+        return self.get_current_episode_info().object_category
+
 
     def evaluate_agent(
         self,

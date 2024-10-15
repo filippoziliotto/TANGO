@@ -136,7 +136,7 @@ habitat_baselines:
   # Value Mapper settings
   value_mapper:
     use_value_mapper: True
-    type: "clip"
+    type: "blip"
     size: "base"
     visualize: True
     save_video: False
@@ -145,9 +145,9 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
-    save_image_embed: False
+    map_size: 250
+    pixels_per_meter: 5
+    save_image_embed: True
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

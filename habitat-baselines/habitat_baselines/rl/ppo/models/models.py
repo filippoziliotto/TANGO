@@ -778,20 +778,8 @@ class ValueMapper:
         if self.visualize:
             self.visualize_maps()
 
-    def save_maps(self, frontier_map, obstacle_map, value_map, path="data/datasets/goat_bench/hm3d/v1/val_unseen/maps"):
-        
-        # Save the maps to disk as np.pickle
-        np.save(f"{path}/frontier_map.npy", frontier_map)
-        np.save(f"{path}/obstacle_map.npy", obstacle_map)
-        np.save(f"{path}/value_map.npy", value_map)
-
-    def retrieve_maps(self, path="data/datasets/goat_bench/hm3d/v1/val_unseen/maps"):
-        # Retrieve the maps from disk
-        frontier_map = np.load(f"{path}/frontier_map.npy")
-        obstacle_map = np.load(f"{path}/obstacle_map.npy")
-        value_map = np.load(f"{path}/value_map.npy")
-
-        return frontier_map, obstacle_map, value_map
+    def retrieve_feature_map(self):
+        return self.value_map._embed_map
 
     """
     Visualization methods
@@ -818,12 +806,12 @@ class ValueMapper:
     and eventually update the value with the new cosine similarity given by the feature map
     """
 
-    def compute_feature_map_similarity(self, text):
+    def compute_values_from_features(self, text):
         """
         Method to compute the cosine map from the stored feature map
         """
         image = self.habitat_env.get_current_observation(type="rgb")
-        feature_map = self.value_map._embed_map
+        feature_map = self.retrieve_feature_map()
         return self.frontier_map.compute_map_cosine_similarity(
             feature_map = feature_map, 
             text = text, 
@@ -835,14 +823,16 @@ class ValueMapper:
         """
         Method to update the starting map with the initial image and text
         """
-        feature_value_map = self.compute_feature_map_similarity(text).reshape(self._map_size, self._map_size, 1)
+        feature_value_map = self.compute_values_from_features(text).reshape(self._map_size, self._map_size, 1)
 
-        # We use a simple mean of the two maps as a new starting cosine map
-        self.value_map._value_map = self.value_map._value_map + feature_value_map / 2
+        # We replace the current value map with the one calculated with the new target
+        self.value_map._value_map = feature_value_map
 
         # Update also the frontiers
         # TODO: heck if this is usefull
         self.update_starting_frontiers(self.frontier_map.frontiers, self.value_map._value_map)
+
+        # Visualize the maps
         if self.visualize:
             self.visualize_maps()
         

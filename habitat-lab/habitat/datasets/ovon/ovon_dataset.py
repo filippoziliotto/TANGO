@@ -156,3 +156,10 @@ class OVONDatasetV1(PointNavDatasetV1):
                         path[p_index] = ShortestPathPoint(**point)
 
             self.episodes.append(episode)  # type: ignore [attr-defined]
+
+            # select only episodes where object category attirbute is 'refridgerator','microwave'
+            #self.episodes = [
+            #    episode
+            #    for episode in self.episodes
+            #    if episode.object_category in ["refridgerator", "microwave"]
+            #]

@@ -19,7 +19,7 @@ defaults:
     # - minimum_number_of_actions
     - stop_before_episode_end
     # - smallest_distance_to_target
-    # - top_down_map
+    - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - open_eqa_question_sensor
@@ -57,7 +57,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 118
+    max_episode_steps: 518
   simulator:
     turn_angle: 20
     agents:
@@ -98,7 +98,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.3
+    thresh: 0.5
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -134,17 +134,17 @@ habitat_baselines:
     # 0.7
   value_mapper:
     use_value_mapper: True
-    type: "blip"
-    size: "large"
+    type: "clip"
+    size: "base"
     visualize: True
-    save_video: False
+    save_video: True
     policy: "v1"
     exploration_threshold: 0.2
     min_obstacle_height: 0.3
     max_obstacle_height: 0.5
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 250
+    pixels_per_meter: 5
     save_image_embed: False
 
   LLM:
@@ -160,7 +160,7 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 1.
+  object_distance_threshold: .5
   
   test_episode_count: 10
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
@@ -183,7 +183,7 @@ habitat_baselines:
     split: val
     should_load_ckpt: False
     use_ckpt_config: False
-    # video_option: [ "disk" ]
+    video_option: [ "disk" ]
 
   rl:
     policy:

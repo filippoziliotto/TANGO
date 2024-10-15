@@ -692,7 +692,7 @@ class ValueMapper:
 
         # At the end of episode save the video
         if self.visualize and self.save_video:
-            save_exploration_video(self.video_frames, "video_dir/open_eqa", "open_eqa_example.mp4")
+            save_exploration_video(self.video_frames, "video_dir/open_eqa", "succ_example_1.mp4")
 
         self.frontier_map.reset()
         self.obstacle_map.reset()
@@ -778,6 +778,21 @@ class ValueMapper:
         if self.visualize:
             self.visualize_maps()
 
+    def save_maps(self, frontier_map, obstacle_map, value_map, path="data/datasets/goat_bench/hm3d/v1/val_unseen/maps"):
+        
+        # Save the maps to disk as np.pickle
+        np.save(f"{path}/frontier_map.npy", frontier_map)
+        np.save(f"{path}/obstacle_map.npy", obstacle_map)
+        np.save(f"{path}/value_map.npy", value_map)
+
+    def retrieve_maps(self, path="data/datasets/goat_bench/hm3d/v1/val_unseen/maps"):
+        # Retrieve the maps from disk
+        frontier_map = np.load(f"{path}/frontier_map.npy")
+        obstacle_map = np.load(f"{path}/obstacle_map.npy")
+        value_map = np.load(f"{path}/value_map.npy")
+
+        return frontier_map, obstacle_map, value_map
+
     """
     Visualization methods
     """
@@ -851,7 +866,7 @@ class ValueMapper:
     def get_best_frontier(
         self,
         frontiers: np.ndarray,
-    ) -> Tuple[np.ndarray, float]:
+        ) -> Tuple[np.ndarray, float]:
         """Returns the best frontier and its value based on self._value_map.
 
         Args:
@@ -948,7 +963,7 @@ class ValueMapper:
     def _sort_frontiers_by_value(
         self, frontiers: np.ndarray,
         itm_policy: str = "v1",
-    ) -> Tuple[np.ndarray, List[float]]:
+        ) -> Tuple[np.ndarray, List[float]]:
         
         if itm_policy == "v1":
             return self.frontier_map.sort_waypoints()

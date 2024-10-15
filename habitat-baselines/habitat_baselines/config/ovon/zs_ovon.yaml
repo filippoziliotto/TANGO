@@ -29,7 +29,7 @@ defaults:
   - _self_
 
 habitat:
-  seed: 100
+  seed: 1000
   task:
     success_reward: 2.5
     slack_reward: -1e-3
@@ -64,10 +64,12 @@ habitat:
             min_depth: 0.
             width: 256
             height: 256
+            hfov: 90
             position: [0, 1.2, 0]
           rgb_sensor:
             width: 256
             height: 256
+            hfov: 90
             position: [0, 1.2, 0]
         height: 1.2
         radius: 0.18
@@ -80,8 +82,8 @@ habitat_baselines:
   torch_gpu_id: 0
   task_name: ovon_objectnav
   # Visualization settings
-  video_dir: "video_dir/objectgoal/"
-  writer_type: wb # to deactivate just comment this
+  video_dir: "video_dir/ovon/"
+  # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
@@ -151,7 +153,7 @@ habitat_baselines:
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: 0.8
+  object_distance_threshold: 0.3
   # To evaluate on all episodes, set this to -1
   test_episode_count: 10 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"

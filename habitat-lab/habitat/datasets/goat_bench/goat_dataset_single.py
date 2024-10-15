@@ -263,14 +263,14 @@ class GoatDatasetV1Single(PointNavDatasetV1):
 
                 episode_list.append(GoatEpisodeSingle(**single_episode))
 
-                if single_episode['is_first_task']:
-                    break
+                #if single_episode['is_first_task']:
+                #    break
                     
 
         self.episodes.extend(episode_list)
 
         # Debugging InstnaceImageNav Nonetype object error
-        # self.episodes = [ep for ep in self.episodes if ep.scene_id == 'data/scene_datasets/hm3d/val//00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb']
+        # self.episodes = [ep for ep in self.episodes if ep.object_category == 'boiler' and ep.is_image_goal == True]
 
     def check_final_is_not_start(self, start_pos, final_pos):
         if start_pos == final_pos:

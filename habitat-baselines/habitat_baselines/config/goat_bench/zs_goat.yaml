@@ -17,7 +17,7 @@ defaults:
     - spl
     - soft_spl
     - distance_to_goal_reward
-    # - goat_top_down_map
+    # - top_down_map
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - compass_sensor
@@ -66,7 +66,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 22 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 100 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -111,12 +111,13 @@ habitat_baselines:
   save_obs:
     save_to_disk: True
   sampling_strategy: "unreachable"
+
   # Object Detector settings
   object_detector:
     use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.99
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -124,36 +125,15 @@ habitat_baselines:
     use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet50"
-    additional_thresh: 0.9999
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings
   feature_matcher:
     use_matcher: True
-    threshold: 100
-  # Captioner settings
-  captioner:
-    use_captioner: False
-    type: 'git'
-    size: 'large'
-    quantization: '8'
-  # VQA settings
-  vqa:
-    use_vqa: False
-    type: 'blip'
-    size: 'large'
-    quantization: 16
-    vqa_strategy: 'simple-vqa'
-  # Segmenter settings
-  segmenter:
-    use_segmenter: False
-  
-  room_classifier:
-    use_room_classifier: True
-    cls_threshold: 0.7
-    use_open_set_cls: True
-    open_set_cls_thresh: 0.2
+    threshold: 30
 
+  # Value Mapper settings
   value_mapper:
     use_value_mapper: True
     type: "clip"
@@ -167,26 +147,13 @@ habitat_baselines:
     use_max_confidence: False
     map_size: 500
     pixels_per_meter: 10
-    save_image_embed: True
-
-  LLM:
-    use_LLM: False
-    api_call:
-      use_gpt_api: False
-      model: "gpt-3.5"
-    open_source_call: 
-      use_open_source_llm: False
-      model: "phi3"
-      quantization: "8"
-    llm_answers_path: "habitat-baselines/habitat_baselines/rl/ppo/code_interpreter/prompts/examples/mp3d_eqa_api_answers.json"
-    debugging: False
+    save_image_embed: False
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: .7
-  
-  test_episode_count: -1
+  object_distance_threshold: .4
+  test_episode_count: 10
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

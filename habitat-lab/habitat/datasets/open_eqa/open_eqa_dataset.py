@@ -80,3 +80,6 @@ class OpenEQADatasetV1(Dataset):
                     for p_index, point in enumerate(path):
                         path[p_index] = ShortestPathPoint(**point)        
             self.episodes[ep_index] = episode
+
+        # debugging
+        self.episodes = [ episode for episode in self.episodes if episode.question.question_text in ["What animal is shown in the picture in the bedroom?"] ]

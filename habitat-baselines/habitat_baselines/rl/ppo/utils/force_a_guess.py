@@ -98,7 +98,6 @@ class OpenEQABlindScore:
     
 
     def read_question_categories(self):
-
         # read json file at 
         with open("data/datasets/open_eqa/open-eqa-dataset.json", 'r') as file:
             data = json.load(file)
@@ -111,7 +110,7 @@ class OpenEQABlindScore:
 
         return questions, categories
 
-    def read_answers_file(self, file_path="data/datasets/open_eqa/zs_open_eqa_15.txt"):
+    def read_answers_file(self, file_path="data/datasets/open_eqa/zs_open_eqa_10.txt"):
         with open(file_path, "r") as f:
             lines = f.readlines()
 
@@ -123,17 +122,14 @@ class OpenEQABlindScore:
         return questions, gt_answers, model_answers
     
     def read_output_log(self):
-
-        with open('logs/open_eqa_15.txt', "r") as f:
+        with open('logs/open_eqa_10.txt', "r") as f:
             lines = f.readlines()
         
         finish_before_end = [float(line.split("|")[2].split(":")[-1].strip()) for line in lines if line.startswith("num")]
         return finish_before_end
 
     def preprocess(self, file_path):
-
         questions, gt_answers, model_answers = self.read_answers_file(file_path)
-
 
         # Needed only for differentiate between the categories in ablation study
         questions_cat, cat = self.read_question_categories()
@@ -244,7 +240,9 @@ class OpenEQABlindScore:
 
         results['per_category'] = {}
         for cat in valid_categories:
-            results['per_category'][cat] = calculate_correctness([scores[i] for i in range(len(categories)) if categories[i] == cat and i <20])
+            results['per_category'][cat] = calculate_correctness([scores[i] for i in range(len(categories)) if categories[i] == cat])
+            # print how many questions are in each category
+            print(f"Category: {cat} - {len([scores[i] for i in range(len(categories)) if categories[i] == cat])}")
         
         self.print_(results)
         return scores

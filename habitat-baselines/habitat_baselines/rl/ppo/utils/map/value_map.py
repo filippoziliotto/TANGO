@@ -325,7 +325,7 @@ class ValueMap(BaseMap):
         min_depth: float,
         max_depth: float,
         fov: float,
-    ) -> np.ndarray:
+        ) -> np.ndarray:
         # Get new portion of the map
         curr_data = self._process_local_data(depth, fov, min_depth, max_depth)
 

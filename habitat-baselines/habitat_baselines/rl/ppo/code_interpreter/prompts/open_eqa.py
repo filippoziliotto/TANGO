@@ -22,6 +22,7 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     gt_answer = episode_utils[2]
     print(f'{question} {gt_answer}.')
 
+    DEBUG = True
     if not DEBUG:
         return retrieve_open_eqa_prompts(prompt_utils)
     # read data/datasets/open_eqa/20_prompts_open_eqa.txt and append to list lines in between ## and ##
@@ -69,9 +70,9 @@ def generate_open_eqa_prompt(prompt_utils: PromptUtils):
     else:
         object_var = object
 
-    room = "bathroom"
-    object = "shower curtain"
-    question = "is the shower curtain closed or open?"
+    room = "bedroom"
+    object = "picture"
+    question = "What animal is shown in the picture in the bedroom?"
    
     # TODO: add (room in list(roomcls_labels.keys()))
     if (room is not None) and (object is not None):

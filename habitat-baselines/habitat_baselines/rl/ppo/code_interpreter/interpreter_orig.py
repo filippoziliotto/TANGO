@@ -1,7 +1,12 @@
 from habitat_baselines.rl.ppo.utils.target import Target
+from habitat_baselines.rl.ppo.utils.helper import LLMHelper
 from habitat_baselines.rl.ppo.models.models import (
-    ObjectDetector, FeatureMatcher, ValueMapper
+    ObjectDetector, VQA, FeatureMatcher,
+    ImageCaptioner, SegmenterModel, RoomClassifier, LLMmodel,
+    ValueMapper
 )
+from habitat_baselines.rl.ppo.utils.utils import set_spawn_state, sample_random_points, get_floor_levels
+from habitat_baselines.rl.ppo.utils.names import eqa_objects, rooms_eqa
 
 def parse_return_statement(line):
     # return ---> stop_navigation() primitive
@@ -217,9 +222,26 @@ class PseudoCodePrimitives(PseudoCodeInterpreter):
             'match': self.match,
             'stop_navigation': self.stop_navigation,   
             # Base Vision module functions 
+            'answer': self.answer,
+            'look_around': self.look_around,
+            'describe_scene': self.describe_scene,
+            'segment_scene': self.segment_scene,
+            'classify_room': self.classify_room,
+            # Useless functions
+            'go_downstairs': self.go_downstairs,
+            'go_upstairs': self.go_upstairs,
+            'do_nothing': self.do_nothing,
+            # New functions
+            'count': self.count,
             'map_scene': self.map_scene,
+            'select': self.select,
+            'eval': self.eval,
             'is_found': self.is_found,
-            'nav_to_image_target': self.nav_to_image_target,
+            'look_up': self.look_up,
+            'look_down': self.look_down,
+            'look_right': self.look_right,
+            'look_left': self.look_left,
+            'try_iin_target': self.try_iin_target,
         }
 
 class PseudoCodeExecuter(PseudoCodePrimitives):
@@ -260,6 +282,44 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 threshold=self.habitat_env.matcher.threshold,
             )
             print('Feature matcher loaded')
+
+        if self.habitat_env.vqa.use_vqa:
+            self.vqa = VQA(
+                type=self.habitat_env.vqa.type,
+                size=self.habitat_env.vqa.size,
+                quantization=self.habitat_env.vqa.quantization,
+                vqa_strategy=self.habitat_env.vqa.vqa_strategy
+            )
+            print('VQA-model loaded')
+    
+        if self.habitat_env.captioner.use_captioner:
+            self.captioner = ImageCaptioner(
+                type=self.habitat_env.captioner.type,
+                size=self.habitat_env.captioner.size,
+                quantization=self.habitat_env.captioner.quantization
+            )
+            print('Captioner loaded')
+
+        if self.habitat_env.segmenter.use_segmenter:
+            self.segmenter = SegmenterModel()
+            print('Segmenter loaded')
+    
+        if self.habitat_env.room_classifier.use_room_classifier:
+            self.room_classifier = RoomClassifier(
+                path = self.habitat_env.room_classifier.model_path,
+                cls_threshold = self.habitat_env.room_classifier.cls_threshold,
+                open_set_cls_thresh = self.habitat_env.room_classifier.open_set_cls_thresh,
+                use_open_set_cls = self.habitat_env.room_classifier.use_open_set_cls,
+            )
+
+            print('Room classifier loaded')
+    
+        if self.habitat_env.LLM.use_LLM:
+            type = self.habitat_env.LLM.type
+            quantization = self.habitat_env.LLM.quantization
+            self.helper = LLMHelper(habitat_env)
+            self.LLM_model = LLMmodel(type, quantization, self.helper)
+            print('LLM model loaded')
     
         if self.habitat_env.value_mapper.use_value_mapper:
             self.value_mapper = ValueMapper(
@@ -289,18 +349,28 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
 
-        # If the subtask is over, start new subtask by the last agent position
-        self.save_last_position_and_teleport()
+        # In MP3D-EQA set max-actions shortest path
+        # Also useful in GOAT episodes
+
+        # self.check_episode_floor()
+
+        self.spawn_target_location(max_dist=self.habitat_env.config.habitat_baselines.episode_max_actions)
 
         # Initial 360° turn for frontiers initialization
         self.turn_around()
 
-        # Specific for GOAT this is a mess
-        try:
+        # Assing target name in Instance Image Nav
+        if self.habitat_env.task_name in ["instance_imagenav"]:
             target_name = self.get_variable('target')
-            self.map_scene(target_name)            
-        except:
-            pass 
+            self.map_scene(target_name)
+
+        # Specific for GOAT this is a mess
+        if self.habitat_env.task_name in ['goat']:
+            try:
+                target_name = self.get_variable('target')
+                self.map_scene(target_name)            
+            except:
+                pass 
 
         self.target.exploration = True
         self.target.get_target_coords()
@@ -313,6 +383,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         # If max steps is reached without target located
         if self.habitat_env.max_steps_reached():
+            # Support for EQA in the case max step is reached
+            if self.habitat_env.task_name in ['eqa', 'open_eqa']:
+                _ = self.answer(
+                    question=self.habitat_env.eqa_vars['question'])
             self.stop_navigation()
 
         self.target.update_target_coords()
@@ -333,6 +407,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
             depth_obs = self.habitat_env.get_current_observation(type='depth')
 
+            # Update the navigation ot the object with detection primitive
+            if self.habitat_env.task_name in ['eqa']: #, 'objectnav', 'ovon_objectnav']:
+                detection_dict = self.detect(target_object['labels'][0])
+                if detection_dict['boxes']:
+                    self.target.set_target_coords_from_bbox(depth_obs, detection_dict['boxes'][0])
+
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
@@ -347,29 +427,35 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Target reached stopping the navigation
         """
 
+        if self.habitat_env.task_name in ['eqa', 'open_eqa'] and output_var is not None:
+            # If integer, convert to string
+            if not isinstance(output_var, str):
+                output_var = self.var_to_str(output_var)
+            else:
+                output_var = self.get_variable(eval(output_var))
+            self.update_variable("output_answer", output_var)
+            # Needed for Open-EQA
+            self.habitat_env.eqa_vars['pred_answer'] = output_var
+
         # Exit all the loops in the pseudo-code
         self.loop_exit_flag = True
         self.update_variable('episode_is_over', True) 
 
         # For GOAT dataset
-        self.save_last_position_and_teleport()
+        if self.habitat_env.task_name in ['goat']:
+            self.save_last_position_and_teleport()
 
         # Call STOP action and finish the episode
         self.habitat_env.execute_action(action='stop')
         self.habitat_env.update_episode_stats()
 
+        # Reset deteciton dict
+        if self.habitat_env.object_detector.store_detections:   
+            self.object_detector.reset_detection_dict()
+
         # Reset value mapper
         if self.habitat_env.value_mapper.use_value_mapper:
-            # Save maps to file
-            # if not self.habitat_env.check_scene_change():
-            #     self.value_mapper.save_maps(
-            #         frontier_map = self.value_mapper.frontier_map, 
-            #         obstacle_map = self.value_mapper.obstacle_map, 
-            #         value_map = self.value_mapper.value_map
-            #     )
-                
-            if self.habitat_env.check_scene_change():
-                self.value_mapper.reset_map()
+            self.value_mapper.reset_map()
 
     def turn_around(self):
         """
@@ -381,6 +467,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.get_current_step() == 0:
             for _ in range(num_turns):
                 self.habitat_env.execute_action(action='turn_left')
+                # Using "explore" as ITM to select best frontiers for exploration
                 self.map_scene("explore")
 
     def save_last_position_and_teleport(self):
@@ -398,7 +485,137 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
+            
+    """
+    Utility modules for navigation settings
+    """
+
+    def spawn_target_location(self, max_dist):
+        """
+        Spawn a target location given a max distance, check utils.py 
+        form more details. http://arxiv.org/abs/2405.16559.
+        """
+        if (self.habitat_env.task_name in ['eqa']) and (self.habitat_env.get_current_step() == 0):
+            sim = self.habitat_env.get_habitat_sim()
+            episode = self.habitat_env.get_current_episode_info()
+            set_spawn_state(sim, episode, max_dist)
+
+        if self.habitat_env.task_name in ['goat']:
+            self.save_last_position_and_teleport()
         
+                
+    def go_downstairs(self):
+        """
+        Go downstairs primitive, needed
+        cause pointgoal model is not able to go downstairs
+        """
+        sim = self.habitat_env.get_habitat_sim()
+        final_pos = self.habitat_env.get_current_episode_info().goals[0].position
+        current_rotation = self.habitat_env.get_current_position().rotation
+        sim.set_agent_state(final_pos, current_rotation)
+
+    def go_upstairs(self):
+        """
+        Go upstairs primitive, needed
+        cause pointgoal model is not able to go upstairs
+        """
+        sim = self.habitat_env.get_habitat_sim()
+        final_pos = self.habitat_env.get_current_episode_info().goals[0].position
+        current_rotation = self.habitat_env.get_current_position().rotation
+        sim.set_agent_state(final_pos, current_rotation)
+
+    def do_nothing(self, steps=20):
+        """
+        Do nothing for a certain number of steps
+        """
+        # Needed for Open-EQA
+        assert steps < self.habitat_env.config.habitat.environment.max_episode_steps
+
+        for i in range(steps):
+            self.habitat_env.execute_action(action='turn_left')
+            self.habitat_env.update_episode_stats()
+
+    def look_up(self):
+        """
+        Look up primitive
+        """
+        # Look up action 
+        self.habitat_env.execute_action(action='look_up')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def look_down(self):
+        """
+        Look Down primitive
+        """
+        # Look down action
+        self.habitat_env.execute_action(action='look_down')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+        
+    def handle_errors(self):
+        """
+        Handle errors in the execution of the pseudo code
+        this is useful if the LLM produces faluty code
+        """
+        
+        if self.habitat_env.task_name in ['eqa', 'open_eqa']:
+            self.answer(self.habitat_env.eqa_vars['question'])
+
+        # Call STOP action and finish the episode
+        self.habitat_env.execute_action(action='stop')
+        self.habitat_env.update_episode_stats()
+
+        # Exit all the loops in the pseudo-code
+        self.loop_exit_flag = True
+        self.update_variable('episode_is_over', True) 
+
+        # Reset deteciton dict
+        if self.habitat_env.object_detector.store_detections:   
+            self.object_detector.reset_detection_dict()
+
+        # Reset value mapper
+        if self.habitat_env.value_mapper.use_value_mapper:
+            self.value_mapper.reset_map()
+
+        # Count how many errors in GPT code
+        if self.habitat_env.task_name in ['open_eqa']:
+            self.habitat_env.gpt_errors += 1
+
+    def look_right(self):
+        """
+        Look right primitive
+        """
+        # Look right action
+        self.habitat_env.execute_action(action='turn_right')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def look_left(self):
+        """
+        Look left primitive
+        """
+        # Look left action
+        self.habitat_env.execute_action(action='turn_left')
+        self.habitat_env.update_episode_stats()
+        self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def check_episode_floor(self):
+        """
+        Check the floor of the episode
+        """
+        if self.habitat_env.task_name in ['goat'] and self.habitat_env.get_current_step() == 0:
+            env_call = self.habitat_env.envs.call(['habitat_env'])[0]
+            sim = env_call.sim
+            curr_ep = env_call.current_episode
+            scene_id = curr_ep.scene_id
+            ep_id = curr_ep.episode_id
+            start_pos = curr_ep.start_position
+            floor_points = sample_random_points(sim)
+            level = get_floor_levels(start_pos[1], floor_points)
+
+            self.habitat_env.goat_episode_levels.append((ep_id, scene_id, level))
+
     """
     Computer Vision modules
     """
@@ -408,14 +625,35 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
 
+        # If room in target name, classify the room and return
+        if target_name in rooms_eqa:
+            return self.classify_room(target_name)
+
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
-        if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
-            detection_dict = self.object_detector_closed.detect(obs, target_name)
-        else:
-            detection_dict = self.object_detector.detect(obs, target_name)
+        # This is useful for EQA, to speed things up. Can be done without this part.
+        if self.habitat_env.task_name in ['eqa']:
+            if (self.habitat_env.object_detector.use_additional_detector) and (target_name in list(eqa_objects.keys())):
+                target_name = eqa_objects[target_name]
+                detection_dict = self.object_detector_closed.detect(obs, target_name)
+            else:
+                detection_dict = self.object_detector.detect(obs, target_name)
 
+        elif self.habitat_env.task_name in ['objectnav', 'ovon_objectnav', 'open_eqa', 'instance_imagenav', 'goat']:
+            # TODO: Label2Id classes modification (e.g. 'couch' -> 'sofa')
+            if self.habitat_env.object_detector.use_additional_detector and target_name in list(self.object_detector_closed.model.model.config.label2id.keys()):
+                detection_dict = self.object_detector_closed.detect(obs, target_name)
+            else:
+                detection_dict = self.object_detector.detect(obs, target_name)
+
+        if self.habitat_env.object_detector.store_detections:
+            self.habitat_env.target_name = target_name
+            self.habitat_env.memory_dict = self.object_detector.get_detection_dict()
+            for label in self.memory_dict:
+                if 'xyz' not in self.habitat_env.memory_dict[label]:  
+                    self.habitat_env.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.habitat_env.memory_dict[label]['bbox'])
+        
         if detection_dict[target_name]['boxes']:
             # Add 3D position to targets
             for target in detection_dict:
@@ -452,14 +690,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.save_observation(target, 'iin_target')
             
         tau = self.feature_matcher.match(observation, target)
-        tau = self.nav_to_image_target(tau, target_name)
+        tau = self.try_iin_target(tau, target_name)
 
         if tau >= self.habitat_env.matcher.threshold:
             return True
         else:
             return False
 
-    def nav_to_image_target(self, tau, target_name):
+    def try_iin_target(self, tau, target_name):
         if tau >= 10:
             detection = self.detect(target_name)
             if detection['boxes']:
@@ -469,10 +707,138 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 target = self.habitat_env.get_current_observation(type='instance_imagegoal')
                 tau = self.feature_matcher.match(observation, target)
         return tau
+
+    def answer(self, question, image=None):
+        """
+        VQA module for answering questions
+        The actual class is defined in models.py
+        """
+
+        img = image if image is not None else self.habitat_env.get_current_observation(type='rgb')
+
+        if self.habitat_env.task_name in ['eqa']:
+            gt_answer = self.habitat_env.eqa_vars['gt_answer']
+            similarity, answer = self.vqa.answer(question, img, gt_answer)
+            self.habitat_env.eqa_vars['pred_answer'] = answer
+            self.habitat_env.eqa_vars['orig_answer'] = self.vqa.original_answer
+
+        elif self.habitat_env.task_name in ['open_eqa']:
+            answer = self.vqa.answer(question, img)
+            self.habitat_env.eqa_vars['pred_answer'] = answer
+
+        # Adding support for ImageGoal Nav with target image goal
+        elif self.habitat_env.task_name in ['instance_imagenav']:
+            img = self.habitat_env.get_current_observation(type='instance_imagegoal')
+            answer = self.vqa.answer(question, img)
+            
+        else:
+            answer = self.vqa.answer(question, img)
+
+        self.update_variable("ans", answer)
+
+        return answer
+
+    def describe_scene(self, type='stereo'):
+        """
+        Describe the scene with a caption possibly
+        differentiating between the 360° degree views and the normal one
+        """
+        assert type in ['frontal', 'stereo'], ValueError
+
+        views = self.look_around()
+
+        caption_stereo = self.captioner.generate_caption(views['stacked'])
+        caption_frontal = self.captioner.generate_caption(views['rgb'])
+
+        if type in ['frontal']:
+            return caption_frontal[-1]
+        
+        caption = {
+                'stereo': caption_stereo,
+                'frontal': {
+                    'rgb': views['rgb'],
+                    'depth': views['depth'],
+                    'captions': caption_frontal,
+                    'agent_state': views['state']}}
+        return caption
+
+    def segment_scene(self, target=None):
+        """
+        Segment the scene using a segmentation model
+        possibly filtering the target category
+        """
+        # TODO: ideal code would be
+        # while True:
+        #     explore_scene()
+        #     object = detect('chair')
+        #     if object:
+        #         navigate_to(object)
+        #         view = look_around()
+        #         segment = segment_scene(view, target='chair')
+        #         answer = answer('how many chairs are there?')
+        #         stop_navigation()
+
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        segmentation = self.segmenter.segment(obs)
+
+        # target = ['chair', 'couch']
+        if target is not None:
+            segmentation = [item for item in segmentation if item['category'] in target]
+
+        if self.habitat_env.save_obs:
+            self.habitat_env.debugger.save_obs(obs, 'segmentation', segmentation=segmentation)
+
+        return segmentation
+
+    def classify_room(self, room_name):
+        """
+        Classify the room using a room classifier model
+        details in models.py and roomcls_utils folder
+        """
+        obs = self.habitat_env.get_current_observation(type='rgb')
+        # obs = self.look_around(80)['stacked']
  
+        # This should be better than the 180° view
+        # Returns None if not the correct room
+        room, confidence = self.room_classifier.classify(obs, room_name)
+
+        # If room is found then lets use an object detector to find the bboxes
+        if room == room_name:
+            # room_det = self.detect(room_name)
+            room_det = {'boxes': [[0,0,100,100]], 'scores': confidence}
+        else:
+            room_det = self.room_classifier.convert_to_det_dict()
+
+        self.update_variable('room', room)
+        self.map_scene(room_name)
+
+        return room_det
+    
+    def select(self, target):
+        """
+        Select the target object from the scene
+        """
+        img  = self.habitat_env.get_current_observation(type='rgb')
+        bbox = self.detect(target)
+
+        if bbox:
+            crop_image_mask = bbox[0][0]
+            crop_image = img[crop_image_mask[1]:crop_image_mask[3], crop_image_mask[0]:crop_image_mask[2]]
+
+            # For debugging purposes
+            self.save_observation(crop_image, 'select')
+            return crop_image
+        else: return None
+        
     """
     Python subroutines or logical modules
     """
+    def look_around(self, degrees=180):
+        """
+        Look around primitive of 360° for convention
+        turning to the left for a full rotation
+        """
+        return self.habitat_env.get_stereo_view(degrees)
     
     def map_scene(self, target_name):
         """
@@ -491,6 +857,52 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # No forntier found, explore with random policy
         else:
             self.target.generate_target()
+    
+    def eval(self, expression):
+        """
+        Evaluate the expression, it can be a string
+        """
+        # This is done to avoid possible mistakes in variables naming
+        tmp_vars = self.variables.copy()
+        tmp_expr = expression
+
+        # If the expression is an integer
+        if isinstance(expression, int):
+            tmp_expr = str(tmp_expr)
+        
+        eval_expression = eval(expression, tmp_vars)
+
+        if not isinstance(eval_expression, str):
+            eval_expression = str(eval_expression)
+
+        # Save the variable to the interpreter class
+        self.define_variable('expression', eval_expression)
+
+        return eval_expression
+            
+    def count(self, target):
+        """
+        Count how many objects can you see in the scene
+        given a certain target
+        """
+
+        # Take the object detector dict
+        # The dict is like this:
+        # {
+        #     # Multiple detections
+        #     "chair":
+        #         {
+        #             "boxes": [[x1, y1, x2, y2], [x1, y1, x2, y2], ...],
+        #             "scores": [0.99, 0.98, ...],
+        #             "xyz": [[x, y, z], [x, y, z], ...],
+        #             "segmentation_mask" : [np.ndarray (or None), np.ndarray (or None), ...]
+        #         }
+        # }
+        #####  IMPORTANT
+        #####  This dictionary is passed to this primitive from detector like this: dict["target"], e.g. dict["chair"]
+        
+        n_target = len(target['boxes'])
+        return int(n_target)
 
     def is_found(self, target):
         """
@@ -499,7 +911,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         target = self.check_variable_type(target)
-        is_found_target = len(target['boxes']) > 0
+        is_found_target = self.count(target) > 0
 
 
         # If target is found we update the self.exploration_targets variable
@@ -510,7 +922,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     self.exploration_targets[i] = (True, target_name)
                     break     
 
-            # Update the starting map with the new target
+            # Update the starting map with the first unexplored target
             for found, target_name in self.exploration_targets:
                 if not found:
                     self.value_mapper.update_starting_map(text=target_name)

@@ -81,11 +81,13 @@ class ValueMap(BaseMap):
         self._use_max_confidence = use_max_confidence
         self._fusion_type = fusion_type
         self._obstacle_map = obstacle_map
-        if self._obstacle_map is not None:
-            if pixels_per_meter is not None:
-                self.pixels_per_meter = pixels_per_meter
-            assert self._obstacle_map.pixels_per_meter == self.pixels_per_meter
-            assert self._obstacle_map.size == self.size
+        self.pixels_per_meter = pixels_per_meter
+        self._pixels_per_meter = pixels_per_meter
+        # if self._obstacle_map is not None:
+        #     if pixels_per_meter is not None:
+        #         self.pixels_per_meter = pixels_per_meter
+        #     assert self._obstacle_map.pixels_per_meter == self.pixels_per_meter
+        #     assert self._obstacle_map.size == self.size
         if os.environ.get("MAP_FUSION_TYPE", "") != "":
             self._fusion_type = os.environ["MAP_FUSION_TYPE"]
 
@@ -248,6 +250,49 @@ class ValueMap(BaseMap):
                     marker_kwargs["color"] = self._selected__frontier_color
                 pos = self._px_to_xy(pos.reshape(1,2))[0]
                 map_img = self._traj_vis.draw_circle(map_img, pos, **marker_kwargs)
+
+        return map_img
+    
+    def visualize_memory(
+        self,
+        markers: Optional[List[Tuple[np.ndarray, Dict[str, Any]]]] = None,
+        reduce_fn: Callable = lambda i: np.max(i, axis=-1),
+        obstacle_map: Optional["ObstacleMap"] = None,  # type: ignore # noqa: F821
+        best_frontier: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
+
+        if markers is None:
+            markers = []
+            for frontier in obstacle_map._get_frontiers():
+                marker_kwargs = {
+                    "radius": self._circle_marker_radius,
+                    "thickness": self._circle_marker_thickness,
+                    "color": (0, 0, 255),
+                }
+                markers.append((frontier[:2], marker_kwargs))
+
+        """Return an image representation of the map"""
+        # Must negate the y values to get the correct orientation
+        reduced_map = reduce_fn(self._value_map).copy()
+        if obstacle_map is not None:
+            reduced_map[obstacle_map.explored_area == 0] = 0
+        map_img = np.flipud(reduced_map)
+        # Make all 0s in the value map equal to the max value, so they don't throw off
+        # the color mapping (will revert later)
+        zero_mask = map_img == 0
+        map_img[zero_mask] = np.max(map_img)
+        map_img = monochannel_to_inferno_rgb(map_img)
+        # Revert all values that were originally zero to white
+        map_img[zero_mask] = (255, 255, 255)
+        if len(self._camera_positions) > 0:
+            self._traj_vis.draw_trajectory(
+                map_img,
+                self._camera_positions,
+                self._last_camera_yaw,
+            )
+
+        pos = self._px_to_xy(best_frontier.reshape(1,2))[0]
+        map_img = self._traj_vis.draw_circle(map_img, pos, **marker_kwargs)
 
         return map_img
 

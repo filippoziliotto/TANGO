@@ -84,6 +84,7 @@ class FrontierMap:
         Method to update the starting frontiers with the new map
         """
         for i, frontier in enumerate(frontiers):
+            break
             updated_cosines = max( frontier.cosine ,
                     np.max(value_map[
                         int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter, 
@@ -206,6 +207,10 @@ class FrontierMap:
             from_feature_to_image(cosine_sims, feature_map, mask_non_zero)
 
         return value_map
+
+    def _add_frontier(self, location: np.ndarray, cosine: float) -> None:
+        self.frontiers.append(Frontier(location, cosine, None))
+
 
 
 def from_feature_to_image(cosine_sim: np.ndarray , feature_map: np.ndarray, mask:np.ndarray) -> np.ndarray:

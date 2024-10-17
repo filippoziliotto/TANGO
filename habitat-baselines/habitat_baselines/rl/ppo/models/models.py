@@ -679,11 +679,6 @@ class ValueMapper:
             use_feature_map = save_image_embed
         )
 
-        if self.habitat_env.task_name in ["instance_imagenav"]:
-            self.feature_matcher = FeatureMatcher(
-                threshold=25.0
-            )
-
     """
     Map methods
     """
@@ -778,8 +773,16 @@ class ValueMapper:
         if self.visualize:
             self.visualize_maps()
 
-    def retrieve_feature_map(self):
-        return self.value_map._embed_map
+    def retrieve_map(self, type="value"):
+        
+        if type == "value":
+            return self.value_map._value_map
+        elif type == "frontier":
+            return self.frontier_map
+        elif type == "obstacle":
+            return self.obstacle_map._obstacle_map
+        elif type == "feature":
+            return self.value_map._embed_map
 
     """
     Visualization methods
@@ -806,12 +809,12 @@ class ValueMapper:
     and eventually update the value with the new cosine similarity given by the feature map
     """
 
-    def compute_values_from_features(self, text):
+    def compute_values_from_features(self, text, feature_map):
         """
         Method to compute the cosine map from the stored feature map
         """
         image = self.habitat_env.get_current_observation(type="rgb")
-        feature_map = self.retrieve_feature_map()
+
         return self.frontier_map.compute_map_cosine_similarity(
             feature_map = feature_map, 
             text = text, 
@@ -819,35 +822,74 @@ class ValueMapper:
             save_to_disk = True
         )
 
-    def update_starting_map(self, text):
+    def update_values_from_features(self, text):
         """
         Method to update the starting map with the initial image and text
         """
-        feature_value_map = self.compute_values_from_features(text).reshape(self._map_size, self._map_size, 1)
+        value_map = self.retrieve_map(type="value")
+        frontier_map = self.retrieve_map(type="frontier")
+        feature_map = self.retrieve_map(type="feature")
 
-        # We replace the current value map with the one calculated with the new target
-        self.value_map._value_map = feature_value_map
+        # Update value map from the feature map with the new target
+        self.value_map._value_map = self.compute_values_from_features(
+            text=text,
+            feature_map=feature_map
+        ).reshape(self._map_size, self._map_size, 1)
 
-        # Update also the frontiers
-        # TODO: heck if this is usefull
-        self.update_starting_frontiers(self.frontier_map.frontiers, self.value_map._value_map)
+        # Update also the frontiers w.r.t. new values
+        self.frontier_map.frontiers = self.frontier_map.update_frontiers_from_value(
+            frontiers= frontier_map.frontiers,
+            value_map= value_map
+        )
 
         # Visualize the maps
         if self.visualize:
             self.visualize_maps()
-        
-    def update_starting_frontiers(self, frontiers, value_map_from_feature):
+
+
+    """
+    Memory from Feature map calculation methods
+    """
+
+    def get_highest_similarity_value(self, 
+                                     value_map, 
+                                     smooth: bool = False,
+                                     smooth_kernel: int = 5):
         """
-        Method to update the starting frontiers with the new map
+        Get the highest value from the value map
         """
 
-        for i, frontier in enumerate(frontiers):
-            updated_cosines = np.max(value_map_from_feature[
-                int(frontier.xyz[0]) - self._pixels_per_meter : int(frontier.xyz[0]) + self._pixels_per_meter , 
-                int(frontier.xyz[1]) - self._pixels_per_meter : int(frontier.xyz[1]) + self._pixels_per_meter
-            ])
-            self.frontier_map.frontiers[i].cosine = updated_cosines
+        # Smooth the value map so that high values are higher and lower values are lower
+        if smooth:
+            value_map = cv2.GaussianBlur(value_map, (smooth_kernel, smooth_kernel), 0)
 
+        # Get index of highest value (250,250, value)
+        idx = np.unravel_index(np.argmax(value_map, axis=None), value_map.shape)[:-1]
+
+        # Add memory as if it was a frontier
+        self.frontier_map._add_frontier(np.array(idx), float(value_map[idx]))
+        self.frontier_map.frontiers = self.frontier_map.update_frontiers_from_value(
+            self.frontier_map.frontiers, 
+            value_map
+        )
+        self._best_frontier = self.frontier_map.frontiers[0]
+
+        # Update Visualization
+        if self.visualize:
+            val_map = self.value_map.visualize_memory(
+                # reduce_fn=self._reduce_values,
+                obstacle_map=self.obstacle_map,
+                best_frontier=np.array(idx, dtype='float64')
+            )
+            cv2.imwrite("images/value_map.png", val_map)
+
+
+        # Get the polar coordinates of the highest value
+        robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
+        heading = self.habitat_env.get_current_observation(type="compass")
+        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, np.array(idx))
+
+        return memory_coords
 
     """
     Frontier calculation methods
@@ -877,13 +919,7 @@ class ValueMapper:
 
         # If no frontier is found, sample random point
         if not self.frontiers_found(frontiers):
-            try:
-                frontier_regions = self._get_highest_memory_value(self.value_map._value_map)
-                self.best_frontier_polar = get_polar_from_frontier(self.value_map, robot_xy, heading, frontier_regions[0])
-                return self.best_frontier_polar
-            except:
-                # If there is no frontier found, then just sample a random point
-                return None
+            return None
 
         # If there is a last point pursued, then we consider sticking to pursuing it
         # if it is still in the list of frontiers and its current value is not much
@@ -1015,35 +1051,3 @@ class ValueMapper:
     def _get_current_rgb(self):
         return self.habitat_env.get_current_observation(type='rgb')
 
-    """
-    Instance-image Navigation Tau calculator, the idea is to use
-    the feature Matcher class to calculate the similarity of a frontier
-    given the current image and the image of the instance
-    """
-
-    def _get_current_tau(self, current_image):
-        tau = self.feature_matcher.match(current_image, self.target_image)
-        return tau
-    
-    def _get_highest_memory_value(self, value_map, threshold=0.5):
-        from sklearn.cluster import DBSCAN
-
-        important_pixels = np.argwhere(value_map > 0.1)
-        db = DBSCAN(eps=5, min_samples=10).fit(important_pixels)
-
-        # Step 3: Extract cluster labels and find centers
-        labels = db.labels_
-        unique_labels = set(labels)
-        centers = []
-
-        for label in unique_labels:
-            if label == -1:  # -1 means noise in DBSCAN, ignore it
-                continue
-            cluster_points = important_pixels[labels == label]
-            center = cluster_points.mean(axis=0)
-            centers.append(center)
-        
-        # convert to list of arrays
-        centers = [np.array(center[:-1]) for center in centers]
-
-        return centers

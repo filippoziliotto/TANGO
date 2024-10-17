@@ -250,6 +250,11 @@ class Target:
                 coords = self.cartesian_coords
             )
 
+        elif from_type in ["polar"]:
+            self.set_target_coords_from_polar(
+                coords = self.polar_coords
+            )
+
         # TODO: implement bbox update
         elif from_type in ["bbox"]:
             pass

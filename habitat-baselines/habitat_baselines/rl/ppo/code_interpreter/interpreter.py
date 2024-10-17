@@ -282,33 +282,40 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
 
-        current_goal = self.habitat_env.get_current_goat_target()
+        # Check current GOAT goal
+        self.current_goal = self.habitat_env.get_current_goat_target()
 
         # If the subtask is over, start new subtask by the last agent position
         self.save_last_position_and_teleport()
 
         # Update current value map with feature map memory
-        self.use_target_memory(
-            target_name = current_goal
+        is_found = self.use_target_memory(
+            target_name = self.current_goal
         )
+
+        if is_found:
+            self.stop_navigation()
+            return
 
         # Initial 360° turn for frontiers initialization, given a target
         self.turn_around(
-            target_name = current_goal
+            target_name = self.current_goal
         )
 
         # Specific for GOAT this is a mess
-        try:
-            target_name = self.get_variable('target')
-            self.map_scene(target_name)            
-        except:
-            pass 
+        # try:
+        #     target_name = self.get_variable('target')
+        #     self.map_scene(target_name)            
+        # except:
+        #     pass 
 
         self.target.exploration = True
         self.target.get_target_coords()
 
         self.habitat_env.execute_action(coords=self.target.polar_coords)
         self.habitat_env.update_episode_stats()
+
+        self.target.update_target_coords()
 
         # For debugging purposes
         self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
@@ -317,7 +324,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             self.stop_navigation()
 
-        self.target.update_target_coords()
+        self.map_scene(
+            target_name=self.current_goal
+        )
 
     def navigate_to(self, target_object):
         """
@@ -333,7 +342,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.target.set_target_coords_from_bbox(depth_obs, target_object['boxes'][0])
         
         while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
-            depth_obs = self.habitat_env.get_current_observation(type='depth')
 
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
@@ -341,8 +349,29 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # Update polar coordinates given the new agent step
             self.target.update_target_coords()
 
+            # Update maps
+            self.map_scene(self.current_goal) 
+
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+    def navigate_to_memory_target(self):
+        self.target.exploration = False
+        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
+
+            self.habitat_env.execute_action(coords=self.target.polar_coords)
+            self.habitat_env.update_episode_stats()
+
+            # Update polar coordinates given the new agent step
+            self.target.update_target_coords()
+
+            # Update maps
+            self.map_scene(self.current_goal)
+
+            # For debugging purposes
+            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+        self.target.exploration = True
 
     def stop_navigation(self, output_var=None):
         """
@@ -360,9 +389,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.execute_action(action='stop')
         self.habitat_env.update_episode_stats()
 
-        # Reset value mapper
+        # Reset value mapper if scene changes
         if self.habitat_env.value_mapper.use_value_mapper:
-
             if self.habitat_env.check_scene_change():
                 self.value_mapper.reset_map()
 
@@ -371,9 +399,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Make a complete turn at the beginning of the episode
         to initialize the frontiers to have as many as possible
         """
+
         num_turns = 360 // self.habitat_env.config.habitat.simulator.turn_angle
 
-        if self.habitat_env.get_current_step() == 0:
+        # Trun around for initial exploration only at the first subtask
+        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is True):
             for _ in range(num_turns):
                 self.habitat_env.execute_action(action='turn_left')
                 self.map_scene(target_name)
@@ -401,8 +431,62 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.value_mapper.save_image_embed:
             # If first step, >= second subtask, and last agent position is not None
             if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None):
-                self.value_mapper.update_starting_map(text=target_name)
+                self.value_mapper.update_values_from_features(
+                    text=target_name,
+                )
 
+                # Check if the new regions contains the object
+                memory_frontier = self.value_mapper.get_highest_similarity_value(
+                    value_map=self.value_mapper.retrieve_map(type="value"),
+                )
+
+                # Set new target coordinates and Navigate to the target
+                self.target.cartesian_coords = self.target.coordinates.from_polar_to_cartesian(
+                    polar_coords=memory_frontier,
+                    agent_state=self.habitat_env.get_current_position()
+                )
+                self.target.set_target(
+                    coords=self.target.cartesian_coords,
+                    from_type="cartesian",
+                    agent_state=self.habitat_env.get_current_position(),
+                )
+
+                # Navigate to the target point based on memory
+                self.navigate_to_memory_target()
+                
+                # Turn around and check if target is there
+                is_found = self.turn_from_memory_target()
+
+                return is_found
+
+    def turn_from_memory_target(self):
+        """
+        Turn around from the memory target
+        """
+        is_found = False
+        num_turns = 360 // self.habitat_env.config.habitat.simulator.turn_angle
+        for _ in range(num_turns):
+            self.habitat_env.execute_action(action='turn_left')
+            self.map_scene(self.current_goal)
+            
+            # For debugging purposes
+            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+            # If a detection is made
+            detection_var = self.detect(self.current_goal)
+            if detection_var['boxes']:
+                is_found = True
+                # Set the variable
+                self.define_variable('memory_target', detection_var)
+
+                # Navigate to the target
+                self.navigate_to(self.get_variable('memory_target'))
+
+                self.stop_navigation()
+                break
+
+        return is_found
+            
     """
     Computer Vision modules
     """
@@ -435,11 +519,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # For debugging purposes, take the first detection
             self.save_observation(obs, 'detection', detection_dict[target_name]['boxes'])
-            pass 
-
-        else:
-            # If the target is not found, update the semantic exploration
-            self.map_scene(target_name)
             
         return  detection_dict[target_name]
 
@@ -484,8 +563,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         and use Image-Text embedding to find the best frontier
         https://github.com/bdaiinstitute/vlfm/tree/main
         """
+
         image = self.habitat_env.get_current_observation(type='rgb')
         self.value_mapper.update_map(image, target_name)
+
+        # If in Navigation mode don't update target coords
+        if not self.target.exploration:
+            return
 
         best_frontier = self.value_mapper.best_frontier_polar
 
@@ -494,7 +578,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.target.set_target_coords_from_polar(best_frontier)
         # No forntier found, explore with random policy
         else:
-            self.target.generate_target()
+            self.target.generate_target()   
 
     def is_found(self, target):
         """

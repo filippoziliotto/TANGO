@@ -269,7 +269,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 use_max_confidence = self.habitat_env.value_mapper.use_max_confidence,  
                 map_size = self.habitat_env.value_mapper.map_size,       
                 pixels_per_meter = self.habitat_env.value_mapper.pixels_per_meter,
-                save_image_embed = self.habitat_env.value_mapper.save_image_embed,       
+                save_image_embed = self.habitat_env.value_mapper.save_image_embed,    
+                th_memory = self.habitat_env.value_mapper.th_memory,   
             )
             print('Value mapper loaded')
 
@@ -436,9 +437,13 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 )
 
                 # Check if the new regions contains the object
-                memory_frontier = self.value_mapper.get_highest_similarity_value(
+                memory_frontier, value = self.value_mapper.get_highest_similarity_value(
                     value_map=self.value_mapper.retrieve_map(type="value"),
                 )
+
+                # If less than threshold, we don't know where object is
+                if value < self.value_mapper.th_memory:
+                    return False
 
                 # Set new target coordinates and Navigate to the target
                 self.target.cartesian_coords = self.target.coordinates.from_polar_to_cartesian(

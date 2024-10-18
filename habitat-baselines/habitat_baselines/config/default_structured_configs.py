@@ -563,6 +563,7 @@ class ValueMapperConfig(HabitatBaselinesBaseConfig):
     map_size: int = 1000
     pixels_per_meter: int = 20
     save_image_embed: bool = False
+    th_memory: float = 0.4
 
 @dataclass
 class HabitatBaselinesConfig(HabitatBaselinesBaseConfig):

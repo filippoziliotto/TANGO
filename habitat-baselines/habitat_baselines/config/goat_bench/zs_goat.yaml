@@ -148,6 +148,8 @@ habitat_baselines:
     map_size: 1000
     pixels_per_meter: 20
     save_image_embed: True
+    # Memory threshold
+    th_memory: 0.4
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

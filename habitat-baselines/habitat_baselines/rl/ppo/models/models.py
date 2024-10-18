@@ -636,7 +636,8 @@ class ValueMapper:
                  use_max_confidence: bool = False,
                  map_size: int = 1000,
                  pixels_per_meter: int = 20,
-                 save_image_embed: bool = False
+                 save_image_embed: bool = False,
+                 th_memory: float = 0.4
                  ):
         # Class settings
         self.habitat_env = habitat_env
@@ -652,6 +653,7 @@ class ValueMapper:
         self._map_size = map_size
         self._pixels_per_meter = pixels_per_meter
         self.save_image_embed = save_image_embed
+        self.th_memory = th_memory
        
         # Map Initializattion
         self.obstacle_map = ObstacleMap(
@@ -761,6 +763,7 @@ class ValueMapper:
         # Add agent trajectory to the value map
         self.value_map.update_agent_traj(
             robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3],
+            # robot_xy = self.habitat_env.get_current_observation(type="gps"),
             robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
@@ -863,16 +866,25 @@ class ValueMapper:
         if smooth:
             value_map = cv2.GaussianBlur(value_map, (smooth_kernel, smooth_kernel), 0)
 
-        # Get index of highest value (250,250, value)
+        # Get index of highest value (250, 250, value)
         idx = np.unravel_index(np.argmax(value_map, axis=None), value_map.shape)[:-1]
+        idx = np.array(idx, dtype='float64')
+        # Get value of index
+        value = value_map[idx[0], idx[1]]
 
         # Add memory as if it was a frontier
-        self.frontier_map._add_frontier(np.array(idx), float(value_map[idx]))
-        self.frontier_map.frontiers = self.frontier_map.update_frontiers_from_value(
-            self.frontier_map.frontiers, 
-            value_map
-        )
-        self._best_frontier = self.frontier_map.frontiers[0]
+        # self.frontier_map._add_frontier(idx, float(value_map[idx]))
+        # self.frontier_map.frontiers = self.frontier_map.update_frontiers_from_value(
+        #     self.frontier_map.frontiers, 
+        #     value_map
+        # )
+        # self._best_frontier = self.frontier_map.frontiers[0]
+
+        # Get the polar coordinates of the highest value
+        # Since we restart the subtask from current position we take the last heading/xy
+        robot_xy = self.robot_xy
+        heading = self.heading
+        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, idx)
 
         # Update Visualization
         if self.visualize:
@@ -883,13 +895,7 @@ class ValueMapper:
             )
             cv2.imwrite("images/value_map.png", val_map)
 
-
-        # Get the polar coordinates of the highest value
-        robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
-        heading = self.habitat_env.get_current_observation(type="compass")
-        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, np.array(idx))
-
-        return memory_coords
+        return memory_coords, value
 
     """
     Frontier calculation methods
@@ -911,8 +917,8 @@ class ValueMapper:
         """
         # The points and values will be sorted in descending order
         sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers, self.policy)
-        robot_xy = self.habitat_env.get_current_observation(type="gps")
-        heading = self.habitat_env.get_current_observation(type="compass")
+        self.robot_xy = self.habitat_env.get_current_observation(type="gps")
+        self.heading = self.habitat_env.get_current_observation(type="compass")
         # robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
         best_frontier_idx = None
         top_two_values = tuple(sorted_values[:2])
@@ -952,7 +958,7 @@ class ValueMapper:
         # it is not cyclic.
         if best_frontier_idx is None:
             for idx, frontier in enumerate(sorted_pts):
-                cyclic = self._acyclic_enforcer.check_cyclic(robot_xy, frontier, top_two_values)
+                cyclic = self._acyclic_enforcer.check_cyclic(self.robot_xy, frontier, top_two_values)
                 if cyclic:
                     continue
                 best_frontier_idx = idx
@@ -962,17 +968,17 @@ class ValueMapper:
             # print("All frontiers are cyclic. Just choosing the closest one.")
             best_frontier_idx = max(
                 range(len(frontiers)),
-                key=lambda i: np.linalg.norm(frontiers[i] - robot_xy),
+                key=lambda i: np.linalg.norm(frontiers[i] - self.robot_xy),
             )
 
         best_frontier = sorted_pts[best_frontier_idx]
         best_value = sorted_values[best_frontier_idx]
-        self._acyclic_enforcer.add_state_action(robot_xy, best_frontier, top_two_values)
+        self._acyclic_enforcer.add_state_action(self.robot_xy, best_frontier, top_two_values)
         self._last_value = best_value
         self._last_frontier = best_frontier
 
         # We update the target only if the best frontier has changed
-        self.best_frontier_polar = get_polar_from_frontier(self.value_map, robot_xy, heading, best_frontier)
+        self.best_frontier_polar = get_polar_from_frontier(self.value_map, self.robot_xy, self.heading, best_frontier)
 
         return self.best_frontier_polar
 

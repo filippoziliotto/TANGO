@@ -56,14 +56,14 @@ habitat:
         type: SoftSPL
       success:
         type: Success
-        success_distance: 0.3
+        success_distance: 0.25
 
     # In the case look up/down actions are used
     actions:
       look_up:
-        tilt_angle: 20
+        tilt_angle: 30
       look_down:
-        tilt_angle: 20
+        tilt_angle: 30
 
   environment:
     max_episode_steps: 500 # 5000 for one GOAT episode (with 10 subtasks)
@@ -76,7 +76,7 @@ habitat:
 
   simulator:
     # type: GOATSim-v0
-    turn_angle: 20
+    turn_angle: 30
     # tilt_angle: 20
     # action_space_config: "v2-goat"
     agents:
@@ -86,12 +86,12 @@ habitat:
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.2, 0]
+            position: [0, 1.31, 0]
           depth_sensor:
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.2, 0]
+            position: [0, 1.31, 0]
         radius: 0.18
         height: 1.41
     habitat_sim_v0:
@@ -103,20 +103,20 @@ habitat_baselines:
   # Visualization settings
   # tensorboard_dir: tb
   video_dir: video_dir/goat/
-  # writer_type: wb # to deactivate just comment this
+  writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_goat_prova
+    run_name: zs_goat_memory
   save_obs:
-    save_to_disk: True
+    save_to_disk: False
   sampling_strategy: "unreachable"
 
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit"
-    size: "base"
+    type: "owl-vit2"
+    size: "large"
     thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
@@ -124,7 +124,7 @@ habitat_baselines:
     # Additional object detector settings
     use_additional_detector: True
     additional_type: "detr"
-    additional_size: "resnet50"
+    additional_size: "resnet101"
     additional_thresh: 0.9
     additional_nms_thresh: 0.5
 
@@ -138,18 +138,18 @@ habitat_baselines:
     use_value_mapper: True
     type: "blip"
     size: "large"
-    visualize: True
+    visualize: False
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
     min_obstacle_height: 0.3
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 700
+    pixels_per_meter: 14
     save_image_embed: True
     # Memory threshold
-    th_memory: 0.3
+    th_memory: 0.4
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

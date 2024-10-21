@@ -897,17 +897,7 @@ class ValueMapper:
         value = float(value_map[idx])
         idx = np.array(idx, dtype='float64')
         # Swap x and y
-        idx_1 = np.flipud(idx) 
-        self.memory_frontier = idx_1
-        # idx_2 = np.array([self.value_map.size - idx_1[0], idx_1[1]])
-
-        # Add memory as if it was a frontier
-        # self.frontier_map._add_frontier(idx, float(value_map[idx]))
-        # self.frontier_map.frontiers = self.frontier_map.update_frontiers_from_value(
-        #     self.frontier_map.frontiers, 
-        #     value_map
-        # )
-        # self._best_frontier = self.frontier_map.frontiers[0]
+        self.memory_frontier = np.flipud(idx) 
 
         # Get the polar coordinates of the highest value
         # Since we restart the subtask from current position we take the last heading/xy
@@ -915,14 +905,14 @@ class ValueMapper:
         # heading = self.heading
         robot_xy = self.habitat_env.get_current_observation(type="gps")
         heading = self.habitat_env.get_current_observation(type="compass")
-        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, idx_1)
+        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, self.memory_frontier)
 
         # Update Visualization
         if self.visualize:
             val_map = self.value_map.visualize_memory(
                 # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
-                best_frontier=idx_1
+                best_frontier=self.memory_frontier
             )
             cv2.imwrite("images/memory_map.png", val_map)
 

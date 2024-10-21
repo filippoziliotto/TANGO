@@ -277,6 +277,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     """
     Habitat environment modules to define actions
     """
+
+    def load_goat_goal_and_task(self):
+        """
+        Load the current GOAT goal and task
+        """
+        self.current_goal = self.habitat_env.get_current_goat_target()
+        self.current_task = self.habitat_env.get_current_episode_info().goat_task
+        if self.current_task in ['object', 'description']:
+            self.current_task = 'text'
+
     def explore_scene(self):
         """
         Exploration primitive (set distant target)
@@ -284,14 +294,15 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         # Check current GOAT goal
-        self.current_goal = self.habitat_env.get_current_goat_target()
+        self.load_goat_goal_and_task()
 
         # If the subtask is over, start new subtask by the last agent position
-        self.save_last_position_and_teleport()
+        # self.save_last_position_and_teleport()
 
         # Update current value map with feature map memory
         is_found = self.use_target_memory(
-            target_name = self.current_goal
+            target_name = self.current_goal,
+            type = self.current_task
         )
 
         if is_found:
@@ -347,6 +358,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
+            # Update polar coordinates given the new detection
+            # detection_var = self.detect(self.current_goal)
+            # if detection_var['boxes']:
+            #     self.target.set_target_coords_from_bbox(depth_obs, detection_var['boxes'][0])
+
             # Update polar coordinates given the new agent step
             self.target.update_target_coords()
 
@@ -357,20 +373,24 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
     def navigate_to_memory_target(self):
+        k = 0
         self.target.exploration = False
-        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()):
+        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()) and (k < 100):
 
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
 
             # Update polar coordinates given the new agent step
-            self.target.update_target_coords()
+            self.target.polar_coords = self.value_mapper.update_polar_from_current_position(self.target.polar_coords)
+            # self.target.update_target_coords()
 
             # Update maps
             self.map_scene(self.current_goal)
 
             # For debugging purposes
             self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+            k += 1
 
         self.target.exploration = True
 
@@ -391,6 +411,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.update_episode_stats()
 
         # Reset value mapper if scene changes
+        # TODO: change to the fact that there are many episodes in the same scene
+        # the map should reset also in the same scene
         if self.habitat_env.value_mapper.use_value_mapper:
             if self.habitat_env.check_scene_change():
                 self.value_mapper.reset_map()
@@ -425,15 +447,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
     
-    def use_target_memory(self, target_name):
+    def use_target_memory(self, target_name, type="text"):
         """
         Use the target memory to navigate to the target
         """
         if self.value_mapper.save_image_embed:
             # If first step, >= second subtask, and last agent position is not None
-            if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None):
+            if (self.habitat_env.get_current_step() == 1) and (self.habitat_env.get_current_episode_info().is_first_task is False): # and (self.habitat_env.last_agent_pos is not None):
                 self.value_mapper.update_values_from_features(
                     text=target_name,
+                    type=type
                 )
 
                 # Check if the new regions contains the object
@@ -446,13 +469,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                     return False
 
                 # Set new target coordinates and Navigate to the target
-                self.target.cartesian_coords = self.target.coordinates.from_polar_to_cartesian(
-                    polar_coords=memory_frontier,
-                    agent_state=self.habitat_env.get_current_position()
-                )
                 self.target.set_target(
-                    coords=self.target.cartesian_coords,
-                    from_type="cartesian",
+                    coords=memory_frontier,
+                    from_type="polar",
                     agent_state=self.habitat_env.get_current_position(),
                 )
 
@@ -463,6 +482,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 is_found = self.turn_from_memory_target()
 
                 return is_found
+            
+            return False
 
     def turn_from_memory_target(self):
         """
@@ -479,16 +500,23 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # If a detection is made
             detection_var = self.detect(self.current_goal)
-            if detection_var['boxes']:
-                is_found = True
-                # Set the variable
-                self.define_variable('memory_target', detection_var)
 
-                # Navigate to the target
-                self.navigate_to(self.get_variable('memory_target'))
+            if self.current_task in ["text"]:
+                if detection_var['boxes']:
+                    is_found = True
+                    # Set the variable
+                    self.define_variable('memory_target', detection_var)
 
-                self.stop_navigation()
-                break
+                    # Navigate to the target
+                    self.navigate_to(self.get_variable('memory_target'))
+                    break
+
+            elif self.current_task in ["image"]:
+                if self.match(self.current_goal):
+                    is_found = True
+                    break
+
+        self.target.exploration = True
 
         return is_found
             

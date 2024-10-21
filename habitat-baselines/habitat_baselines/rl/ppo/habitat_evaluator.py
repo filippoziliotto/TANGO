@@ -627,11 +627,17 @@ class HabitatEvaluator(Evaluator):
         """
         Check if the scene has changed
         """
+        change = False
         current_scene = self.get_current_episode_info().scene_id
         if self.current_scene != current_scene:
             self.current_scene = current_scene
-            return True
-        return False
+            change = True
+
+        #  I next episode has .is_first_task as True, then is a change_scene
+        if self.get_current_episode_info().is_first_task:
+            change = True
+        
+        return change
 
     def get_current_goat_target(self):
         """

@@ -66,7 +66,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 50 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 500 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -145,11 +145,11 @@ habitat_baselines:
     min_obstacle_height: 0.3
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 1000
-    pixels_per_meter: 20
+    map_size: 500
+    pixels_per_meter: 10
     save_image_embed: True
     # Memory threshold
-    th_memory: 0.4
+    th_memory: 0.3
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

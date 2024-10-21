@@ -647,6 +647,11 @@ class ValueMapper:
         self.policy = policy
         value_channels = 1 if policy in ["v1", "v2"] else 2
 
+        # Map sensor settings
+        self.robot_xy = None
+        self.heading = None
+        self.camera_to_episodic = None
+
         # Frontier settings
         self._acyclic_enforcer = AcyclicEnforcer()
         self._exploration_thresh = exploration_thresh
@@ -694,6 +699,8 @@ class ValueMapper:
         self.frontier_map.reset()
         self.obstacle_map.reset()
         self.value_map.reset()
+
+        # Other Resets
         self.frontiers_at_step = []
         self.video_frames = []
 
@@ -727,7 +734,7 @@ class ValueMapper:
         # Update obstacle map and compute frontiers
         self.obstacle_map.update_map(
             depth = self._get_current_depth(),
-            tf_camera_to_episodic=self._get_tf_camera_to_episodic(self.habitat_env),
+            tf_camera_to_episodic=self._get_tf_camera_to_episodic(),
             min_depth=self._min_depth,
             max_depth=self._max_depth,
             fx=self._fx,
@@ -745,7 +752,7 @@ class ValueMapper:
         self.value_map.update_map(
             values = np.array([self.curr_values]),
             depth = self._get_current_depth(),
-            tf_camera_to_episodic = self._get_tf_camera_to_episodic(self.habitat_env),
+            tf_camera_to_episodic = self._get_tf_camera_to_episodic(),
             min_depth = self._min_depth,
             max_depth = self._max_depth,
             fov = np.deg2rad(self._fov),
@@ -762,8 +769,7 @@ class ValueMapper:
 
         # Add agent trajectory to the value map
         self.value_map.update_agent_traj(
-            robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3],
-            # robot_xy = self.habitat_env.get_current_observation(type="gps"),
+            robot_xy = self._get_tf_camera_to_episodic()[:2, 3],
             robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
@@ -812,20 +818,24 @@ class ValueMapper:
     and eventually update the value with the new cosine similarity given by the feature map
     """
 
-    def compute_values_from_features(self, text, feature_map):
+    def compute_values_from_features(self, text, feature_map, type="text"):
         """
         Method to compute the cosine map from the stored feature map
         """
-        image = self.habitat_env.get_current_observation(type="rgb")
+        if type in ["text"]:
+            image = self.habitat_env.get_current_observation(type="rgb")
+        elif type in ["image"]:
+            image = self.habitat_env.get_current_observation(type="instance_imagegoal")
 
         return self.frontier_map.compute_map_cosine_similarity(
             feature_map = feature_map, 
             text = text, 
+            type=type,
             image = image, 
             save_to_disk = True
         )
 
-    def update_values_from_features(self, text):
+    def update_values_from_features(self, text, type="text"):
         """
         Method to update the starting map with the initial image and text
         """
@@ -836,7 +846,8 @@ class ValueMapper:
         # Update value map from the feature map with the new target
         self.value_map._value_map = self.compute_values_from_features(
             text=text,
-            feature_map=feature_map
+            feature_map=feature_map,
+            type = type
         ).reshape(self._map_size, self._map_size, 1)
 
         # Update also the frontiers w.r.t. new values
@@ -848,29 +859,47 @@ class ValueMapper:
         # Visualize the maps
         if self.visualize:
             self.visualize_maps()
-
+    
 
     """
     Memory from Feature map calculation methods
     """
 
+    def update_polar_from_current_position(self, 
+                                           current_polar_coords):
+
+        # Get the current position of the robot
+        robot_xy = self.habitat_env.get_current_observation(type="gps")
+        heading = self.habitat_env.get_current_observation(type="compass")
+
+        # Get the polar coordinates of the current position
+        current_polar_coords = get_polar_from_frontier(
+            self.value_map, 
+            robot_xy, 
+            heading, 
+            self.memory_frontier
+        )
+        return current_polar_coords
+
     def get_highest_similarity_value(self, 
                                      value_map, 
-                                     smooth: bool = False,
+                                     smooth: bool = True,
                                      smooth_kernel: int = 5):
         """
         Get the highest value from the value map
         """
 
         # Smooth the value map so that high values are higher and lower values are lower
-        if smooth:
-            value_map = cv2.GaussianBlur(value_map, (smooth_kernel, smooth_kernel), 0)
+        value_map_ = cv2.GaussianBlur(value_map, (smooth_kernel, smooth_kernel), 0) if smooth else value_map
 
         # Get index of highest value (250, 250, value)
-        idx = np.unravel_index(np.argmax(value_map, axis=None), value_map.shape)[:-1]
+        idx = np.unravel_index(np.argmax(value_map_, axis=None), value_map.shape)[:-1]
+        value = float(value_map[idx])
         idx = np.array(idx, dtype='float64')
-        # Get value of index
-        value = value_map[idx[0], idx[1]]
+        # Swap x and y
+        idx_1 = np.flipud(idx) 
+        self.memory_frontier = idx_1
+        # idx_2 = np.array([self.value_map.size - idx_1[0], idx_1[1]])
 
         # Add memory as if it was a frontier
         # self.frontier_map._add_frontier(idx, float(value_map[idx]))
@@ -882,18 +911,20 @@ class ValueMapper:
 
         # Get the polar coordinates of the highest value
         # Since we restart the subtask from current position we take the last heading/xy
-        robot_xy = self.robot_xy
-        heading = self.heading
-        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, idx)
+        # robot_xy = self.robot_xy
+        # heading = self.heading
+        robot_xy = self.habitat_env.get_current_observation(type="gps")
+        heading = self.habitat_env.get_current_observation(type="compass")
+        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, idx_1)
 
         # Update Visualization
         if self.visualize:
             val_map = self.value_map.visualize_memory(
                 # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
-                best_frontier=np.array(idx, dtype='float64')
+                best_frontier=idx_1
             )
-            cv2.imwrite("images/value_map.png", val_map)
+            cv2.imwrite("images/memory_map.png", val_map)
 
         return memory_coords, value
 
@@ -917,8 +948,11 @@ class ValueMapper:
         """
         # The points and values will be sorted in descending order
         sorted_pts, sorted_values = self._sort_frontiers_by_value(frontiers, self.policy)
+
         self.robot_xy = self.habitat_env.get_current_observation(type="gps")
         self.heading = self.habitat_env.get_current_observation(type="compass")
+        self.camera_to_episodic = self._get_tf_camera_to_episodic()
+
         # robot_xy = self._get_tf_camera_to_episodic(self.habitat_env)[:2, 3]
         best_frontier_idx = None
         top_two_values = tuple(sorted_values[:2])
@@ -1048,9 +1082,10 @@ class ValueMapper:
     def _get_current_depth(self):
         return self.habitat_env.get_current_observation(type='depth')[:,:,0]
 
-    def _get_tf_camera_to_episodic(self, habitat_env):
-        x, y = habitat_env.get_current_observation(type='gps')
-        camera_yaw = habitat_env.get_current_observation(type='compass')
+    def _get_tf_camera_to_episodic(self):
+        # x,y = robot_xy
+        x, y = self.habitat_env.get_current_observation(type='gps')
+        camera_yaw = self.habitat_env.get_current_observation(type='compass')
         camera_position = np.array([x, -y, self._camera_height])
         return xyz_yaw_to_tf_matrix(camera_position, camera_yaw)
 

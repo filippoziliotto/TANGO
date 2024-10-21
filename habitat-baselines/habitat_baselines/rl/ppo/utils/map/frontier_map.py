@@ -176,6 +176,7 @@ class FrontierMap:
                                       feature_map: np.ndarray, 
                                       text: str, 
                                       image: np.ndarray, 
+                                      type: str = "text",
                                       save_to_disk: bool = False) -> np.ndarray:
         """
         Computes the cosine similarity given the feature map saved for each pixel
@@ -188,17 +189,28 @@ class FrontierMap:
         
         if self.type in ["blip"]:
             inputs = self.processor(image, text, return_tensors="pt").to(self.device)
-            text_embeds = self.encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
-            text_embeds = normalize(self.encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
+            if type in ["text"]:
+                text_embeds = self.encoder.text_encoder(inputs.data["input_ids"], attention_mask=inputs.data["attention_mask"]).last_hidden_state
+                text_embeds = normalize(self.encoder.text_proj(text_embeds[:,0,:]), dim=-1).squeeze(0).detach().cpu().numpy()
+            elif type in ["image"]:
+                image_embeds = self.encoder.vision_model(inputs.data["pixel_values"])
+                image_embeds = normalize(self.encoder.vision_proj(image_embeds.last_hidden_state[:, 0, :]), dim=-1).squeeze(0).detach().cpu().numpy()
         elif self.type in ["clip"]:
             inputs = self.processor(text=[text], images=image, return_tensors="pt", padding=True).to(self.device)
             outputs = self.encoder(**inputs)
-            text_embeds = outputs.text_embeds.squeeze(0).detach().cpu().numpy()
-
-        assert feature_map.shape[-1] == text_embeds.shape[-1], "Feature map and text embeddings have to have the same dimension"
+            if type in ["text"]:
+                text_embeds = outputs.text_embeds.squeeze(0).detach().cpu().numpy()
+            elif type in ["image"]:
+                image_embeds = outputs.image_embeds.squeeze(0).detach().cpu().numpy()
 
         mask_non_zero = np.any(feature_map, axis=2)
-        cosine_sims = cosine_similarity(feature_map[mask_non_zero], text_embeds.reshape(1, -1))
+
+        if type in ["text"]:
+            assert feature_map.shape[-1] == text_embeds.shape[-1], "Feature map and text embeddings have to have the same dimension"
+            cosine_sims = cosine_similarity(feature_map[mask_non_zero], text_embeds.reshape(1, -1))
+        elif type in ["image"]:
+            assert feature_map.shape[-1] == image_embeds.shape[-1], "Feature map and image embeddings have to have the same dimension"
+            cosine_sims = cosine_similarity(feature_map[mask_non_zero], image_embeds.reshape(1, -1))
 
         value_map = np.zeros(feature_map.shape[:2])
         value_map[mask_non_zero] = cosine_sims.flatten()

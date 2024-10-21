@@ -3,6 +3,7 @@
 import json
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+import random
 
 import attr
 from habitat.core.registry import registry
@@ -226,6 +227,7 @@ class GoatDatasetV1Single(PointNavDatasetV1):
         episode_list = []
         k = 0 + len(self.episodes) + 1
         for i, goat_ep in enumerate(self.current_scene_episodes):
+            episode_list_single = []
             for j, subtask in enumerate(goat_ep.tasks):
                 single_episode = {}
                 single_episode['episode_id'] = k
@@ -261,20 +263,36 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 else:
                     single_episode['is_image_goal'] = True
 
-                episode_list.append(GoatEpisodeSingle(**single_episode))
+                episode_list_single.append(GoatEpisodeSingle(**single_episode))
+            
+            DEBUG, RANDOM = False, False
+            if RANDOM:
+                episode_list_single = self.randomize(episode_list_single)
 
-                #if single_episode['is_first_task']:
-                #    break
-                    
+            if DEBUG: 
+                # use only is_image_goal or first_task = true
+                episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
+
+            episode_list.extend(episode_list_single)
 
         self.episodes.extend(episode_list)
-
-        # Debugging InstnaceImageNav Nonetype object error
-        # self.episodes = [ep for ep in self.episodes if ep.object_category == 'boiler' and ep.is_image_goal == True]
 
     def check_final_is_not_start(self, start_pos, final_pos):
         if start_pos == final_pos:
             return False
         return True
-        
+    
+    def randomize(self, episode_list):
+        # Randomize the order of episode, the first episode is always the first task the other are in random order
+        # Separate the first episode
+        first_episode = next(ep for ep in episode_list if ep.is_first_task)
+        remaining_episodes = [ep for ep in episode_list if not ep.is_first_task]
+
+        # select only image goals
+        remaining_episodes = [ep for ep in remaining_episodes if ep.is_image_goal == True]
+
+        # shuffle the remaining episodes
+        random.shuffle(remaining_episodes)
+        episode_list = [first_episode] + remaining_episodes
+        return episode_list
 

@@ -237,7 +237,9 @@ class ValueMap(BaseMap):
         map_img = monochannel_to_inferno_rgb(map_img)
         # Revert all values that were originally zero to white
         map_img[zero_mask] = (255, 255, 255)
+
         if len(self._camera_positions) > 0:
+            self._traj_vis._pixels_per_meter = self.pixels_per_meter
             self._traj_vis.draw_trajectory(
                 map_img,
                 self._camera_positions,
@@ -285,12 +287,18 @@ class ValueMap(BaseMap):
         # Revert all values that were originally zero to white
         map_img[zero_mask] = (255, 255, 255)
         if len(self._camera_positions) > 0:
+            self._traj_vis._pixels_per_meter = self.pixels_per_meter
             self._traj_vis.draw_trajectory(
                 map_img,
                 self._camera_positions,
                 self._last_camera_yaw,
             )
 
+        marker_kwargs = {
+            "radius": self._circle_marker_radius,
+            "thickness": self._circle_marker_thickness,
+            "color": (0, 0, 255),
+        }
         pos = self._px_to_xy(best_frontier.reshape(1,2))[0]
         map_img = self._traj_vis.draw_circle(map_img, pos, **marker_kwargs)
 

@@ -38,6 +38,7 @@ class GoatDatasetV1Single(PointNavDatasetV1):
     content_scenes_path: str = "{data_path}/content/{scene}.json.gz"
     goals: Dict[str, Sequence[InstanceImageGoal]]
     current_scene_episodes: List[GoatEpisode] = []
+    goat_episodes: List[GoatEpisodeSingle] = []
 
     @staticmethod
     def dedup_goals(dataset: Dict[str, Any]) -> Dict[str, Any]:
@@ -226,56 +227,59 @@ class GoatDatasetV1Single(PointNavDatasetV1):
 
         episode_list = []
         k = 0 + len(self.episodes) + 1
-        for i, goat_ep in enumerate(self.current_scene_episodes):
-            episode_list_single = []
-            for j, subtask in enumerate(goat_ep.tasks):
-                single_episode = {}
-                single_episode['episode_id'] = k
-                k += 1
-                single_episode['scene_id'] = goat_ep.scene_id
+        max_episodes = 1500
 
-                if j == 0:
-                    single_episode['is_first_task'] = True
-                else:
-                    single_episode['is_first_task'] = False
+        if max_episodes > len(self.episodes):
+            for i, goat_ep in enumerate(self.current_scene_episodes):
+                episode_list_single = []
+                for j, subtask in enumerate(goat_ep.tasks):
+                    single_episode = {}
+                    single_episode['episode_id'] = k
+                    k += 1
+                    single_episode['scene_id'] = goat_ep.scene_id
 
-                tmp = goat_ep.goals[j].copy()
-                single_episode['goals'] = tmp
-                single_episode['object_category'] = subtask[0]
-                single_episode['goat_task'] = subtask[1]
+                    if j == 0:
+                        single_episode['is_first_task'] = True
+                    else:
+                        single_episode['is_first_task'] = False
 
-                single_episode['start_position'] = goat_ep.start_position
-                single_episode['start_rotation'] = goat_ep.start_rotation
+                    tmp = goat_ep.goals[j].copy()
+                    single_episode['goals'] = tmp
+                    single_episode['object_category'] = subtask[0]
+                    single_episode['goat_task'] = subtask[1]
 
-                # check rotation is horizontal, check if useful
-                single_episode['start_rotation'][0] = 0
-                single_episode['start_rotation'][2] = 0
+                    single_episode['start_position'] = goat_ep.start_position
+                    single_episode['start_rotation'] = goat_ep.start_rotation
 
-                for w, img_goals in enumerate(tmp):
-                    tmp2 = img_goals.copy()
-                    try:
-                        single_episode['goals'][w] = self.__deserialize_imagenav_goal(tmp2)
-                    except:
-                        single_episode['goals'][w] = InstanceImageGoal(**tmp2)
+                    # check rotation is horizontal, check if useful
+                    single_episode['start_rotation'][0] = 0
+                    single_episode['start_rotation'][2] = 0
 
-                if subtask[1] in ['object', 'description']:
-                    single_episode['is_image_goal'] = False
-                else:
-                    single_episode['is_image_goal'] = True
+                    for w, img_goals in enumerate(tmp):
+                        tmp2 = img_goals.copy()
+                        try:
+                            single_episode['goals'][w] = self.__deserialize_imagenav_goal(tmp2)
+                        except:
+                            single_episode['goals'][w] = InstanceImageGoal(**tmp2)
 
-                episode_list_single.append(GoatEpisodeSingle(**single_episode))
-            
-            DEBUG, RANDOM = False, False
-            if RANDOM:
-                episode_list_single = self.randomize(episode_list_single)
+                    if subtask[1] in ['object', 'description']:
+                        single_episode['is_image_goal'] = False
+                    else:
+                        single_episode['is_image_goal'] = True
 
-            if DEBUG: 
-                # use only is_image_goal or first_task = true
-                episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
+                    episode_list_single.append(GoatEpisodeSingle(**single_episode))
+                
+                DEBUG, RANDOM = False, False
+                if RANDOM:
+                    episode_list_single = self.randomize(episode_list_single)
 
-            episode_list.extend(episode_list_single)
+                if DEBUG: 
+                    # use only is_image_goal or first_task = true
+                    episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
 
-        self.episodes.extend(episode_list)
+                episode_list.extend(episode_list_single)
+
+            self.episodes.extend(episode_list)
 
     def check_final_is_not_start(self, start_pos, final_pos):
         if start_pos == final_pos:
@@ -295,4 +299,4 @@ class GoatDatasetV1Single(PointNavDatasetV1):
         random.shuffle(remaining_episodes)
         episode_list = [first_episode] + remaining_episodes
         return episode_list
-
+    

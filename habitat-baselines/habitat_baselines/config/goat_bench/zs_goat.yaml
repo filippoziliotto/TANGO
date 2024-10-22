@@ -66,7 +66,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 500 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 100 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -137,7 +137,7 @@ habitat_baselines:
   value_mapper:
     use_value_mapper: True
     type: "blip"
-    size: "large"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"

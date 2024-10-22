@@ -651,6 +651,7 @@ class ValueMapper:
         self.robot_xy = None
         self.heading = None
         self.camera_to_episodic = None
+        self.current_step = 0
 
         # Frontier settings
         self._acyclic_enforcer = AcyclicEnforcer()
@@ -690,6 +691,11 @@ class ValueMapper:
     Map methods
     """
 
+    def is_first_subtask_step(self):
+        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False):
+            self.value_map._camera_positions = self.value_map._camera_positions[:-1]
+            self.value_map._last_camera_yaw = self.value_map._last_camera_yaw[:-1]
+
     def reset_map(self):
 
         # At the end of episode save the video
@@ -703,6 +709,7 @@ class ValueMapper:
         # Other Resets
         self.frontiers_at_step = []
         self.video_frames = []
+        self.current_step = 0
 
     def preprocess_target(self, target):
         assert target is not None or target != "", "Target should not be empty"
@@ -778,6 +785,8 @@ class ValueMapper:
             frontiers=self.obstacle_map._get_frontiers()
         )
 
+        self.current_step += 1
+
         # Visualize the maps
         if self.visualize:
             self.visualize_maps()
@@ -812,6 +821,26 @@ class ValueMapper:
 
         if self.save_video:
             self.video_frames.append((obs_map, val_map))
+
+    def get_maps_image(self, map_type):
+        # This only gets the 
+        if map_type == "obstacle":
+            return self.obstacle_map.visualize(
+                best_frontier = self._last_frontier
+            )
+        elif map_type == "value":
+            return self.value_map.visualize(
+                # reduce_fn=self._reduce_values,
+                obstacle_map=self.obstacle_map,
+                best_frontier=self._last_frontier
+            )
+        elif map_type == "memory":
+            try: return self.memory_map_vals
+            except: return self.value_map.visualize(
+                # reduce_fn=self._reduce_values,
+                obstacle_map=self.obstacle_map,
+                best_frontier=self._last_frontier
+            )
 
     """
     Feature map methods, i.e. methods to compute the cosine similarity between the feature map and the text
@@ -869,14 +898,14 @@ class ValueMapper:
                                            current_polar_coords):
 
         # Get the current position of the robot
-        robot_xy = self.habitat_env.get_current_observation(type="gps")
-        heading = self.habitat_env.get_current_observation(type="compass")
+        self.robot_xy = self.habitat_env.get_current_observation(type="gps")
+        self.heading = self.habitat_env.get_current_observation(type="compass")
 
         # Get the polar coordinates of the current position
         current_polar_coords = get_polar_from_frontier(
             self.value_map, 
-            robot_xy, 
-            heading, 
+            self.robot_xy, 
+            self.heading, 
             self.memory_frontier
         )
         return current_polar_coords
@@ -903,9 +932,9 @@ class ValueMapper:
         # Since we restart the subtask from current position we take the last heading/xy
         # robot_xy = self.robot_xy
         # heading = self.heading
-        robot_xy = self.habitat_env.get_current_observation(type="gps")
-        heading = self.habitat_env.get_current_observation(type="compass")
-        memory_coords = get_polar_from_frontier(self.value_map, robot_xy, heading, self.memory_frontier)
+        # robot_xy = self.habitat_env.get_current_observation(type="gps")
+        # heading = self.habitat_env.get_current_observation(type="compass")
+        memory_coords = get_polar_from_frontier(self.value_map, self.robot_xy, self.heading, self.memory_frontier)
 
         # Update Visualization
         if self.visualize:
@@ -915,6 +944,8 @@ class ValueMapper:
                 best_frontier=self.memory_frontier
             )
             cv2.imwrite("images/memory_map.png", val_map)
+            cv2.imwrite("video_dir/goat/memory_examples/memory_map_step_"+str(self.current_step)+".png", val_map)
+            self.memory_map_vals = val_map.copy()
 
         return memory_coords, value
 

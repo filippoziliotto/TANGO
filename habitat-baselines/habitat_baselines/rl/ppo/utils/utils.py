@@ -532,13 +532,19 @@ def log_final_results(
             aggregated_stats[stat_key] = np.mean(
                 [v[stat_key] for v in stats_episodes.values() if stat_key in v]
             )    
-        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
-        for k, v in metrics.items():
-            writer.add_scalar(f"eval_metrics/{k}", v, step_id)        
-                
-        writer.add_scalar(
-                "eval_reward/average_reward", aggregated_stats["reward"], step_id
+
+        # Remove infinite values and calculate mean
+        aggregated_stats['distance_to_goal'] = np.mean(
+            [v['distance_to_goal'] for v in stats_episodes.values() if v['distance_to_goal'] != float('inf')]
         )
+
+        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
+        # for k, v in metrics.items():
+        #     writer.add_scalar(f"eval_metrics/{k}", v, step_id)        
+                
+        # writer.add_scalar(
+        #         "eval_reward/average_reward", aggregated_stats["reward"], step_id
+        # )
             
         # Print final results
         logger.info('-----------------------')

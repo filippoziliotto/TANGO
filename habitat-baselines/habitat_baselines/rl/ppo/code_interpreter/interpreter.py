@@ -2,6 +2,9 @@ from habitat_baselines.rl.ppo.utils.target import Target
 from habitat_baselines.rl.ppo.models.models import (
     ObjectDetector, FeatureMatcher, ValueMapper
 )
+import os
+import cv2
+import numpy as np
 
 def parse_return_statement(line):
     # return ---> stop_navigation() primitive
@@ -274,6 +277,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             )
             print('Value mapper loaded')
 
+        if self.habitat_env.save_obs:
+            self.obstacle_map = []
+            self.value_map = []
+            self.observations = []
+            self.memory_map_vals = []
+
     """
     Habitat environment modules to define actions
     """
@@ -297,7 +306,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.load_goat_goal_and_task()
 
         # If the subtask is over, start new subtask by the last agent position
-        # self.save_last_position_and_teleport()
+        self.save_last_position_and_teleport()
 
         # Update current value map with feature map memory
         is_found = self.use_target_memory(
@@ -314,13 +323,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             target_name = self.current_goal
         )
 
-        # Specific for GOAT this is a mess
-        # try:
-        #     target_name = self.get_variable('target')
-        #     self.map_scene(target_name)            
-        # except:
-        #     pass 
-
         self.target.exploration = True
         self.target.get_target_coords()
 
@@ -336,6 +338,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             self.stop_navigation()
 
+        # if not self.check_first_step_subtask():
         self.map_scene(
             target_name=self.current_goal
         )
@@ -415,7 +418,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # the map should reset also in the same scene
         if self.habitat_env.value_mapper.use_value_mapper:
             if self.habitat_env.check_scene_change():
+                if self.habitat_env.save_obs:
+                    self.save_images_as_video("observations", self.observations, is_observation=True)
+                    self.save_images_as_video("obstacle_map", self.obstacle_map)
+                    self.save_images_as_video("value_map", self.value_map)
+                    self.save_images_as_video("memory_map", self.memory_map_vals)
+                        
+
                 self.value_mapper.reset_map()
+                self.obstacle_map = []
+                self.value_map = []
 
     def turn_around(self, target_name):
         """
@@ -435,14 +447,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Save the last position of the agent in the episode
         """
-        if (self.habitat_env.get_current_step() == 0) and \
-            (self.habitat_env.get_current_episode_info().is_first_task is False) and \
-                (self.habitat_env.last_agent_pos is not None):
-            if not self.habitat_env.check_scene_change():
-                sim = self.habitat_env.get_habitat_sim()
-                sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
-            else:
-                pass
+
+        # If subtask, first step, not a scene/episode change
+        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None) and \
+            (not self.habitat_env.check_scene_change()):
+            sim = self.habitat_env.get_habitat_sim()
+            sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
 
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
@@ -529,6 +539,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
 
+        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False):
+            return []
+
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
 
@@ -598,7 +611,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         image = self.habitat_env.get_current_observation(type='rgb')
+
         self.value_mapper.update_map(image, target_name)
+
+        if self.habitat_env.save_obs and (self.habitat_env.get_current_step() > 0):
+            self.observations.append(self.habitat_env.get_current_observation(type='rgb'))
+            self.obstacle_map.append(self.value_mapper.get_maps_image("obstacle"))
+            self.value_map.append(self.value_mapper.get_maps_image("value"))
+            self.memory_map_vals.append(self.value_mapper.get_maps_image("memory"))
 
         # If in Navigation mode don't update target coords
         if not self.target.exploration:
@@ -631,4 +651,40 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, name, bbox)
 
-
+    def check_first_step_subtask(self):
+        """
+        Check if the first step of the subtask
+        """
+        return (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None) and (not self.habitat_env.check_scene_change())
+    
+    def save_images_as_video(self, video_name, images_list, base_path="video_dir/goat", subpath="memory_examples", frame_rate=30, is_observation=False):
+        # Step 1: Create the directory if it doesn't exist
+        save_dir = os.path.join(base_path, subpath)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Step 2: Define the video output path
+        video_path = os.path.join(save_dir, video_name + ".mp4")
+        
+        # Step 3: Get the height and width of the first image (assuming all images have the same size)
+        if len(images_list) == 0:
+            raise ValueError("Image list is empty. Provide at least one image.")
+        
+        height, width, layers = images_list[0].shape
+        
+        # Step 4: Initialize the video writer
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 'mp4v' codec for MP4 files
+        video_writer = cv2.VideoWriter(video_path, fourcc, frame_rate, (width, height))
+        
+        # Step 5: Write each image to the video file, converting from RGB to BGR
+        for img in images_list:
+            
+            if img.shape != (height, width, 3):
+                raise ValueError("All images must have the same shape (height, width, 3).")
+            
+            if is_observation:
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # Convert from RGB to BGR
+            video_writer.write(img)
+        
+        # Step 6: Release the video writer
+        video_writer.release()
+        print(f"Video saved at {video_path}")

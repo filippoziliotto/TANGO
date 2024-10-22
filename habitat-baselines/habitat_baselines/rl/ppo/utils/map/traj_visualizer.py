@@ -35,6 +35,16 @@ class TrajectoryVisualizer:
         img = self._draw_path(img, camera_positions)
         img = self._draw_agent(img, camera_positions[-1], camera_yaw)
         return img
+    
+    def draw_trajectory_goat_memory(
+        self,
+        img: np.ndarray,
+        camera_positions: Union[np.ndarray, List[np.ndarray]],
+        camera_yaw: float,
+    ) -> np.ndarray:
+        """Draws the trajectory on the image and returns it"""
+        img = self._draw_agent(img, camera_positions[-1], camera_yaw)
+        return img
 
     def _draw_path(self, img: np.ndarray, camera_positions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
         """Draws the path on the image and returns it"""

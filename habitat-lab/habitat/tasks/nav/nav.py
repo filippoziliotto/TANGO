@@ -660,6 +660,8 @@ class SPL(Measure):
         self._sim = sim
         self._config = config
 
+        self.current_step = 0
+
         super().__init__()
 
     def _get_uuid(self, *args: Any, **kwargs: Any) -> str:
@@ -672,12 +674,16 @@ class SPL(Measure):
 
         self._previous_position = self._sim.get_agent_state().position
         self._agent_episode_distance = 0.0
+
         self._start_end_episode_distance = task.measurements.measures[
             DistanceToGoal.cls_uuid
         ].get_metric()
+
         self.update_metric(  # type:ignore
             episode=episode, task=task, *args, **kwargs
         )
+
+        self.current_step = 0
 
     def _euclidean_distance(self, position_a, position_b):
         return np.linalg.norm(position_b - position_a, ord=2)
@@ -688,11 +694,25 @@ class SPL(Measure):
         ep_success = task.measurements.measures[Success.cls_uuid].get_metric()
 
         current_position = self._sim.get_agent_state().position
-        self._agent_episode_distance += self._euclidean_distance(
-            current_position, self._previous_position
-        )
+
+        # The distance is the current position to the goal
+        if (self.current_step == 0) and (episode.is_first_task == False):
+            self._agent_episode_distance = 0.
+            self._previous_position = current_position
+
+        else:
+            self._agent_episode_distance += self._euclidean_distance(
+                current_position, self._previous_position
+            )
 
         self._previous_position = current_position
+
+        # If subtask we take the distance to goal from current position
+        if (self.current_step == 1) and (episode.is_first_task == False):
+            self._start_end_episode_distance = task.measurements.measures[
+                DistanceToGoal.cls_uuid
+            ].get_metric()
+
 
         self._metric = ep_success * (
             self._start_end_episode_distance
@@ -700,6 +720,8 @@ class SPL(Measure):
                 self._start_end_episode_distance, self._agent_episode_distance
             )
         )
+
+        self.current_step += 1
 
 
 

@@ -428,6 +428,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
                 self.value_mapper.reset_map()
                 self.obstacle_map = []
                 self.value_map = []
+                print("--------------------------")
+                print("Resetting the value mapper")
+                print("--------------------------")
 
     def turn_around(self, target_name):
         """

@@ -5,6 +5,9 @@ import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 import random
 
+# Set seed
+random.seed(100)
+
 import attr
 from habitat.core.registry import registry
 from habitat.core.simulator import AgentState
@@ -38,7 +41,6 @@ class GoatDatasetV1Single(PointNavDatasetV1):
     content_scenes_path: str = "{data_path}/content/{scene}.json.gz"
     goals: Dict[str, Sequence[InstanceImageGoal]]
     current_scene_episodes: List[GoatEpisode] = []
-    goat_episodes: List[GoatEpisodeSingle] = []
 
     @staticmethod
     def dedup_goals(dataset: Dict[str, Any]) -> Dict[str, Any]:
@@ -227,73 +229,67 @@ class GoatDatasetV1Single(PointNavDatasetV1):
 
         episode_list = []
         k = 0 + len(self.episodes) + 1
-        max_episodes = 1500
+        for i, goat_ep in enumerate(self.current_scene_episodes):
+            episode_list_single = []
+            for j, subtask in enumerate(goat_ep.tasks):
+                single_episode = {}
+                single_episode['episode_id'] = k
+                k += 1
+                single_episode['scene_id'] = goat_ep.scene_id
 
-        if max_episodes > len(self.episodes):
-            for i, goat_ep in enumerate(self.current_scene_episodes):
-                episode_list_single = []
-                for j, subtask in enumerate(goat_ep.tasks):
-                    single_episode = {}
-                    single_episode['episode_id'] = k
-                    k += 1
-                    single_episode['scene_id'] = goat_ep.scene_id
+                if j == 0:
+                    single_episode['is_first_task'] = True
+                else:
+                    single_episode['is_first_task'] = False
 
-                    if j == 0:
-                        single_episode['is_first_task'] = True
-                    else:
-                        single_episode['is_first_task'] = False
+                tmp = goat_ep.goals[j].copy()
+                single_episode['goals'] = tmp
+                single_episode['object_category'] = subtask[0]
+                single_episode['goat_task'] = subtask[1]
 
-                    tmp = goat_ep.goals[j].copy()
-                    single_episode['goals'] = tmp
-                    single_episode['object_category'] = subtask[0]
-                    single_episode['goat_task'] = subtask[1]
+                single_episode['start_position'] = goat_ep.start_position
+                single_episode['start_rotation'] = goat_ep.start_rotation
 
-                    single_episode['start_position'] = goat_ep.start_position
-                    single_episode['start_rotation'] = goat_ep.start_rotation
+                # check rotation is horizontal, check if useful
+                single_episode['start_rotation'][0] = 0
+                single_episode['start_rotation'][2] = 0
 
-                    # check rotation is horizontal, check if useful
-                    single_episode['start_rotation'][0] = 0
-                    single_episode['start_rotation'][2] = 0
+                for w, img_goals in enumerate(tmp):
+                    tmp2 = img_goals.copy()
+                    try:
+                        single_episode['goals'][w] = self.__deserialize_imagenav_goal(tmp2)
+                    except:
+                        single_episode['goals'][w] = InstanceImageGoal(**tmp2)
 
-                    for w, img_goals in enumerate(tmp):
-                        tmp2 = img_goals.copy()
-                        try:
-                            single_episode['goals'][w] = self.__deserialize_imagenav_goal(tmp2)
-                        except:
-                            single_episode['goals'][w] = InstanceImageGoal(**tmp2)
+                if subtask[1] in ['object', 'description']:
+                    single_episode['is_image_goal'] = False
+                else:
+                    single_episode['is_image_goal'] = True
 
-                    if subtask[1] in ['object', 'description']:
-                        single_episode['is_image_goal'] = False
-                    else:
-                        single_episode['is_image_goal'] = True
-
-                    episode_list_single.append(GoatEpisodeSingle(**single_episode))
+                episode_list_single.append(GoatEpisodeSingle(**single_episode))
                 
-                DEBUG, RANDOM = False, False
-                if RANDOM:
-                    episode_list_single = self.randomize(episode_list_single)
+            DEBUG, RANDOM, CUT = False, True, True
 
-                if DEBUG: 
-                    # use only is_image_goal or first_task = true
-                    episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
+            if RANDOM:
+                episode_list_single = self.randomize(episode_list_single)
 
-                episode_list.extend(episode_list_single)
+            if CUT:
+                # Len(episode_list_single) >= 5 & <= 10 randomly, keep first task
+                episode_list_single = episode_list_single[:random.randint(5, 10)]
 
-            self.episodes.extend(episode_list)
+            if DEBUG: 
+                # use only is_image_goal or first_task = true
+                episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
 
-    def check_final_is_not_start(self, start_pos, final_pos):
-        if start_pos == final_pos:
-            return False
-        return True
+            episode_list.extend(episode_list_single)
+
+        self.episodes.extend(episode_list)
     
     def randomize(self, episode_list):
         # Randomize the order of episode, the first episode is always the first task the other are in random order
         # Separate the first episode
         first_episode = next(ep for ep in episode_list if ep.is_first_task)
         remaining_episodes = [ep for ep in episode_list if not ep.is_first_task]
-
-        # select only image goals
-        remaining_episodes = [ep for ep in remaining_episodes if ep.is_image_goal == True]
 
         # shuffle the remaining episodes
         random.shuffle(remaining_episodes)

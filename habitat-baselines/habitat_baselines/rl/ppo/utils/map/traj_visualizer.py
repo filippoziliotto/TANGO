@@ -15,7 +15,7 @@ class TrajectoryVisualizer:
     agent_line_thickness: int = 3
     path_color: tuple = (0, 255, 0)
     path_thickness: int = 3
-    scale_factor: float = 0.5
+    scale_factor: float = 0.7
 
     def __init__(self, origin_in_img: np.ndarray, pixels_per_meter: float):
         self._origin_in_img = origin_in_img

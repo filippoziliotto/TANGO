@@ -35,7 +35,7 @@ habitat:
   seed: 100
   dataset:
     type: Goat-v1-single
-    split: val_unseen_split2
+    split: val_unseen
     data_path: data/datasets/goat_bench/hm3d/v1/{split}/{split}.json.gz
     scenes_dir: "data/scene_datasets/"
 
@@ -64,7 +64,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 100 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 50 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -171,7 +171,7 @@ habitat_baselines:
   eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal"]
 
   eval:
-    split: val_unseen_split2
+    split: val_unseen
     should_load_ckpt: False
     use_ckpt_config: False
     # video_option: [ "disk" ]

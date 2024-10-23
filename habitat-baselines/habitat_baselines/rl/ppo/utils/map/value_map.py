@@ -274,6 +274,7 @@ class ValueMap(BaseMap):
                 markers.append((frontier[:2], marker_kwargs))
 
         """Return an image representation of the map"""
+
         # Must negate the y values to get the correct orientation
         reduced_map = reduce_fn(self._value_map).copy()
         if obstacle_map is not None:

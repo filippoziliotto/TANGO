@@ -694,7 +694,6 @@ class ValueMapper:
     def is_first_subtask_step(self):
         if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False):
             self.value_map._camera_positions = self.value_map._camera_positions[:-1]
-            self.value_map._last_camera_yaw = self.value_map._last_camera_yaw[:-1]
 
     def reset_map(self):
 
@@ -941,7 +940,7 @@ class ValueMapper:
             val_map = self.value_map.visualize_memory(
                 # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
-                best_frontier=self.memory_frontier
+                best_frontier=self.memory_frontier,
             )
             cv2.imwrite("images/memory_map.png", val_map)
             cv2.imwrite("video_dir/goat/memory_examples/memory_map_step_"+str(self.current_step)+".png", val_map)

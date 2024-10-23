@@ -338,10 +338,11 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.max_steps_reached():
             self.stop_navigation()
 
-        # if not self.check_first_step_subtask():
-        self.map_scene(
-            target_name=self.current_goal
-        )
+        # In the case of failure don't map the scene until new subtask is set
+        if not self.loop_exit_flag:
+            self.map_scene(
+                target_name=self.current_goal
+            )
 
     def navigate_to(self, target_object):
         """

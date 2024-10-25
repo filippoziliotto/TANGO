@@ -714,13 +714,23 @@ class SPL(Measure):
             ].get_metric()
 
 
-        self._metric = ep_success * (
-            self._start_end_episode_distance
-            / max(
-                self._start_end_episode_distance, self._agent_episode_distance
+        try:
+            self._metric = ep_success * (
+                self._start_end_episode_distance
+                / max(
+                    self._start_end_episode_distance, self._agent_episode_distance
+                )
             )
-        )
-
+            
+        # If the denominator is zero then the agent starts lready close to the target. We set a minimum 0.1 meters
+        except ZeroDivisionError:
+            self._start_end_episode_distance = 0.1
+            self._metric = ep_success * (
+                self._start_end_episode_distance
+                / max(
+                    self._start_end_episode_distance, self._agent_episode_distance
+                )
+            )
         self.current_step += 1
 
 

@@ -64,7 +64,7 @@ habitat:
         tilt_angle: 20
 
   environment:
-    max_episode_steps: 50 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 518 # 5000 for one GOAT episode (with 10 subtasks)
     iterator_options:
       cycle: False
       shuffle: False
@@ -115,7 +115,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.3
+    thresh: 0.99
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -123,7 +123,7 @@ habitat_baselines:
     use_additional_detector: True
     additional_type: "detr"
     additional_size: "resnet50"
-    additional_thresh: 0.9
+    additional_thresh: 0.999
     additional_nms_thresh: 0.5
 
   # Feature Matcher settings

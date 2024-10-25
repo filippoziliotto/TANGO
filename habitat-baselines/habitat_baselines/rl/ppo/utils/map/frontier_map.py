@@ -204,10 +204,15 @@ class FrontierMap:
                 image_embeds = outputs.image_embeds.squeeze(0).detach().cpu().numpy()
 
         mask_non_zero = np.any(feature_map, axis=2)
+        
+        # Fix error if Feature map has (0, embed_dim) shape
+        if feature_map.shape == (0, feature_map.shape[-1]):
+            feature_map = np.zeros((700,700,feature_map[-1]))
 
         if type in ["text"]:
             assert feature_map.shape[-1] == text_embeds.shape[-1], "Feature map and text embeddings have to have the same dimension"
             cosine_sims = cosine_similarity(feature_map[mask_non_zero], text_embeds.reshape(1, -1))
+            
         elif type in ["image"]:
             assert feature_map.shape[-1] == image_embeds.shape[-1], "Feature map and image embeddings have to have the same dimension"
             cosine_sims = cosine_similarity(feature_map[mask_non_zero], image_embeds.reshape(1, -1))

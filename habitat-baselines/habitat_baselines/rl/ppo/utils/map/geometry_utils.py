@@ -381,7 +381,11 @@ def place_img_in_img(img1: np.ndarray, img2: np.ndarray, row: int, col: int) -> 
     Returns:
         numpy.ndarray: The updated base image with img2 placed.
     """
-    assert 0 <= row < img1.shape[0] and 0 <= col < img1.shape[1], "Pixel location is outside the image."
+    if not ((0 <= row < img1.shape[0]) and (0 <= col < img1.shape[1])): #, "Pixel location is outside the image."
+        outside_row, outside_col = row > img1.shape[0], col > img1.shape[1]
+        if outside_col: col = img1.shape[1]
+        if outside_row: row = img1.shape[0]
+            
     top = row - img2.shape[0] // 2
     left = col - img2.shape[1] // 2
     bottom = top + img2.shape[0]

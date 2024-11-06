@@ -2053,7 +2053,58 @@ class GoatDistanceToGoalRewardMeasurementConfig(MeasurementConfig):
     type: str = "GoatDistanceToGoalReward"
     success_distance: float = 0.25
 
+# MULTION
+@dataclass
+class SubSuccessMeasurementConfig(MeasurementConfig):
+    type: str = "SubSuccess"
+    success_distance: float = 1.5
 
+@dataclass
+class PercentageSuccessMeasurementConfig(MeasurementConfig):
+    type: str = "PercentageSuccess"
+    success_distance: float = 1.5
+
+@dataclass
+class MSPLMeasurementConfig(MeasurementConfig):
+    type: str = "MSPL"
+
+@dataclass
+class PSPLMeasurementConfig(MeasurementConfig):
+    type: str = "PSPL"
+
+@dataclass
+class RawMetricsMeasurementConfig(MeasurementConfig):
+    type: str = "RawMetrics"
+
+@dataclass
+class WPLMeasurementConfig(MeasurementConfig):
+    type: str = "WPL"
+
+@dataclass
+class DistanceToCurrGoalMeasurementConfig(MeasurementConfig):
+    type: str = "DistanceToCurrGoal"
+    distance_to: str = "POINT"
+
+@dataclass
+class DistanceToMultiGoalMeasurementConfig(MeasurementConfig):
+    type: str = "DistanceToMultiGoal"
+    distance_to: str = "POINT"
+
+@dataclass
+class RatioMeasurementConfig(MeasurementConfig):
+    type: str = "Ratio"
+    distance_to: str = "POINT"
+@dataclass
+class EpisodeLengthMeasurementConfig(MeasurementConfig):
+    type: str = "EpisodeLength"
+
+@dataclass
+class FoundObjectActionConfig(ActionConfig):
+    type: str = "FoundObjectAction"
+
+@dataclass
+class MultiGoalSensorConfig(LabSensorConfig):
+    type: str = "MultiGoalSensor"
 
 # -----------------------------------------------------------------------------
 # Register configs in the Hydra ConfigStore
@@ -3009,10 +3060,82 @@ cs.store(
 cs.store(
     package="habitat.task.measurements.goat_top_down_map",
     group="habitat/task/measurements",
-    name="goat_top_down_mapr",
+    name="goat_top_down_map",
     node=GoatTopDownMapMeasurementConfig,
 )
-
+# MULTION
+cs.store(
+    package="habitat.task.measurements.sub_success",
+    group="habitat/task/measurements",
+    name="sub_success",
+    node=SubSuccessMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.percentage_success",
+    group="habitat/task/measurements",
+    name="percentage_success",
+    node=PercentageSuccessMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.mspl",
+    group="habitat/task/measurements",
+    name="mspl",
+    node=MSPLMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.pspl",
+    group="habitat/task/measurements",
+    name="pspl",
+    node=PSPLMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.raw_metrics",
+    group="habitat/task/measurements",
+    name="raw_metrics",
+    node=RawMetricsMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.wpl",
+    group="habitat/task/measurements",
+    name="wpl",
+    node=WPLMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.distance_to_curr_goal",
+    group="habitat/task/measurements",
+    name="distance_to_curr_goal",
+    node=DistanceToCurrGoalMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.distance_to_multi_goal",
+    group="habitat/task/measurements",
+    name="distance_to_multi_goal",
+    node=DistanceToMultiGoalMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.ratio",
+    group="habitat/task/measurements",
+    name="ratio",
+    node=RatioMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.measurements.episode_length",
+    group="habitat/task/measurements",
+    name="episode_length",
+    node=EpisodeLengthMeasurementConfig,
+)
+cs.store(
+    package="habitat.task.actions.found",
+    group="habitat/task/actions",
+    name="found",
+    node=FoundObjectActionConfig,
+)
+cs.store(
+    package="habitat.task.lab_sensors.multiobjectgoal",
+    group="habitat/task/lab_sensors",
+    name="multiobjectgoal",
+    node=MultiGoalSensorConfig,
+)
 
 from hydra.core.config_search_path import ConfigSearchPath
 from hydra.core.plugins import Plugins

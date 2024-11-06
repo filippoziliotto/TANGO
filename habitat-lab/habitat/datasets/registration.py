@@ -15,6 +15,7 @@ from habitat.datasets.vln import _try_register_r2r_vln_dataset
 from habitat.datasets.open_eqa import _try_register_open_eqa_dataset
 from habitat.datasets.goat_bench import _try_register_goat_dataset
 from habitat.datasets.ovon import _try_register_ovon_datasetv1
+from habitat.datasets.multinav import _try_register_multinavdatasetv1
 
 
 def make_dataset(id_dataset, **kwargs):
@@ -34,3 +35,5 @@ _try_register_rearrangedatasetv0()
 _try_register_open_eqa_dataset()
 _try_register_goat_dataset()
 _try_register_ovon_datasetv1()
+_try_register_multinavdatasetv1()
+

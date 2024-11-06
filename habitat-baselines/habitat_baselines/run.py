@@ -38,10 +38,12 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     # OPEN-EQA
     # config_name="open_eqa/zs_open_eqa_semantic.yaml"
     # GOAT
-    config_name="goat_bench/zs_goat.yaml"
+    # config_name="goat_bench/zs_goat.yaml"
     #config_name="goat_bench/zs_goat_settings.yaml"
     # OVON
     # config_name="ovon/zs_ovon.yaml"
+    # MultiON
+    config_name="multinav/multinav_3_ON.yaml"
 
 )
 def main(cfg: "DictConfig"):

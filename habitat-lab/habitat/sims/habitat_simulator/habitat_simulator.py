@@ -18,6 +18,8 @@ from typing import (
 )
 
 import magnum as mn
+import quaternion
+from magnum import Quaternion, Vector3
 import numpy as np
 from gym import spaces
 from gym.spaces.box import Box
@@ -293,9 +295,28 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         super().__init__(self.sim_config)
         # load additional object paths specified by the dataset
         # TODO: Should this be moved elsewhere?
-        obj_attr_mgr = self.get_object_template_manager()
+        self.obj_attr_mgr = self.get_object_template_manager()
+        self.rigid_obj_mgr = self.get_rigid_object_manager()
         for path in self.habitat_config.additional_object_paths:
-            obj_attr_mgr.load_configs(path)
+            self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
+
+        # obj_attr_mgr = self.get_object_template_manager()
+        # self.rigid_obj_mgr = self.get_rigid_object_manager()
+        # self.sphere_template = self.obj_attr_mgr.get_template_by_handle(
+        #     self.obj_attr_mgr.get_template_handles("cylinder_green")[0]
+        # )
+        # self.obj_attr_mgr.register_template(self.sphere_template, "cylinder_green")
+        # obj_id = self.obj_attr_mgr.load_configs("data/objects/cylinder_green")[0]
+        for i, obj_id in enumerate(self.obj_template_ids):
+            obj = self.rigid_obj_mgr.add_object_by_template_id(
+            obj_id
+            )
+            setattr(self, f'obj_{i}', obj)
+
+        # self.new_obj = self.rigid_obj_mgr.add_object_by_template_id(
+        #   self.obj_template_ids[3]
+        # )
+
         self._action_space = spaces.Discrete(
             len(
                 self.sim_config.agents[
@@ -304,6 +325,43 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
             )
         )
         self._prev_sim_obs: Optional[Observations] = None
+
+    def translate_and_rotate_obj(self, object_: object, position: np.ndarray):
+        # object_.translation = self.get_agent_state().position + np.array([.5, .5, .5])
+        object_.translation = position
+
+        angle = np.pi / 2  # Rotation angle in radians
+        axis = np.array([1, 0, 0])  # Rotation axis (X-axis)
+        rotation_vector = angle * axis
+
+        # Create rotation quaternion using numpy quaternion module
+        rotation_quaternion = quaternion.from_rotation_vector(rotation_vector)
+
+        # Extract scalar (w) and vector (x, y, z) parts
+        q_w = rotation_quaternion.w
+        q_xyz = np.array([rotation_quaternion.x, rotation_quaternion.y, rotation_quaternion.z])
+
+        # Create a magnum.Quaternion object with (vector, scalar)
+        magnum_quat = Quaternion(Vector3(*q_xyz), q_w)
+        object_.rotation = magnum_quat
+
+    def create_objects(self, position: np.ndarray, obj_name: str):
+        # i would like to have self.obj_{i} = something
+        color_dict = {
+            "cylinder_red": 5,
+            "cylinder_green": 3,
+            "cylinder_blue": 1,
+            "cylinder_yellow": 7,
+            "cylinder_pink": 4,
+            "cylinder_cyan": 2,
+            "cylinder_white": 6,
+            "cylinder_black": 0,
+        }
+
+        # get the object template id from the object name
+        obj_i = getattr(self, f'obj_{color_dict[obj_name]}')
+
+        self.translate_and_rotate_obj(obj_i, position)
 
     def create_sim_config(
         self, _sensor_suite: SensorSuite
@@ -740,3 +798,14 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         observations[
             KEYFRAME_OBSERVATION_KEY
         ] = self.gfx_replay_manager.extract_keyframe()
+
+    def add_objects_multinav(self, path="data/objects"):
+        r"""Adds objects to the current scene from a given path.
+
+        :param path: Path to the object file.
+        """
+        obj_attr_mgr = self.get_object_template_manager()
+        rigid_obj_mgr = self.get_rigid_object_manager()
+        template_ids = obj_attr_mgr.load_configs(path)
+        for obj in template_ids:
+            rigid_obj_mgr.add_object_by_template_id(obj)

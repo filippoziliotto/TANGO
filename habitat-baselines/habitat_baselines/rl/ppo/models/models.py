@@ -775,8 +775,8 @@ class ValueMapper:
 
         # Add agent trajectory to the value map
         self.value_map.update_agent_traj(
-            robot_xy = self._get_tf_camera_to_episodic()[:2, 3],
-            robot_heading = self.habitat_env.get_current_observation(type="compass"),
+           robot_xy = self._get_tf_camera_to_episodic()[:2, 3],
+           robot_heading = self.habitat_env.get_current_observation(type="compass"),
         )
 
         # Update the best frontier amd save to this class
@@ -920,6 +920,16 @@ class ValueMapper:
         # Smooth the value map so that high values are higher and lower values are lower
         value_map_ = cv2.GaussianBlur(value_map, (smooth_kernel, smooth_kernel), 0) if smooth else value_map
 
+        value_map_ = np.zeros_like(value_map)
+        
+        # Step 2: Scale high-importance values
+        high_indices = value_map >= 0.4
+        value_map_[high_indices] = np.minimum(value_map[high_indices] * 1.5, 1.0)
+        
+        # Step 3: Scale low-importance values
+        low_indices = value_map < 0.4
+        value_map_[low_indices] = value_map[low_indices] * 1.5
+
         # Get index of highest value (250, 250, value)
         idx = np.unravel_index(np.argmax(value_map_, axis=None), value_map.shape)[:-1]
         value = float(value_map[idx])
@@ -929,10 +939,6 @@ class ValueMapper:
 
         # Get the polar coordinates of the highest value
         # Since we restart the subtask from current position we take the last heading/xy
-        # robot_xy = self.robot_xy
-        # heading = self.heading
-        # robot_xy = self.habitat_env.get_current_observation(type="gps")
-        # heading = self.habitat_env.get_current_observation(type="compass")
         memory_coords = get_polar_from_frontier(self.value_map, self.robot_xy, self.heading, self.memory_frontier)
 
         # Update Visualization
@@ -941,6 +947,7 @@ class ValueMapper:
                 # reduce_fn=self._reduce_values,
                 obstacle_map=self.obstacle_map,
                 best_frontier=self.memory_frontier,
+                value_map=value_map_
             )
             cv2.imwrite("images/memory_map.png", val_map)
             cv2.imwrite("video_dir/goat/memory_examples/memory_map_step_"+str(self.current_step)+".png", val_map)

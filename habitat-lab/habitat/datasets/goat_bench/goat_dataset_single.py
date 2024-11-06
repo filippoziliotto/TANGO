@@ -268,7 +268,7 @@ class GoatDatasetV1Single(PointNavDatasetV1):
 
                 episode_list_single.append(GoatEpisodeSingle(**single_episode))
                 
-            DEBUG, RANDOM, CUT = False, True, True
+            DEBUG, RANDOM, CUT = False, False, False
 
             if RANDOM:
                 episode_list_single = self.randomize(episode_list_single)
@@ -277,10 +277,20 @@ class GoatDatasetV1Single(PointNavDatasetV1):
                 # Len(episode_list_single) >= 5 & <= 10 randomly, keep first task
                 episode_list_single = episode_list_single[:random.randint(5, 10)]
 
-            if DEBUG: 
-                # use only is_image_goal or first_task = true
-                episode_list_single = [ep for ep in episode_list_single if ep.is_image_goal == True or ep.is_first_task == True]
+            if DEBUG and (k <= 10): 
 
+                task_list = ['object', 'desciption', 'object', 'image']
+                object_list = ['reridgerator', 'carpet', 'freezer', 'boiler']
+                
+                # i would like to have these and task in this order. 
+                #  1 object,refridgetator 2 description, carpet 3 object, freezer 4 image, boiler
+
+                # check if episode_list_single has the object and tasks (check .object_category and .goat_task)
+
+                for task, object in zip(task_list, object_list):
+                    if not any([ep.goat_task == task and ep.object_category == object for ep in episode_list_single]):
+                        episode_list_single = []
+                                    
             episode_list.extend(episode_list_single)
 
         self.episodes.extend(episode_list)
@@ -295,4 +305,17 @@ class GoatDatasetV1Single(PointNavDatasetV1):
         random.shuffle(remaining_episodes)
         episode_list = [first_episode] + remaining_episodes
         return episode_list
-    
+
+
+    def filter_episodes(self, episode_list, task_list, object_list):
+        selected_episodes = []
+        task_index = 0
+
+        for episode in episode_list:
+            
+            if (episode.goat_task == task_list[task_index] and
+                    episode.object_category == object_list[task_index]):
+                selected_episodes.append(episode)
+                task_index += 1
+
+        return selected_episodes

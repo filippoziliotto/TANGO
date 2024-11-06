@@ -261,7 +261,11 @@ class ValueMap(BaseMap):
         reduce_fn: Callable = lambda i: np.max(i, axis=-1),
         obstacle_map: Optional["ObstacleMap"] = None,  # type: ignore # noqa: F821
         best_frontier: Optional[np.ndarray] = None,
+        value_map: np.ndarray = None,
     ) -> np.ndarray:
+
+        if value_map is None:
+            value_map = self._value_map
 
         if markers is None:
             markers = []
@@ -276,7 +280,7 @@ class ValueMap(BaseMap):
         """Return an image representation of the map"""
 
         # Must negate the y values to get the correct orientation
-        reduced_map = reduce_fn(self._value_map).copy()
+        reduced_map = reduce_fn(value_map).copy()
         if obstacle_map is not None:
             reduced_map[obstacle_map.explored_area == 0] = 0
         map_img = np.flipud(reduced_map)
@@ -289,13 +293,13 @@ class ValueMap(BaseMap):
         map_img[zero_mask] = (255, 255, 255)
         
         # Only draws the agent
-        if len(self._camera_positions) > 0:
-            self._traj_vis._pixels_per_meter = self.pixels_per_meter
-            self._traj_vis.draw_trajectory_goat_memory(
-                map_img,
-                self._camera_positions,
-                self._last_camera_yaw,
-            )
+        # if len(self._camera_positions) > 0:
+        #     self._traj_vis._pixels_per_meter = self.pixels_per_meter
+        #     self._traj_vis.draw_trajectory_goat_memory(
+        #         map_img,
+        #         self._camera_positions,
+        #         self._last_camera_yaw,
+        #     )
 
         marker_kwargs = {
             "radius": self._circle_marker_radius,

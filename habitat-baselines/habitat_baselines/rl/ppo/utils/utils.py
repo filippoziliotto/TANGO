@@ -391,6 +391,12 @@ class PromptUtils:
         file_name = f"open_eqa_api_answers_{num}.json"
         return os.path.join(file_path, file_name)
 
+    def get_multinav_target(self):
+        cats = []
+        for goal in self.habitat_env.get_current_episode_info().goals:
+            cats.append(goal.object_category)
+        return cats
+
 """
 Utils to sample points from different
 floors since HM3D-sem is not fully annotated
@@ -489,7 +495,11 @@ def log_episode_stats(
             f"stop_before_end: {v['stop_before_episode_end']} | "
             f"Answer: {eqa_vars['pred_answer']} | "
         )
-        
+
+    elif task in ['multinav']:
+        formatted_results = (
+            " "
+        )
     # Objectnav and Instance Imagenav support results prints
     else:
         formatted_results = (
@@ -546,6 +556,22 @@ def log_final_results(
         #         "eval_reward/average_reward", aggregated_stats["reward"], step_id
         # )
             
+        # Print final results
+        logger.info('-----------------------')
+        logger.info('| EVALUATION FINISHED |')
+        logger.info('-----------------------')
+
+        for k, v in aggregated_stats.items():
+            logger.info(f"Average episode {k}: {v:.4f}")
+        logger.info('-----------------------')      
+
+    elif task in ['multinav']:
+        #  only keys different from "raw_metrics"
+        for stat_key in all_ks:
+            aggregated_stats[stat_key] = np.mean(
+                [v[stat_key] for v in stats_episodes.values() if stat_key in v and stat_key != "raw_metrics"]
+            )
+
         # Print final results
         logger.info('-----------------------')
         logger.info('| EVALUATION FINISHED |')

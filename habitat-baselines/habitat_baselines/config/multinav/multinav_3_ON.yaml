@@ -8,106 +8,102 @@ defaults:
     - move_forward
     - turn_left
     - turn_right
-    - look_up
-    - look_down
+    - found
   - /habitat/task/measurements:
-    - num_steps
-    - distance_to_goal
+    # - num_steps
+    # - distance_to_goal
+    # - success
+    # - spl
+    # - soft_spl
+    # - top_down_map
+    - distance_to_curr_goal
+    - distance_to_multi_goal
+    - sub_success
     - success
-    - spl
-    - soft_spl
-    - distance_to_goal_reward
+    - episode_length
+    - mspl
+    - percentage_success
+    - ratio
+    - pspl
+    - raw_metrics
   - /habitat/task/lab_sensors:
     - pointgoal_with_gps_compass_sensor
     - compass_sensor
     - gps_sensor
     - heading_sensor
-    - instance_imagegoal_sensor
-    - instance_imagegoal_hfov_sensor
+    - multiobjectgoal
   - /habitat/dataset: dataset_config_schema
-  - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat/simulator/sensor_setups@habitat.simulator.agents.main_agent: rgbd_agent
+  - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.resize_shortest_edge: resize_shortest_edge_base
   - /habitat_baselines/rl/policy/obs_transforms@habitat_baselines.rl.policy.main_agent.obs_transforms.center_cropper: center_cropper_base
   - _self_
 
 habitat:
   seed: 100
-  dataset:
-    type: Goat-v1-single
-    split: val_unseen
-    data_path: data/datasets/goat_bench/hm3d/v1/{split}/{split}.json.gz
-    scenes_dir: "data/scene_datasets/"
-
   task:
-    type: Goat-v1
+    success_reward: 2.5
+    slack_reward: -1e-3
+    type: MultiNav-v1
+    end_on_success: True
+    reward_measure: success
     success_measure: success
-    reward_measure: distance_to_goal_reward
-
+    goal_sensor_uuid: multiobjectgoal
     measurements:
-      distance_to_goal:
-        type: DistanceToGoal
-        distance_to: "VIEW_POINTS"
-      spl:
-        type: SPL
-      soft_spl:
-        type: SoftSPL
+      # distance_to_goal:
+      #   distance_to: POINT
       success:
-        type: Success
-        success_distance: 0.3
+        success_distance: 1.5
 
-    # In the case look up/down actions are used
-    actions:
-      look_up:
-        tilt_angle: 20
-      look_down:
-        tilt_angle: 20
+  dataset:
+    type: MultiNav-v1
+    split: train
+    scenes_dir: data/scene_datasets
+    data_path: data/datasets/multinav/3_ON/{split}/{split}.json.gz
+    # group_by_scene: False
+    # max_scene_repeat_episodes: 1
 
   environment:
-    max_episode_steps: 518 # 5000 for one GOAT episode (with 10 subtasks)
+    max_episode_steps: 500
     iterator_options:
-      cycle: False
-      shuffle: False
-      group_by_scene: True
-      num_episode_sample: -1
-      max_scene_repeat_episodes: -1
-
+      max_scene_repeat_steps: 50000
   simulator:
-    # type: GOATSim-v0
-    turn_angle: 20
-    # tilt_angle: 20
-    # action_space_config: "v2-goat"
+    additional_object_paths: [ data/objects ]
+    forward_step_size: 0.25
+    turn_angle: 30
     agents:
       main_agent:
         sim_sensors:
+          depth_sensor:
+            min_depth: 0.
+            width: 256
+            height: 256
+            hfov: 90
+            position: [0, 0.88, 0]
           rgb_sensor:
             width: 256
             height: 256
             hfov: 90
-            position: [0, 1.2, 0]
-          depth_sensor:
-            width: 256
-            height: 256
-            hfov: 90
-            position: [0, 1.2, 0]
-        radius: 0.18
-        height: 1.41
+            position: [0, 0.88, 0]
+        height: 0.88
+        radius: 0.1
+
     habitat_sim_v0:
       gpu_device_id: 0
 
 habitat_baselines:
+  trainer_name: "ddppo"
   torch_gpu_id: 0
-  task_name: goat
+  task_name: multinav
   # Visualization settings
-  # tensorboard_dir: tb
-  video_dir: video_dir/goat/
+  video_dir: "video_dir/ovon/"
   # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: zs_goat_prova
+    run_name: ovon_prova
   save_obs:
-    save_to_disk: True
+    save_to_disk: True 
   sampling_strategy: "unreachable"
 
   # Object Detector settings
@@ -115,49 +111,69 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit"
     size: "base"
-    thresh: 0.2
+    thresh: 0.01
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
+    detection_cls_thresh: 0.2
     # Additional object detector settings
     use_additional_detector: True
     additional_type: "detr"
-    additional_size: "resnet50"
-    additional_thresh: 0.999
+    additional_size: "resnet101"
+    additional_thresh: 0.9
     additional_nms_thresh: 0.5
-
   # Feature Matcher settings
   feature_matcher:
-    use_matcher: True
-    threshold: 30
+    use_matcher: False
+  # Captioner settings
+  captioner:
+    use_captioner: False
+    type: 'git'
+    size: 'large'
+    quantization: '8'
+  vqa:
+    use_vqa: False
+    type: 'blip'
+    size: 'large'
+    quantization: 16
+    vqa_strategy: 'simple-vqa'
+  # Segmenter settings
+  segmenter:
+    use_segmenter: False
+
+  # Room Classifier settings
+  room_classifier:
+    use_room_classifier: False
+    cls_threshold: 0.7
+    use_open_set_cls: True
+    open_set_cls_thresh: 0.2
 
   # Value Mapper settings
   value_mapper:
     use_value_mapper: True
     type: "blip"
-    size: "large"
+    size: "base"
     visualize: True
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
-    min_obstacle_height: 0.3
-    max_obstacle_height: 0.88
+    min_obstacle_height: 0.2
+    max_obstacle_height: 0.6
     use_max_confidence: False
-    map_size: 1000
-    pixels_per_meter: 20
+    map_size: 250
+    pixels_per_meter: 5
     save_image_embed: True
-    # Memory threshold
-    th_memory: 0.3
+    th_memory: 0.99
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
-  object_distance_threshold: .4
-  test_episode_count: -1
+  object_distance_threshold: 0.3
+  # To evaluate on all episodes, set this to -1
+  test_episode_count: -1 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"
-  trainer_name: ddppo
   num_updates: -1
   total_num_steps: 2.5e9
   log_interval: 10
@@ -168,10 +184,10 @@ habitat_baselines:
   evaluate: True
   load_resume_state_config: False
   verbose: False
-  eval_keys_to_include_in_name: [ "num_steps", "distance_to_goal"]
-
+  eval_keys_to_include_in_name: []
   eval:
-    split: val_unseen
+  # minival: 30 episodes , val: 1000 episodes
+    split: val
     should_load_ckpt: False
     use_ckpt_config: False
     # video_option: [ "disk" ]
@@ -179,11 +195,7 @@ habitat_baselines:
   rl:
     policy:
       main_agent:
-        name: PointNavResNetPolicy
-        obs_transforms:
-          resize_shortest_edge:
-            trans_keys: [rgb, depth]
-
+        name: "PointNavResNetPolicy"
     ppo:
       # ppo params
       clip_param: 0.2
@@ -195,6 +207,7 @@ habitat_baselines:
       eps: 1e-5
       max_grad_norm: 0.2
       num_steps: 128
+      hidden_size: 512
       use_gae: True
       gamma: 0.99
       tau: 0.95
@@ -202,7 +215,7 @@ habitat_baselines:
       use_linear_lr_decay: False
       reward_window_size: 50
       use_normalized_advantage: False
-      hidden_size: 512
+
       # Use double buffered sampling, typically helps
       # when environment time is similar or large than
       # policy inference time during rollout generation

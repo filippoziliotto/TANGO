@@ -481,6 +481,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # Exit all the loops in the pseudo-code
             self.loop_exit_flag = True
             self.update_variable('episode_is_over', True) 
+            self.previous_action_found = False
 
             # Call STOP action and finish the episode
             self.habitat_env.execute_action(action='stop')
@@ -493,7 +494,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # the map should reset also in the same scene
             if self.habitat_env.value_mapper.use_value_mapper:
                     # if self.habitat_env.save_obs:
-                    if True:
+                    if False:
                         self.save_images_as_video("observations", self.observations, is_observation=True)
                         self.save_images_as_video("obstacle_map", self.obstacle_map)
                         self.save_images_as_video("value_map", self.value_map)

@@ -66,7 +66,7 @@ class ObjectDetector:
                 return_tensors='pt')
             return encoding
         elif self.type in ["owl-vit", "owl-vit2"]:
-            text = [[f'a photo of {obj_name}']]
+            text = [[f'a photo of a {obj_name}']]
         elif self.type in ["grounding-dino"]:
             text = f"a {obj_name}."
 

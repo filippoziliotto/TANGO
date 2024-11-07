@@ -10,10 +10,11 @@ def generate_multinav_prompt(prompt_utils: PromptUtils):
     print("Navigating to object:", object_cats)
     object_cats_new = []
     for cat_var in object_cats:
-        #  cat are "cylinder_{color}"
-        #  transofmrin "Color Cylinder"
-        cat = cat_var.replace("_", " ")
-        cat = cat.title()
+        # names is "cylinder_{color}"
+        # transform to "Color Cylinder"
+
+        cat = cat_var.split("_")
+        cat = cat[1].capitalize() + " " + cat[0].capitalize()     
         object_cats_new.append((cat_var,cat))
 
     prompt = f"""     

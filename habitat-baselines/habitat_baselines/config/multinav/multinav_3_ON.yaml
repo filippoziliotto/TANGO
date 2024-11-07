@@ -111,11 +111,11 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.1
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
-    detection_cls_thresh: 0.05
+    detection_cls_thresh: 0.2
     # Additional object detector settings
     use_additional_detector: False
     additional_type: "detr"
@@ -138,7 +138,7 @@ habitat_baselines:
     map_size: 1000
     pixels_per_meter: 20
     save_image_embed: True
-    th_memory: 0.1
+    th_memory: 0.4
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

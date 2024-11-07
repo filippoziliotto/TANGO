@@ -109,44 +109,19 @@ habitat_baselines:
   # Object Detector settings
   object_detector:
     use_detector: True
-    type: "owl-vit"
+    type: "owl-vit2"
     size: "base"
-    thresh: 0.01
+    thresh: 0.2
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
     detection_cls_thresh: 0.2
     # Additional object detector settings
-    use_additional_detector: True
+    use_additional_detector: False
     additional_type: "detr"
     additional_size: "resnet101"
     additional_thresh: 0.9
     additional_nms_thresh: 0.5
-  # Feature Matcher settings
-  feature_matcher:
-    use_matcher: False
-  # Captioner settings
-  captioner:
-    use_captioner: False
-    type: 'git'
-    size: 'large'
-    quantization: '8'
-  vqa:
-    use_vqa: False
-    type: 'blip'
-    size: 'large'
-    quantization: 16
-    vqa_strategy: 'simple-vqa'
-  # Segmenter settings
-  segmenter:
-    use_segmenter: False
-
-  # Room Classifier settings
-  room_classifier:
-    use_room_classifier: False
-    cls_threshold: 0.7
-    use_open_set_cls: True
-    open_set_cls_thresh: 0.2
 
   # Value Mapper settings
   value_mapper:
@@ -162,15 +137,15 @@ habitat_baselines:
     use_max_confidence: False
     map_size: 250
     pixels_per_meter: 5
-    save_image_embed: True
-    th_memory: 0.99
+    save_image_embed: False
+    th_memory: 0.3
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)
   # This value is then added to the agent radius (e.g. 0.5 + 0.18 )
   object_distance_threshold: 0.3
   # To evaluate on all episodes, set this to -1
-  test_episode_count: -1 # n° of evaluation episodes
+  test_episode_count: 5 # n° of evaluation episodes
   eval_ckpt_path_dir: "data/new_checkpoints/pointnav/hm3d-depth/"
   num_environments: 1
   checkpoint_folder: "data/new_checkpoints/pointnav/hm3d-depth/"

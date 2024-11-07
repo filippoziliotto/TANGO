@@ -345,6 +345,24 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         magnum_quat = Quaternion(Vector3(*q_xyz), q_w)
         object_.rotation = magnum_quat
 
+    def translate_to_origin(self, object_: object):
+        object_.translation = [0., 0., 0.]
+        # Rotate Horizontally
+        angle = np.pi / 2  # Rotation angle in radians
+        axis = np.array([0, 1, 0])  # Rotation axis (Y-axis)
+        rotation_vector = angle * axis
+
+        # Create rotation quaternion using numpy quaternion module
+        rotation_quaternion = quaternion.from_rotation_vector(rotation_vector)
+
+        # Extract scalar (w) and vector (x, y, z) parts
+        q_w = rotation_quaternion.w
+        q_xyz = np.array([rotation_quaternion.x, rotation_quaternion.y, rotation_quaternion.z])
+
+        # Create a magnum.Quaternion object with (vector, scalar)
+        magnum_quat = Quaternion(Vector3(*q_xyz), q_w)
+        object_.rotation = magnum_quat
+
     def create_objects(self, position: np.ndarray, obj_name: str):
         # i would like to have self.obj_{i} = something
         color_dict = {
@@ -362,6 +380,11 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         obj_i = getattr(self, f'obj_{color_dict[obj_name]}')
 
         self.translate_and_rotate_obj(obj_i, position)
+
+    def reset_objects(self):
+        for i in range(8):
+            obj_i = getattr(self, f'obj_{i}')
+            self.translate_to_origin(obj_i)
 
     def create_sim_config(
         self, _sensor_suite: SensorSuite

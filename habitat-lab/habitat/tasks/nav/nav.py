@@ -1861,9 +1861,7 @@ class RawMetrics(Measure):
 
         if ep_sub_success:
             print("--------------")
-            print("SubGoal Found")
-            print("--------------")
-
+            print(f"{task.currGoalIndex} SubGoal Found")
             # print them in line with only two decimal and divide by | metric |
             print("Success: ", round(ep_success, 2), " | Percentage Success: ", round(p_success, 2), " | Distance to Current Subgoal: ", round(distance_to_curr_subgoal, 2), " | Distance to Multi Goal: ", round(self._metric['distance_to_multi_goal'], 2), "\n| Subgoals Found: ", self._metric['subgoals_found'], " | MSPL: ", round(self._metric['MSPL'], 2), " | PSPL: ", round(self._metric['PSPL'], 2), " | Episode Length: ", self._metric['episode_lenth'])
 

@@ -498,8 +498,17 @@ def log_episode_stats(
 
     elif task in ['multinav']:
         formatted_results = (
-            " "
+            f"Success: {v['success']:.2f} | ",
+            f"Percentage Success: {v['percentage_success']:.2f} | ",
+            # f"Sub Success: {v['sub_success']:.2f} | ",
+            f"PSPL: {v['pspl']:.2f} | ",
+            f"MSPL: {v['mspl']:.2f} | ",
+            f"Distance to Curr goal: {v['distance_to_curr_goal']:.2f} | ",
+            f"Distance to Multi goal: {v['distance_to_multi_goal']:.2f} | ",
+            f"Episode Length: {v['episode_length']} | ",
+            f"Ratio: {v['ratio']:.2f} | ",
         )
+
     # Objectnav and Instance Imagenav support results prints
     else:
         formatted_results = (
@@ -566,11 +575,14 @@ def log_final_results(
         logger.info('-----------------------')      
 
     elif task in ['multinav']:
+
         #  only keys different from "raw_metrics"
         for stat_key in all_ks:
             aggregated_stats[stat_key] = np.mean(
                 [v[stat_key] for v in stats_episodes.values() if stat_key in v and stat_key != "raw_metrics"]
             )
+
+        metrics = {k: v for k, v in aggregated_stats.items() if k != "reward"}
 
         # Print final results
         logger.info('-----------------------')

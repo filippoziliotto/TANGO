@@ -316,30 +316,35 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     Habitat environment modules to define actions
     """
 
-    def create_multinav_objects(self):
+    def create_multinav_objects(self, episode):
         """
         Create the Multinav objects
         """
-        episode = self.habitat_env.get_current_episode_info()
         positions = [goal.position for goal in episode.goals]
+        objects_categories = [goal.object_category for goal in episode.goals]
         sim = self.habitat_env.get_habitat_sim()
         # sim.translate_and_rotate_obj(sim.new_obj, sim.get_agent_state().position
         
         for i, position in enumerate(positions):
             sim.create_objects(
                 position=position,
-                obj_name=episode.goals[i].object_category,
+                obj_name=objects_categories[i],
             )
 
-    def load_multinav_targets(self):
+    def reset_multinav_objects(self):
+        """
+        Reset the Multinav objects
+        """
+        sim = self.habitat_env.get_habitat_sim()
+        sim.reset_objects()
+
+    def load_multinav_targets(self, episode):
         """
         Load the Multinav targets
         """
-        if self.habitat_env.get_current_step() == 0:
-            self.episode = self.habitat_env.get_current_episode_info()
 
-        self.goals = [goal.object_category for goal in self.episode.goals]
-        self.current_goal_var = self.goals[self.episode.currGoalIndex]
+        self.goals = [goal.object_category for goal in episode.goals]
+        self.current_goal_var = self.goals[episode.currGoalIndex]
         # Transfor "cylinder_{color}" to "Color Cylinder"
         self.current_goal = self.current_goal_var.replace("_", " ")
         self.current_goal = self.current_goal.title()
@@ -353,19 +358,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Exploration primitive (set distant target)
         see target.py for more details
         """
-
         if self.habitat_env.get_current_step() == 0:
-            self.create_multinav_objects()
+            self.episode = self.habitat_env.get_current_episode_info()
+            self.create_multinav_objects(self.episode)
 
         # Check current GOAT goal
-        self.load_multinav_targets()
-
-
-        # If the subtask is over, start new subtask by the last agent position
-        # self.save_last_position_and_teleport()
-
-        # if self.habitat_env.get_current_step() % 100 == 0 and self.habitat_env.get_current_step() > 0:
-        #     self.substop_navigation()
+        self.load_multinav_targets(self.episode)
 
         # Update current value map with feature map memory
         is_found = self.use_target_memory(
@@ -385,9 +383,9 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.target.get_target_coords()
 
         #  For debugging purposes
-        self.target.set_target_coords_from_cartesian(
-            coords = self.episode.goals[self.episode.currGoalIndex].position,
-        )
+        # self.target.set_target_coords_from_cartesian(
+        #     coords = self.episode.goals[self.episode.currGoalIndex].position,
+        # )
 
         self.habitat_env.execute_action(coords=self.target.polar_coords)
         self.habitat_env.update_episode_stats()
@@ -479,10 +477,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.habitat_env.execute_action(action='stop')
             self.habitat_env.update_episode_stats()
 
+            # Reset Objects to origin
+            self.reset_multinav_objects()
+
             # Reset value mapper if scene changes
             # the map should reset also in the same scene
             if self.habitat_env.value_mapper.use_value_mapper:
-                    if self.habitat_env.save_obs:
+                    # if self.habitat_env.save_obs:
+                    if False:
                         self.save_images_as_video("observations", self.observations, is_observation=True)
                         self.save_images_as_video("obstacle_map", self.obstacle_map)
                         self.save_images_as_video("value_map", self.value_map)

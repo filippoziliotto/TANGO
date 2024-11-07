@@ -9,7 +9,8 @@ NON_SCALAR_METRICS = {
     "top_down_map", 
     "collisions.is_collision",
     "bboxes",
-    "question_meta"}
+    "question_meta",
+    "raw_metrics"}
 
 
 def extract_scalars_from_info(

@@ -264,6 +264,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env = habitat_env
         self.target = Target(habitat_env)
 
+        self.previous_action_found = False
+
         if self.habitat_env.object_detector.use_detector:
             self.object_detector = ObjectDetector(
                 type=self.habitat_env.object_detector.type, 
@@ -326,6 +328,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # sim.translate_and_rotate_obj(sim.new_obj, sim.get_agent_state().position
         
         for i, position in enumerate(positions):
+            if i == 0:
+                self.position = position
             sim.create_objects(
                 position=position,
                 obj_name=objects_categories[i],
@@ -342,16 +346,15 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
         Load the Multinav targets
         """
-
         self.goals = [goal.object_category for goal in episode.goals]
         self.current_goal_var = self.goals[episode.currGoalIndex]
         # Transfor "cylinder_{color}" to "Color Cylinder"
         self.current_goal = self.current_goal_var.replace("_", " ")
         self.current_goal = self.current_goal.title()
         # Invert the color and object
-        self.current_goal = " ".join(self.current_goal.split()[::-1])
+        # self.current_goal = " ".join(self.current_goal.split()[::-1])
         # cylinder to recangle
-        self.current_goal = self.current_goal.replace("Cylinder", "Rectangle")
+        # self.current_goal = self.current_goal.replace("Cylinder", "Rectangle")
 
     def explore_scene(self):
         """
@@ -363,26 +366,30 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.create_multinav_objects(self.episode)
 
         # Check current GOAT goal
+        # print(self.habitat_env.get_habitat_sim().get_agent_state().position)
         self.load_multinav_targets(self.episode)
 
         # Update current value map with feature map memory
-        is_found = self.use_target_memory(
-            target_name = self.current_goal,
-        )
+        if self.previous_action_found:
+            is_found = self.use_target_memory(
+                target_name = self.current_goal,
+            )
 
-        if is_found:
-            self.stop_navigation()
-            return
+            if is_found:
+                self.current_line += 4
+                self.stop_navigation()
+                return
 
         # Initial 360° turn for frontiers initialization, given a target
-        self.turn_around(
-            target_name = self.current_goal
-        )
+        if self.habitat_env.get_current_step() == 0:
+            self.turn_around(
+                target_name = self.current_goal
+            )
 
         self.target.exploration = True
         self.target.get_target_coords()
 
-        #  For debugging purposes
+        # For debugging purposes
         # self.target.set_target_coords_from_cartesian(
         #     coords = self.episode.goals[self.episode.currGoalIndex].position,
         # )
@@ -404,6 +411,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.map_scene(
                 target_name=self.current_goal
             )
+
+        self.previous_action_found = False
 
     def navigate_to(self, target_object):
         """
@@ -440,7 +449,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
     def navigate_to_memory_target(self):
         k = 0
         self.target.exploration = False
-        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()) and (k < 100):
+        while (not self.target.is_target_reached()) and (not self.habitat_env.max_steps_reached()) and (k < 200):
 
             self.habitat_env.execute_action(coords=self.target.polar_coords)
             self.habitat_env.update_episode_stats()
@@ -484,7 +493,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # the map should reset also in the same scene
             if self.habitat_env.value_mapper.use_value_mapper:
                     # if self.habitat_env.save_obs:
-                    if False:
+                    if True:
                         self.save_images_as_video("observations", self.observations, is_observation=True)
                         self.save_images_as_video("obstacle_map", self.obstacle_map)
                         self.save_images_as_video("value_map", self.value_map)
@@ -507,12 +516,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.habitat_env.update_episode_stats()
 
         self.episode.currGoalIndex += 1
+        self.previous_action_found = True
 
         if self.habitat_env.disp_info['percentage_success'] != (self.episode.currGoalIndex)/len(self.episode.goals):
             print("Failed to find the object")
             self.episode.currGoalIndex = 3
             self.stop_navigation()
-
 
     def turn_around(self, target_name):
         """
@@ -523,64 +532,48 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         num_turns = 360 // self.habitat_env.config.habitat.simulator.turn_angle
 
         # Trun around for initial exploration only at the first subtask
-        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().currGoalIndex == 0):
-            for _ in range(num_turns):
-                self.habitat_env.execute_action(action='turn_left')
-                self.map_scene(target_name)
+        for _ in range(num_turns):
+            self.habitat_env.execute_action(action='turn_left')
+            self.map_scene(target_name)
 
-                # save the observation for debugging purposes
-                self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+            # save the observation for debugging purposes
+            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
-    def save_last_position_and_teleport(self):
-        """
-        Save the last position of the agent in the episode
-        """
-
-        # If subtask, first step, not a scene/episode change
-        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().is_first_task is False) and (self.habitat_env.last_agent_pos is not None) and \
-            (not self.habitat_env.check_scene_change()):
-            sim = self.habitat_env.get_habitat_sim()
-            sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
-
-        if self.loop_exit_flag:
-            self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
-    
     def use_target_memory(self, target_name):
         """
         Use the target memory to navigate to the target
         """
         if self.value_mapper.save_image_embed:
-            # If first step, >= second subtask, and last agent position is not None
-            if (self.habitat_env.get_current_step() == 1) and (self.habitat_env.get_current_episode_info().currGoalIndex > 0): # and (self.habitat_env.last_agent_pos is not None):
-                self.value_mapper.update_values_from_features(
-                    text=target_name,
-                    type='text'
-                )
+            self.value_mapper.update_values_from_features(
+                text=target_name,
+                type='text'
+            )
 
-                # Check if the new regions contains the object
-                memory_frontier, value = self.value_mapper.get_highest_similarity_value(
-                    value_map=self.value_mapper.retrieve_map(type="value"),
-                )
+            # Check if the new regions contains the object
+            memory_frontier, value = self.value_mapper.get_highest_similarity_value(
+                value_map=self.value_mapper.retrieve_map(type="value"),
+            )
 
-                # If less than threshold, we don't know where object is
-                if value < self.value_mapper.th_memory:
-                    return False
+            # If less than threshold, we don't know where object is
+            if value < self.value_mapper.th_memory:
+                return False
 
-                # Set new target coordinates and Navigate to the target
-                self.target.set_target(
-                    coords=memory_frontier,
-                    from_type="polar",
-                    agent_state=self.habitat_env.get_current_position(),
-                )
+            # Set new target coordinates and Navigate to the target
+            self.target.set_target(
+                coords=memory_frontier,
+                from_type="polar",
+                agent_state=self.habitat_env.get_current_position(),
+            )
 
-                # Navigate to the target point based on memory
-                self.navigate_to_memory_target()
+            # Navigate to the target point based on memory
+            self.navigate_to_memory_target()
                 
-                # Turn around and check if target is there
-                is_found = self.turn_from_memory_target()
+            # Turn around and check if target is there
+            is_found = self.turn_from_memory_target()
 
-                return is_found
-            
+            return is_found
+    
+        else:
             return False
 
     def turn_from_memory_target(self):
@@ -590,6 +583,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         is_found = False
         num_turns = 360 // self.habitat_env.config.habitat.simulator.turn_angle
         for _ in range(num_turns):
+
+            if self.habitat_env.max_steps_reached():
+                self.stop_navigation()
+
             self.habitat_env.execute_action(action='turn_left')
             self.map_scene(self.current_goal)
             
@@ -599,20 +596,14 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             # If a detection is made
             detection_var = self.detect(self.current_goal)
 
-            if self.current_task in ["text"]:
-                if detection_var['boxes']:
-                    is_found = True
-                    # Set the variable
-                    self.define_variable('memory_target', detection_var)
+            if detection_var['boxes']:
+                is_found = True
+                # Set the variable
+                self.define_variable('memory_target', detection_var)
 
-                    # Navigate to the target
-                    self.navigate_to(self.get_variable('memory_target'))
-                    break
-
-            elif self.current_task in ["image"]:
-                if self.match(self.current_goal):
-                    is_found = True
-                    break
+                # Navigate to the target
+                self.navigate_to(self.get_variable('memory_target'))
+                break
 
         self.target.exploration = True
 
@@ -627,8 +618,8 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         The actual class is defined in models.py
         """
 
-        if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().currGoalIndex > 0):
-            return []
+        # if (self.habitat_env.get_current_step() == 0) and (self.habitat_env.get_current_episode_info().currGoalIndex > 0):
+        #     return []
 
         obs = self.habitat_env.get_current_observation(type='rgb')
         depth_obs = self.habitat_env.get_current_observation(type='depth')
@@ -709,16 +700,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         if self.habitat_env.save_obs:
             self.habitat_env.debugger.save_obs(obs, name, bbox)
 
-    def check_subgoal_failed(self):
-        """
-        Check if the subgoal is failed
-        """
-
-        
-
-        return False
-
-    def save_images_as_video(self, video_name, images_list, base_path="video_dir/goat", subpath="memory_examples", frame_rate=30, is_observation=False):
+    def save_images_as_video(self, video_name, images_list, base_path="video_dir/multinav", subpath="memory_examples", frame_rate=30, is_observation=False):
         # Step 1: Create the directory if it doesn't exist
         save_dir = os.path.join(base_path, subpath)
         os.makedirs(save_dir, exist_ok=True)
@@ -749,3 +731,16 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # Step 6: Release the video writer
         video_writer.release()
         print(f"Video saved at {video_path}")
+
+    def save_last_position_and_teleport(self):
+        """
+        Save the last position of the agent in the episode
+        """
+
+        # If subtask, first step, not a scene/episode change
+        if self.habitat_env.get_current_step() == 0:
+            sim = self.habitat_env.get_habitat_sim()
+            sim.set_agent_state(self.habitat_env.last_agent_pos.position, self.habitat_env.last_agent_pos.rotation)
+
+        if self.loop_exit_flag:
+            self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()

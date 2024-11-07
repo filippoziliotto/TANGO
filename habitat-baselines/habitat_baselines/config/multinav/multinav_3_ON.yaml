@@ -40,7 +40,7 @@ defaults:
   - _self_
 
 habitat:
-  seed: 100
+  seed: 99
   task:
     success_reward: 2.5
     slack_reward: -1e-3
@@ -96,12 +96,12 @@ habitat_baselines:
   torch_gpu_id: 0
   task_name: multinav
   # Visualization settings
-  video_dir: "video_dir/ovon/"
+  video_dir: "video_dir/multion/"
   # writer_type: wb # to deactivate just comment this
   wb:
     entity: ziliottofilippodev
     project_name: NavProg
-    run_name: ovon_prova
+    run_name: multion
   save_obs:
     save_to_disk: True 
   sampling_strategy: "unreachable"
@@ -111,11 +111,11 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.2
+    thresh: 0.1
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
-    detection_cls_thresh: 0.2
+    detection_cls_thresh: 0.05
     # Additional object detector settings
     use_additional_detector: False
     additional_type: "detr"
@@ -132,13 +132,13 @@ habitat_baselines:
     save_video: False
     policy: "v1"
     exploration_threshold: 0.2
-    min_obstacle_height: 0.2
-    max_obstacle_height: 0.6
+    min_obstacle_height: 0.15
+    max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 250
-    pixels_per_meter: 5
-    save_image_embed: False
-    th_memory: 0.3
+    map_size: 1000
+    pixels_per_meter: 20
+    save_image_embed: True
+    th_memory: 0.1
 
   # Eval settings
   # Distance detection threshold (when the agent should call stop action)

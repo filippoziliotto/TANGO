@@ -265,6 +265,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.target = Target(habitat_env)
 
         self.previous_action_found = False
+        self.num_targets = int(self.habitat_env.config.habitat.dataset.data_path.split("/")[3].split("_")[0])
 
         if self.habitat_env.object_detector.use_detector:
             self.object_detector = ObjectDetector(
@@ -328,8 +329,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # sim.translate_and_rotate_obj(sim.new_obj, sim.get_agent_state().position
         
         for i, position in enumerate(positions):
-            if i == 0:
-                self.position = position
             sim.create_objects(
                 position=position,
                 obj_name=objects_categories[i],
@@ -481,7 +480,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         """
 
         # If objects are found, stop the navigation for that subtask
-        if (self.habitat_env.get_current_episode_info().currGoalIndex < 2) and (not self.habitat_env.max_steps_reached()):
+        if (self.habitat_env.get_current_episode_info().currGoalIndex < self.num_targets-1) and (not self.habitat_env.max_steps_reached()):
             self.substop_navigation()
 
         else:
@@ -528,7 +527,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.habitat_env.disp_info['percentage_success'] != (self.episode.currGoalIndex)/len(self.episode.goals):
             print("Failed to find the object")
-            self.episode.currGoalIndex = 3
+            self.episode.currGoalIndex = self.num_targets
             self.stop_navigation()
 
     def turn_around(self, target_name):

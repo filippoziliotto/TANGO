@@ -396,6 +396,9 @@ class PromptUtils:
         for goal in self.habitat_env.get_current_episode_info().goals:
             cats.append(goal.object_category)
         return cats
+    
+    def get_num_objects(self):
+        return int(self.habitat_env.config.habitat.dataset.data_path.split("/")[3].split("_")[0])
 
 """
 Utils to sample points from different

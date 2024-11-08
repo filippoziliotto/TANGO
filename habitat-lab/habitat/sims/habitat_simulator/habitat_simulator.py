@@ -295,10 +295,16 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         super().__init__(self.sim_config)
         # load additional object paths specified by the dataset
         # TODO: Should this be moved elsewhere?
-        # self.obj_attr_mgr = self.get_object_template_manager()
-        # self.rigid_obj_mgr = self.get_rigid_object_manager()
-        # for path in self.habitat_config.additional_object_paths:
-        #     self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
+        self.obj_attr_mgr = self.get_object_template_manager()
+        self.rigid_obj_mgr = self.get_rigid_object_manager()
+        for path in self.habitat_config.additional_object_paths:
+            self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
+
+        for i, obj_id in enumerate(self.obj_template_ids):
+            obj = self.rigid_obj_mgr.add_object_by_template_id(
+            obj_id
+            )
+            setattr(self, f'obj_{i}', obj)
 
         self._action_space = spaces.Discrete(
             len(
@@ -584,16 +590,16 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
                 self.close(destroy=False)
             super().reconfigure(self.sim_config)
 
-        self.obj_attr_mgr = self.get_object_template_manager()
-        self.rigid_obj_mgr = self.get_rigid_object_manager()
-        for path in self.habitat_config.additional_object_paths:
-            self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
+            self.obj_attr_mgr = self.get_object_template_manager()
+            self.rigid_obj_mgr = self.get_rigid_object_manager()
+            for path in self.habitat_config.additional_object_paths:
+                self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
 
-        for i, obj_id in enumerate(self.obj_template_ids):
-            obj = self.rigid_obj_mgr.add_object_by_template_id(
-            obj_id
-            )
-            setattr(self, f'obj_{i}', obj)
+            for i, obj_id in enumerate(self.obj_template_ids):
+                obj = self.rigid_obj_mgr.add_object_by_template_id(
+                obj_id
+                )
+                setattr(self, f'obj_{i}', obj)
 
         self._update_agents_state()
 

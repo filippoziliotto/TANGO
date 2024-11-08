@@ -236,7 +236,14 @@ class Classifier:
                 continue
             
             images = [img_pil.crop(bbox) for bbox in bboxes]
-            obj_name =  [class_name, 'other']
+
+            if class_name in ['black cylinder']:
+                obj_name = ['white cylinder','black cylinder' ]
+            elif class_name in ['blue_cylinder', 'cyan_cylinder']:
+                obj_name = ['blue cylinder', 'cyan cylinder', 'other']
+            else:
+                obj_name =  [class_name, 'other']
+
             text = [f'a photo of a {q}' for q in obj_name]
             inputs = self.processor(text=text, images=images, return_tensors="pt", padding=True)
             inputs = {k: v.to(self.device) for k, v in inputs.items()}

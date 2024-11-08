@@ -135,8 +135,8 @@ habitat_baselines:
     min_obstacle_height: 0.15
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 1000
-    pixels_per_meter: 20
+    map_size: 250
+    pixels_per_meter: 5
     save_image_embed: True
     th_memory: 0.4
 

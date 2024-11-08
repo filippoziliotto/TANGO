@@ -350,7 +350,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         self.current_goal_var = self.goals[episode.currGoalIndex]
         # Transfor "cylinder_{color}" to "Color Cylinder"
         self.current_goal = self.current_goal_var.replace("_", " ")
-        self.current_goal = self.current_goal.title()
         # Invert the color and object
         # self.current_goal = " ".join(self.current_goal.split()[::-1])
         # cylinder to recangle
@@ -433,9 +432,10 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             self.habitat_env.update_episode_stats()
 
             # Update polar coordinates given the new detection
-            # detection_var = self.detect(self.current_goal)
-            # if detection_var['boxes']:
-            #     self.target.set_target_coords_from_bbox(depth_obs, detection_var['boxes'][0])
+            detection_var = self.detect(self.current_goal)
+            if detection_var['boxes']:
+                depth_obs = self.habitat_env.get_current_observation(type='depth')
+                self.target.set_target_coords_from_bbox(depth_obs, detection_var['boxes'][0])
 
             # Update polar coordinates given the new agent step
             self.target.update_target_coords()

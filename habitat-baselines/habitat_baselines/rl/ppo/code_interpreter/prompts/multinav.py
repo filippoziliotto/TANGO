@@ -14,7 +14,7 @@ def generate_multinav_prompt(prompt_utils: PromptUtils):
         # transform to "Color Cylinder"
 
         cat = cat_var.split("_")
-        cat = cat[1].capitalize() + " " + cat[0].capitalize()     
+        cat = cat[1] + " " + cat[0]
         object_cats_new.append((cat_var,cat))
 
     prompt = f"""     

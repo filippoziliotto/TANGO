@@ -211,6 +211,7 @@ class Classifier:
         self.model, self.processor = get_classifier_model(self.type, self.size, self.device)
         self.confidence_threshold = cls_thresh
         self.cls_nms_thresh = 0.3
+        self.multinav = True
 
     def calculate_sim(self,inputs):
         img_feats = self.model.get_image_features(inputs['pixel_values'])
@@ -233,10 +234,10 @@ class Classifier:
             if len(bboxes) == 0:
                 valid_detections[class_name] = {'boxes': [], 'scores': []}
                 continue
-
+            
             images = [img_pil.crop(bbox) for bbox in bboxes]
-            obj_name = [class_name, 'other']
-            text = [f'a photo of {q}' for q in obj_name]
+            obj_name =  [class_name, 'other']
+            text = [f'a photo of a {q}' for q in obj_name]
             inputs = self.processor(text=text, images=images, return_tensors="pt", padding=True)
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
@@ -248,6 +249,7 @@ class Classifier:
 
             class_boxes = []
             class_scores = []
+
 
             for i, cat_id in enumerate(cat_ids):
                 detected_class = obj_name[cat_id]

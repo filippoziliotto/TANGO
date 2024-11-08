@@ -42,8 +42,10 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
     #config_name="goat_bench/zs_goat_settings.yaml"
     # OVON
     # config_name="ovon/zs_ovon.yaml"
-    # MultiON
+    # MultiON 3
     config_name="multinav/multinav_3_ON.yaml"
+    # MultiON 2
+    # config_name="multinav/multinav_2_ON.yaml"
 
 )
 def main(cfg: "DictConfig"):

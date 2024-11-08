@@ -295,27 +295,10 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         super().__init__(self.sim_config)
         # load additional object paths specified by the dataset
         # TODO: Should this be moved elsewhere?
-        self.obj_attr_mgr = self.get_object_template_manager()
-        self.rigid_obj_mgr = self.get_rigid_object_manager()
-        for path in self.habitat_config.additional_object_paths:
-            self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
-
-        # obj_attr_mgr = self.get_object_template_manager()
+        # self.obj_attr_mgr = self.get_object_template_manager()
         # self.rigid_obj_mgr = self.get_rigid_object_manager()
-        # self.sphere_template = self.obj_attr_mgr.get_template_by_handle(
-        #     self.obj_attr_mgr.get_template_handles("cylinder_green")[0]
-        # )
-        # self.obj_attr_mgr.register_template(self.sphere_template, "cylinder_green")
-        # obj_id = self.obj_attr_mgr.load_configs("data/objects/cylinder_green")[0]
-        for i, obj_id in enumerate(self.obj_template_ids):
-            obj = self.rigid_obj_mgr.add_object_by_template_id(
-            obj_id
-            )
-            setattr(self, f'obj_{i}', obj)
-
-        # self.new_obj = self.rigid_obj_mgr.add_object_by_template_id(
-        #   self.obj_template_ids[3]
-        # )
+        # for path in self.habitat_config.additional_object_paths:
+        #     self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
 
         self._action_space = spaces.Discrete(
             len(
@@ -346,7 +329,8 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
         object_.rotation = magnum_quat
 
     def translate_to_origin(self, object_: object):
-        object_.translation = [0., 0., 0.]
+        y_pos = self.get_agent_state().position[1]
+        object_.translation = [0., y_pos -3., 0.]
         # Rotate Horizontally
         angle = np.pi / 2  # Rotation angle in radians
         axis = np.array([0, 1, 0])  # Rotation axis (Y-axis)
@@ -599,6 +583,17 @@ class HabitatSim(habitat_sim.Simulator, Simulator):
             if should_close_on_new_scene:
                 self.close(destroy=False)
             super().reconfigure(self.sim_config)
+
+        self.obj_attr_mgr = self.get_object_template_manager()
+        self.rigid_obj_mgr = self.get_rigid_object_manager()
+        for path in self.habitat_config.additional_object_paths:
+            self.obj_template_ids = self.obj_attr_mgr.load_configs(path)
+
+        for i, obj_id in enumerate(self.obj_template_ids):
+            obj = self.rigid_obj_mgr.add_object_by_template_id(
+            obj_id
+            )
+            setattr(self, f'obj_{i}', obj)
 
         self._update_agents_state()
 

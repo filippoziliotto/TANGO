@@ -659,19 +659,11 @@ class HabitatEvaluator(Evaluator):
         self.get_env_variables(**kwargs)
         self.init_env()
 
-        env = self.envs.call(['habitat_env'])[0]
-        episodes = env.episodes
-
         code_generator = CodeGenerator(self, debug=True)
         self.code_interpreter = PseudoCodeExecuter(self)
 
         while self.episode_iterator():
             self.current_episodes_info = self.envs.current_episodes()
-
-            sim = self.get_habitat_sim()
-            pos = self.get_current_position().position
-                        
-            # self.new_object = self.get_agent_state().position + np.array([0, 0, 1])
 
             # Generate the PseudoCode
             self.pseudo_code = code_generator.generate()

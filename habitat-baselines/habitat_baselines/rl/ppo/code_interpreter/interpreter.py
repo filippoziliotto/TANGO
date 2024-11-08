@@ -351,7 +351,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         # Transfor "cylinder_{color}" to "Color Cylinder"
         self.current_goal = self.current_goal_var.replace("_", " ")
         # Invert the color and object
-        # self.current_goal = " ".join(self.current_goal.split()[::-1])
+        self.current_goal = " ".join(self.current_goal.split()[::-1])
         # cylinder to recangle
         # self.current_goal = self.current_goal.replace("Cylinder", "Rectangle")
 
@@ -456,13 +456,20 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
             # Update polar coordinates given the new agent step
             self.target.polar_coords = self.value_mapper.update_polar_from_current_position(self.target.polar_coords)
+
+            # For debugging purposes
+            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
+
+            detection_var = self.detect(self.current_goal)
+            if detection_var['boxes']:
+                depth_obs = self.habitat_env.get_current_observation(type='depth')
+                self.target.set_target_coords_from_bbox(depth_obs, detection_var['boxes'][0])
+                break
+
             # self.target.update_target_coords()
 
             # Update maps
             self.map_scene(self.current_goal)
-
-            # For debugging purposes
-            self.save_observation(self.habitat_env.get_current_observation(type='rgb'), 'observation')
 
             k += 1
 
@@ -745,3 +752,12 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.loop_exit_flag:
             self.habitat_env.last_agent_pos = self.habitat_env.get_current_position()
+
+    def write_completed_scene(self):
+        """
+        Write the completed scene to the disk
+        """
+        path = "data/datasets/multinav/3_ON/completed_scenes.txt"
+        # append the scene id to the file
+        with open(path, "a") as f:
+            f.write(self.habitat_env.get_current_episode_info().scene_id + "\n")

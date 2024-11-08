@@ -59,16 +59,14 @@ habitat:
     type: MultiNav-v1
     split: train
     scenes_dir: data/scene_datasets
-    # content_scenes: ["1LXtFkjw3qL", "1pXnuDYAj8r"]
     data_path: data/datasets/multinav/3_ON/{split}/{split}.json.gz
+    # group_by_scene: False
+    # max_scene_repeat_episodes: 1
 
   environment:
     max_episode_steps: 500
     iterator_options:
       max_scene_repeat_steps: 50000
-      group_by_scene: False
-      max_scene_repeat_episodes: 1
-
   simulator:
     additional_object_paths: [ data/objects ]
     forward_step_size: 0.25
@@ -113,7 +111,7 @@ habitat_baselines:
     use_detector: True
     type: "owl-vit2"
     size: "base"
-    thresh: 0.2
+    thresh: 0.3
     nms_thresh: 0.5
     store_detections: False
     use_detection_cls: True
@@ -137,8 +135,8 @@ habitat_baselines:
     min_obstacle_height: 0.15
     max_obstacle_height: 0.88
     use_max_confidence: False
-    map_size: 500
-    pixels_per_meter: 10
+    map_size: 1000
+    pixels_per_meter: 20
     save_image_embed: True
     th_memory: 0.4
 

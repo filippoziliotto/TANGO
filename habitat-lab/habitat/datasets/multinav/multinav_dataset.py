@@ -7,6 +7,7 @@
 import json
 import os
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
+import random
 
 if TYPE_CHECKING:
     from habitat.config import DictConfig
@@ -156,4 +157,20 @@ class MultiNavDatasetV1(PointNavDatasetV1):
 
             self.episodes.append(episode)
 
+        # Read scenes from this file data/datasets/multinav/3_ON/completed_scenes.txt
+
+        # with open("data/datasets/multinav/3_ON/completed_scenes.txt", 'r') as file:
+        #     completed_scenes = [line.strip() for line in file if line.strip()]
+
+        # all_scenes_id = set([episode.scene_id for episode in self.episodes])
+
+        # missing_scenes = all_scenes_id - set(completed_scenes)
+
+        # # sample random scene
+        # random_scene = random.choice(list(missing_scenes))
+
+        # select all episodes form a scene taken from all_scenes_ids that is not present in completed_scenes
+        # self.episodes = [episode for episode in self.episodes if episode.scene_id in random_scene]
+
+        # self.keep_one_remaining_scene()
         pass

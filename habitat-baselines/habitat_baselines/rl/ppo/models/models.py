@@ -590,40 +590,6 @@ class RoomClassifier:
         # save attention map to attention.png
         cv2.imwrite("attention.png", avg_attention)
 
-
-class LLMmodel:
-    def __init__(self, type, quantization, helper):
-        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.type = type
-        self.helper = helper
-        self.pipeline = get_llm_model(type, quantization, self.device)
-        self.generation_args = {
-            "max_new_tokens": 500,
-            "return_full_text": False,
-            "temperature": 0.0,
-            "do_sample": False,
-        }
-
-    def preprocess(self, prompt):
-        """
-        Create the input for the LLM as a list of dictionaries
-        This is useful for the pipeline of HF as well as OpenAI
-        """
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        return messages
-
-    def ask_for_help(self):
-        """
-        Generate LLm prediction of the new target goal 
-        (hopefully :))!
-        """
-        prompt = self.helper.create_llm_prompt()
-        messages = self.preprocess(prompt)
-        output = self.pipeline(messages, **self.generation_args)
-        return output[0]['generated_text']
-
 class ValueMapper:
 
     _last_value: float = float("-inf")

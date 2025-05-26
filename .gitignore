@@ -108,6 +108,9 @@ data
 /images/
 pytorch_model.bin
 
+# Keys
+/keys/
+
 # Ignoring md files
 TODO.md
 TROUBLESHOOTING.md

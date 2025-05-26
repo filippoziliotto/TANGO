@@ -349,11 +349,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         see target.py for more details
         """
 
-        # In MP3D-EQA set max-actions shortest path
-        # Also useful in GOAT episodes
-
-        # self.check_episode_floor()
-
         self.spawn_target_location(max_dist=self.habitat_env.config.habitat_baselines.episode_max_actions)
 
         # Initial 360° turn for frontiers initialization
@@ -502,8 +497,7 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
 
         if self.habitat_env.task_name in ['goat']:
             self.save_last_position_and_teleport()
-        
-                
+                    
     def go_downstairs(self):
         """
         Go downstairs primitive, needed
@@ -558,9 +552,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Handle errors in the execution of the pseudo code
         this is useful if the LLM produces faluty code
         """
-        
-        if self.habitat_env.task_name in ['eqa', 'open_eqa']:
-            self.answer(self.habitat_env.eqa_vars['question'])
 
         # Call STOP action and finish the episode
         self.habitat_env.execute_action(action='stop')
@@ -647,13 +638,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
             else:
                 detection_dict = self.object_detector.detect(obs, target_name)
 
-        if self.habitat_env.object_detector.store_detections:
-            self.habitat_env.target_name = target_name
-            self.habitat_env.memory_dict = self.object_detector.get_detection_dict()
-            for label in self.memory_dict:
-                if 'xyz' not in self.habitat_env.memory_dict[label]:  
-                    self.habitat_env.memory_dict[label]['xyz'] = self.target.from_bbox_to_cartesian(depth_obs, self.habitat_env.memory_dict[label]['bbox'])
-        
         if detection_dict[target_name]['boxes']:
             # Add 3D position to targets
             for target in detection_dict:
@@ -767,7 +751,6 @@ class PseudoCodeExecuter(PseudoCodePrimitives):
         Segment the scene using a segmentation model
         possibly filtering the target category
         """
-        # TODO: ideal code would be
         # while True:
         #     explore_scene()
         #     object = detect('chair')
